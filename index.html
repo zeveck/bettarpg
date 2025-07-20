@@ -83,6 +83,8 @@
                     </div>
                 </div>
                 
+                <div id="village-encounter-log"></div>
+                
             </div>
         </div>
 
@@ -137,6 +139,7 @@
                     <div class="enemy-combat">
                         <img id="enemy-fish-combat" src="" alt="Enemy Fish">
                         <h3 id="enemy-name"></h3>
+                        <div id="enemy-level" class="enemy-level-display"></div>
                         <div class="hp-bar">
                             <div id="enemy-hp-bar" class="hp-fill"></div>
                         </div>
@@ -149,8 +152,9 @@
                 <div class="combat-actions">
                     <button onclick="if(game) game.attack()">Attack</button>
                     <button onclick="if(game) game.useSkill()">Bubble Blast (MP)</button>
-                    <button onclick="if(game) game.runAway()">Swim Away</button>
+                    <button id="swim-away-btn" onclick="if(game) game.runAway()">Swim Away</button>
                 </div>
+                <div id="swim-away-message" class="swim-away-message"></div>
             </div>
         </div>
     </div>
@@ -161,12 +165,12 @@
             <div class="stat">MP: <span id="mp">10</span>/<span id="max-mp">10</span></div>
             <div class="stat">Level: <span id="level">1</span></div>
             <div class="stat">EXP: <span id="exp">0</span>/<span id="exp-next">100</span></div>
-            <div class="stat">🍴 Bites: <span id="betta-bites">0</span></div>
+            <div class="stat">Betta Bites: <span id="betta-bites">0</span></div>
         </div>
         <img id="stats-player-sprite" src="graphics/main_fish/player_betta.png" alt="Player Betta">
     </div>
 
-    <div id="version-info">v0.1</div>
+    <div id="version-info">v0.2</div>
 
     <script src="script.js"></script>
 </body>

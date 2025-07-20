@@ -130,8 +130,9 @@ button:hover {
 
 button:disabled {
     background: #666;
-    cursor: not-allowed;
+    cursor: wait;
     transform: none;
+    opacity: 0.6;
 }
 
 #character-creation {
@@ -157,6 +158,7 @@ button:disabled {
     max-width: 500px;
     width: 100%;
     margin: 0 auto;
+    text-align: center;
 }
 
 .character-form label {
@@ -368,6 +370,10 @@ button:disabled {
     line-height: 1.6;
     margin-bottom: 20px;
     min-height: 100px;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 #dialogue-options {
@@ -383,6 +389,10 @@ button:disabled {
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .dialogue-option:hover {
@@ -407,9 +417,9 @@ button:disabled {
     min-width: 140px;
 }
 
-#encounter-log {
+#encounter-log, #village-encounter-log {
     max-width: 600px;
-    margin: 0 auto;
+    margin: 200px auto 0;
     background: rgba(0,0,0,0.5);
     padding: 20px;
     border-radius: 10px;
@@ -417,6 +427,11 @@ button:disabled {
     overflow-y: auto;
     position: relative;
     z-index: 10;
+}
+
+#village-encounter-log {
+    margin: 30px auto 0;
+    max-height: 200px;
 }
 
 .combatants {
@@ -457,10 +472,20 @@ button:disabled {
     animation: shake 0.5s ease-in-out;
 }
 
+#enemy-fish-combat.shake {
+    animation: shake-enemy 0.5s ease-in-out;
+}
+
 @keyframes shake {
     0%, 100% { transform: translateX(0); }
     25% { transform: translateX(-5px) rotate(-2deg); }
     75% { transform: translateX(5px) rotate(2deg); }
+}
+
+@keyframes shake-enemy {
+    0%, 100% { transform: scaleX(-1) translateX(0); }
+    25% { transform: scaleX(-1) translateX(-5px) rotate(-2deg); }
+    75% { transform: scaleX(-1) translateX(5px) rotate(2deg); }
 }
 
 .hp-bar {
@@ -479,6 +504,18 @@ button:disabled {
     width: 100%;
 }
 
+#combat {
+    cursor: default;
+}
+
+#combat.combat-over {
+    cursor: wait !important;
+}
+
+#combat.combat-over * {
+    cursor: wait !important;
+}
+
 #combat-log {
     max-width: 600px;
     margin: 20px auto;
@@ -495,9 +532,26 @@ button:disabled {
     margin: 20px 0;
 }
 
+.enemy-level-display {
+    font-size: 0.9rem;
+    color: #ffaa00;
+    font-weight: bold;
+    margin: 5px 0;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+}
+
 .combat-actions button {
     margin: 0 5px;
     background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+}
+
+.swim-away-message {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #ffaa00;
+    font-weight: bold;
+    margin-top: 10px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
 }
 
 .log-entry {

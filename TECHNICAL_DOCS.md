@@ -1,4 +1,4 @@
-# Betta Fish RPG v0.1 - Technical Documentation
+# Betta Fish RPG v0.2 - Technical Documentation
 
 ## Architecture Overview
 

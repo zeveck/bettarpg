@@ -20,6 +20,8 @@ class BettaRPG {
         this.combatActive = false;
         this.ricePaddyPositions = [];
         this.playerMapPosition = { x: 45, y: 55 }; // Start near village
+        this.isInEdgeZone = false;
+        this.hasReachedEdge = false;
         this.hasDunkleosteusSub = false;
         
         // Initialize audio context for sound effects
@@ -135,6 +137,7 @@ class BettaRPG {
         
         this.initializeEventListeners();
         this.generateRicePaddyPositions();
+        this.setupKeyboardControls();
         
         this.betteNames = [
             "Bubbles", "Finley", "Shimmer", "Sparkle", "Azure", "Coral", "Pearl", "Splash", 
@@ -325,6 +328,66 @@ class BettaRPG {
         
         document.getElementById('create-character').addEventListener('click', () => {
             this.createCharacter();
+        });
+    }
+    
+    setupKeyboardControls() {
+        document.addEventListener('keydown', (event) => {
+            const key = event.key.toLowerCase();
+            
+            // World map controls
+            if (this.currentScreen === 'world-map') {
+                switch(event.key) {
+                    case 'ArrowUp':
+                        event.preventDefault();
+                        this.swimDirection('north');
+                        break;
+                    case 'ArrowDown':
+                        event.preventDefault();
+                        this.swimDirection('south');
+                        break;
+                    case 'ArrowLeft':
+                        event.preventDefault();
+                        this.swimDirection('west');
+                        break;
+                    case 'ArrowRight':
+                        event.preventDefault();
+                        this.swimDirection('east');
+                        break;
+                    case 'Home':
+                        event.preventDefault();
+                        this.returnToVillage();
+                        break;
+                }
+            }
+            
+            // Combat controls
+            if (this.currentScreen === 'combat' && this.combatActive) {
+                switch(key) {
+                    case 'a':
+                        event.preventDefault();
+                        this.attack();
+                        break;
+                    case 'b':
+                        event.preventDefault();
+                        this.useSkill(); // Bubble Blast
+                        break;
+                    case 's':
+                        event.preventDefault();
+                        this.runAway(); // Swim Away
+                        break;
+                }
+            }
+            
+            // Cheat code for Betta Bites
+            if (key === '$') {
+                event.preventDefault();
+                this.player.bettaBites += 100;
+                this.updatePlayerStats();
+                if (this.currentScreen === 'world-map' || this.currentScreen === 'village') {
+                    this.addToEncounterLog("💰 Cheat activated! +100 Betta Bites!");
+                }
+            }
         });
     }
     
@@ -532,6 +595,10 @@ class BettaRPG {
         console.log('Player created:', this.player);
         this.updatePlayerStats();
         console.log('About to switch to village screen');
+        
+        // Add welcome message to encounter log
+        this.addToEncounterLog(`Welcome to Paddy Village, ${this.player.name}! Your adventure begins here.`);
+        
         this.showScreen('village');
     }
     
@@ -663,7 +730,7 @@ class BettaRPG {
             return;
         }
         
-        document.getElementById('dialogue-text').textContent = `🚤 Dunkleosteus Submarine - A mysterious ancient vessel that transforms your appearance completely! Price: 100 Betta Bites. You have ${this.player.bettaBites} Betta Bites.`;
+        document.getElementById('dialogue-text').textContent = `Dunkleosteus Submarine - A mysterious ancient vessel that transforms your appearance completely! Price: 100 Betta Bites. You have ${this.player.bettaBites} Betta Bites.`;
         
         const optionsDiv = document.getElementById('dialogue-options');
         optionsDiv.innerHTML = '';
@@ -717,6 +784,31 @@ class BettaRPG {
         this.showScreen('village');
     }
     
+    checkEdgeStatus() {
+        const x = this.playerMapPosition.x;
+        const y = this.playerMapPosition.y;
+        
+        // Check if at actual edge (within 2% of boundary)
+        const atEdge = (x <= 7 || x >= 93 || y <= 7 || y >= 93);
+        
+        // Check if in edge zone (within 10% of boundary - closer to actual edge)
+        const inEdgeZone = (x <= 15 || x >= 85 || y <= 15 || y >= 85);
+        
+        this.isInEdgeZone = inEdgeZone;
+        
+        return { atEdge, inEdgeZone };
+    }
+    
+    showEdgeMessage() {
+        this.addToEncounterLog("🌟 ══════════════════════════════════════ 🌟");
+        this.addToEncounterLog("    🎉 CONGRATULATIONS! 🎉");
+        this.addToEncounterLog("  You've reached the edge of your paddy!");
+        this.addToEncounterLog("    What lies beyond? More adventures await!");
+        this.addToEncounterLog("           (In Development)");
+        this.addToEncounterLog("🌟 ══════════════════════════════════════ 🌟");
+        this.hasReachedEdge = true;
+    }
+    
     swimDirection(direction) {
         const directionTexts = {
             north: "You swim north through the rice stalks, water becoming murkier.",
@@ -726,19 +818,36 @@ class BettaRPG {
         };
         
         // Move player position
-        const moveDistance = 5; // 5% of screen
+        const moveDistance = 3; // 3% of screen for smaller steps
         switch(direction) {
-            case 'north': this.playerMapPosition.y = Math.max(15, this.playerMapPosition.y - moveDistance); break;
-            case 'south': this.playerMapPosition.y = Math.min(85, this.playerMapPosition.y + moveDistance); break;
-            case 'east': this.playerMapPosition.x = Math.min(85, this.playerMapPosition.x + moveDistance); break;
-            case 'west': this.playerMapPosition.x = Math.max(15, this.playerMapPosition.x - moveDistance); break;
+            case 'north': this.playerMapPosition.y = Math.max(5, this.playerMapPosition.y - moveDistance); break;
+            case 'south': this.playerMapPosition.y = Math.min(95, this.playerMapPosition.y + moveDistance); break;
+            case 'east': this.playerMapPosition.x = Math.min(95, this.playerMapPosition.x + moveDistance); break;
+            case 'west': this.playerMapPosition.x = Math.max(5, this.playerMapPosition.x - moveDistance); break;
         }
         
         // Update player position on map
         this.showPlayerOnMap();
         
+        // Check edge status
+        const { atEdge, inEdgeZone } = this.checkEdgeStatus();
+        
         this.addToEncounterLog(directionTexts[direction]);
         
+        // Show edge message if player reached the edge for the first time
+        if (atEdge && !this.hasReachedEdge) {
+            this.showEdgeMessage();
+            return; // Skip encounter generation when showing edge message
+        }
+        
+        // In edge zone: guaranteed encounters
+        if (inEdgeZone) {
+            this.addToEncounterLog("The water here teems with dangerous predators!");
+            this.startRandomEncounter();
+            return;
+        }
+        
+        // Normal encounter logic for safe areas
         const encounterChance = Math.random();
         
         if (encounterChance < 0.4) {
@@ -770,15 +879,76 @@ class BettaRPG {
         this.addToEncounterLog(findText);
     }
     
+    calculateEnemyLevel() {
+        // Calculate distance from village center (50%, 50%)
+        const centerX = 50;
+        const centerY = 50;
+        const distanceX = Math.abs(this.playerMapPosition.x - centerX);
+        const distanceY = Math.abs(this.playerMapPosition.y - centerY);
+        const maxDistance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+        
+        // Edge zone gets special level 10 enemies
+        if (this.isInEdgeZone) {
+            return 10;
+        }
+        
+        // Convert distance to a level between 1-5
+        // Close to town (distance 0-10): mostly level 1
+        // Far from town (distance 35+): mostly level 5
+        let baseLevel = 1;
+        if (maxDistance > 10) baseLevel = 2;
+        if (maxDistance > 20) baseLevel = 3;
+        if (maxDistance > 30) baseLevel = 4;
+        if (maxDistance > 35) baseLevel = 5;
+        
+        // Add some randomness but keep it reasonable
+        const variation = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
+        const finalLevel = Math.max(1, Math.min(5, baseLevel + variation));
+        
+        return finalLevel;
+    }
+    
+    scaleEnemyWithLevel(enemy, level) {
+        const scaledEnemy = { ...enemy };
+        
+        // Scale HP: base HP * (1 + (level-1) * 0.5)
+        // Level 1: 1.0x, Level 2: 1.5x, Level 3: 2.0x, Level 4: 2.5x, Level 5: 3.0x
+        const hpMultiplier = 1 + (level - 1) * 0.5;
+        scaledEnemy.hp = Math.floor(enemy.hp * hpMultiplier);
+        scaledEnemy.maxHp = scaledEnemy.hp;
+        
+        // Scale damage: base attack * (1 + (level-1) * 0.3)
+        // Level 1: 1.0x, Level 2: 1.3x, Level 3: 1.6x, Level 4: 1.9x, Level 5: 2.2x
+        const damageMultiplier = 1 + (level - 1) * 0.3;
+        scaledEnemy.attack = Math.floor(enemy.attack * damageMultiplier);
+        
+        // Scale EXP slightly: base exp * (1 + (level-1) * 0.2)
+        const expMultiplier = 1 + (level - 1) * 0.2;
+        scaledEnemy.exp = Math.floor(enemy.exp * expMultiplier);
+        
+        scaledEnemy.level = level;
+        
+        return scaledEnemy;
+    }
+    
     startRandomEncounter() {
-        const enemy = this.enemies[Math.floor(Math.random() * this.enemies.length)];
-        this.currentEnemy = { ...enemy };
+        const baseEnemy = this.enemies[Math.floor(Math.random() * this.enemies.length)];
+        const enemyLevel = this.calculateEnemyLevel();
+        
+        this.currentEnemy = this.scaleEnemyWithLevel(baseEnemy, enemyLevel);
         this.currentEnemy.randomHue = Math.floor(Math.random() * 360); // Random hue for color variation
         this.combatActive = true;
         
-        this.addToEncounterLog(`A wild ${enemy.name} appears!`);
-        this.showScreen('combat');
+        const levelText = enemyLevel > 1 ? ` (Level ${enemyLevel})` : '';
+        this.addToEncounterLog(`A wild ${baseEnemy.name}${levelText} appears!`);
+        
+        // Update combat display BEFORE showing screen to prevent flash of old enemy
         this.updateCombatDisplay();
+        this.showScreen('combat');
+        
+        // Remove combat-over class for new battle
+        document.getElementById('combat').classList.remove('combat-over');
+        
         this.enableCombatButtons();
         
         // Play combat start sound
@@ -787,7 +957,10 @@ class BettaRPG {
     
     updateCombatDisplay() {
         document.getElementById('player-name-combat').textContent = this.player.name;
+        
+        // Show enemy name and level separately
         document.getElementById('enemy-name').textContent = this.currentEnemy.name;
+        document.getElementById('enemy-level').textContent = `Level ${this.currentEnemy.level}`;
         
         // Set player fish appearance
         const playerFish = document.getElementById('player-fish-combat');
@@ -802,6 +975,20 @@ class BettaRPG {
         const enemyFish = document.getElementById('enemy-fish-combat');
         enemyFish.src = this.currentEnemy.sprite;
         enemyFish.style.filter = `hue-rotate(${this.currentEnemy.randomHue}deg) saturate(1.3)`;
+        enemyFish.style.transform = 'scaleX(-1)'; // Reset to normal facing left orientation
+        
+        // Disable swim away button for high level enemies
+        const swimAwayBtn = document.getElementById('swim-away-btn');
+        const swimAwayMessage = document.getElementById('swim-away-message');
+        
+        if (this.currentEnemy.level >= 5) {
+            swimAwayBtn.disabled = true;
+            swimAwayMessage.textContent = "⚡ The enemy is too fast to escape! ⚡";
+            this.addToCombatLog("The enemy is too fast to escape from!");
+        } else {
+            swimAwayBtn.disabled = false;
+            swimAwayMessage.textContent = "";
+        }
         
         this.updateCombatHP();
         this.addToCombatLog(`Combat begins! ${this.player.name} vs ${this.currentEnemy.name}`);
@@ -837,13 +1024,26 @@ class BettaRPG {
         
         this.addToCombatLog(`${this.player.name} ${attackAction} for ${playerDamage} damage!`);
         
+        // Update HP display first
+        this.updateCombatHP();
+        
+        // Enemy damage animation
+        const enemyFish = document.getElementById('enemy-fish-combat');
+        enemyFish.classList.add('shake');
+        setTimeout(() => {
+            enemyFish.classList.remove('shake');
+        }, 500);
+        
         if (this.currentEnemy.hp <= 0) {
+            // Flip enemy fish to show defeat
+            setTimeout(() => {
+                enemyFish.style.transform = 'scaleX(-1) scaleY(-1)';
+            }, 250); // Delay to show HP drop first
             this.winCombat();
             return;
         }
         
         this.enemyTurn();
-        this.updateCombatHP();
     }
     
     useSkill() {
@@ -870,7 +1070,21 @@ class BettaRPG {
         
         this.addToCombatLog(`${this.player.name} ${bubbleAction} for ${skillDamage} damage!`);
         
+        // Update HP display first
+        this.updateCombatHP();
+        
+        // Enemy damage animation
+        const enemyFish = document.getElementById('enemy-fish-combat');
+        enemyFish.classList.add('shake');
+        setTimeout(() => {
+            enemyFish.classList.remove('shake');
+        }, 500);
+        
         if (this.currentEnemy.hp <= 0) {
+            // Flip enemy fish to show defeat
+            setTimeout(() => {
+                enemyFish.style.transform = 'scaleX(-1) scaleY(-1)';
+            }, 250); // Delay to show HP drop first
             this.winCombat();
             return;
         }
@@ -883,65 +1097,100 @@ class BettaRPG {
     runAway() {
         if (!this.combatActive) return;
         
-        const escapeChance = Math.random();
-        if (escapeChance < 0.7) {
-            this.combatActive = false;
-            this.disableCombatButtons();
-            this.addToCombatLog(`${this.player.name} swims away quickly!`);
-            setTimeout(() => {
-                this.showScreen('world-map');
-                this.addToEncounterLog("You managed to escape!");
-            }, 1500);
-        } else {
-            this.addToCombatLog("Couldn't escape!");
+        // Check if escape is disabled for high level enemies
+        if (this.currentEnemy.level >= 5) {
+            this.addToCombatLog("You try to escape, but the enemy is too fast!");
             this.enemyTurn();
-            this.updateCombatHP();
+            return;
         }
+        
+        // For levels 1-3, escape should always work (no enemy turn on success)
+        this.combatActive = false;
+        this.disableCombatButtons();
+        this.addToCombatLog(`${this.player.name} swims away quickly!`);
+        setTimeout(() => {
+            this.showScreen('world-map');
+            this.addToEncounterLog("You managed to escape!");
+        }, 1500);
     }
     
     enemyTurn() {
-        const enemyDamage = Math.floor(Math.random() * this.currentEnemy.attack) + 1;
-        this.player.hp = Math.max(0, this.player.hp - enemyDamage);
-        
         // Get random attack description
         const attackDesc = this.currentEnemy.attacks[Math.floor(Math.random() * this.currentEnemy.attacks.length)];
-        this.addToCombatLog(`${this.currentEnemy.name} ${attackDesc} for ${enemyDamage} damage!`);
         
-        // Play wound sound and shake animation
-        this.playSound('wound');
-        const playerFish = document.getElementById('player-fish-combat');
-        playerFish.classList.add('shake');
-        setTimeout(() => {
-            playerFish.classList.remove('shake');
-        }, 500);
-        
-        if (this.player.hp <= 0) {
-            this.loseCombat();
+        if (this.hasDunkleosteusSub) {
+            // Dunkleosteus submarine is invulnerable
+            this.addToCombatLog(`${this.currentEnemy.name} ${attackDesc} but the ancient armor deflects all damage!`);
+            this.playSound('attack'); // Different sound for deflection
+        } else {
+            // Normal damage calculation
+            const enemyDamage = Math.floor(Math.random() * this.currentEnemy.attack) + 1;
+            this.player.hp = Math.max(0, this.player.hp - enemyDamage);
+            
+            this.addToCombatLog(`${this.currentEnemy.name} ${attackDesc} for ${enemyDamage} damage!`);
+            
+            // Play wound sound and shake animation
+            this.playSound('wound');
+            const playerFish = document.getElementById('player-fish-combat');
+            playerFish.classList.add('shake');
+            setTimeout(() => {
+                playerFish.classList.remove('shake');
+            }, 500);
+            
+            if (this.player.hp <= 0) {
+                // Update HP display to show 0 before calling loseCombat
+                this.updateCombatHP();
+                this.updatePlayerStats();
+                this.loseCombat();
+                return;
+            }
         }
     }
     
     winCombat() {
         this.combatActive = false;
         this.disableCombatButtons();
+        
+        // Add combat-over class to show waiting cursor everywhere
+        document.getElementById('combat').classList.add('combat-over');
+        
         this.playSound('fanfare');
         
         const expGained = this.currentEnemy.exp;
-        const bettaBitesGained = Math.floor(Math.random() * 5) + 1; // 1-5 Betta Bites
+        
+        // Scale Betta Bites based on enemy level
+        // Base: 1-5 Betta Bites, +1-2 per level above 1
+        const baseBites = Math.floor(Math.random() * 5) + 1; // 1-5 Betta Bites
+        const levelBonus = (this.currentEnemy.level - 1) * (Math.floor(Math.random() * 2) + 1); // 1-2 per level
+        const bettaBitesGained = baseBites + levelBonus;
         
         this.player.exp += expGained;
         this.player.bettaBites += bettaBitesGained;
         
         this.addToCombatLog(`Victory! Gained ${expGained} EXP and ${bettaBitesGained} Betta Bites!`);
         
+        // Show congratulations message for first Level 10 victory
+        if (this.currentEnemy.level === 10 && !this.hasReachedEdge) {
+            this.hasReachedEdge = true;
+            setTimeout(() => {
+                this.showEdgeMessage();
+                setTimeout(() => {
+                    this.showScreen('world-map');
+                    this.addToEncounterLog(`Defeated ${this.currentEnemy.name}!`);
+                    this.updatePlayerStats();
+                }, 2000); // Extra delay to read congratulations
+            }, 2000);
+        } else {
+            setTimeout(() => {
+                this.showScreen('world-map');
+                this.addToEncounterLog(`Defeated ${this.currentEnemy.name}!`);
+                this.updatePlayerStats();
+            }, 3000);
+        }
+        
         if (this.player.exp >= this.player.expToNext) {
             this.levelUp();
         }
-        
-        setTimeout(() => {
-            this.showScreen('world-map');
-            this.addToEncounterLog(`Defeated ${this.currentEnemy.name}!`);
-            this.updatePlayerStats();
-        }, 3000);
     }
     
     levelUp() {
@@ -981,12 +1230,55 @@ class BettaRPG {
     loseCombat() {
         this.combatActive = false;
         this.disableCombatButtons();
+        
+        // Add combat-over class to show waiting cursor everywhere
+        document.getElementById('combat').classList.add('combat-over');
+        
         this.addToCombatLog("You have been defeated...");
+        
+        // Flip player fish to show death (combat screen)
+        const playerFish = document.getElementById('player-fish-combat');
+        playerFish.style.transform = 'scaleY(-1)';
+        
+        // Also flip player fish in stats panel
+        const statsSprite = document.getElementById('stats-player-sprite');
+        if (statsSprite) {
+            statsSprite.style.transform = 'scaleY(-1)';
+        }
+        
         setTimeout(() => {
-            this.player.hp = Math.floor(this.player.maxHp / 2);
-            this.showScreen('village');
-            this.addToEncounterLog("You wake up back in the village, rescued by other bettas.");
-            this.updatePlayerStats();
+            // Calculate Betta Bites loss (half, rounded down)
+            const bettaBitesLost = Math.floor(this.player.bettaBites / 2);
+            const bettaBitesRemaining = this.player.bettaBites - bettaBitesLost;
+            
+            // Reset to full HP and MP
+            this.player.hp = this.player.maxHp;
+            this.player.mp = this.player.maxMp;
+            this.player.bettaBites = bettaBitesRemaining;
+            
+            // Show loss message in combat log before switching screens
+            if (bettaBitesLost > 0) {
+                this.addToCombatLog(`You lost ${bettaBitesLost} Betta Bites...`);
+            }
+            
+            // Brief delay to let player see the loss before switching to village
+            setTimeout(() => {
+                // Reset player fish orientation (both locations)
+                playerFish.style.transform = '';
+                if (statsSprite) {
+                    statsSprite.style.transform = '';
+                }
+                
+                this.showScreen('village');
+                
+                if (bettaBitesLost > 0) {
+                    this.addToEncounterLog(`You wake up back in the village, rescued by other bettas. You lost ${bettaBitesLost} Betta Bites but feel fully recovered!`);
+                } else {
+                    this.addToEncounterLog("You wake up back in the village, rescued by other bettas. You feel fully recovered!");
+                }
+                
+                this.updatePlayerStats();
+            }, 1500); // Additional delay to see the loss message
         }, 2000);
     }
     
@@ -1000,12 +1292,21 @@ class BettaRPG {
     }
     
     addToEncounterLog(message) {
-        const log = document.getElementById('encounter-log');
-        const entry = document.createElement('div');
-        entry.className = 'log-entry';
-        entry.textContent = message;
-        log.appendChild(entry);
-        log.scrollTop = log.scrollHeight;
+        // Add to both encounter logs (world map and village)
+        const logs = [
+            document.getElementById('encounter-log'),
+            document.getElementById('village-encounter-log')
+        ];
+        
+        logs.forEach(log => {
+            if (log) {
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                entry.textContent = message;
+                log.appendChild(entry);
+                log.scrollTop = log.scrollHeight;
+            }
+        });
     }
 }
 

@@ -1,4 +1,4 @@
-# Betta Fish RPG v0.1
+# Betta Fish RPG v0.2
 
 A browser-based RPG where you play as a young betta fish exploring rice paddies and investigating mysterious disappearances.
 
@@ -10,19 +10,23 @@ A browser-based RPG where you play as a young betta fish exploring rice paddies 
 
 - **Character Creation**: Random name generator, 5 color choices, instant defaults
 - **Village Hub**: 7 NPCs with branching dialogue and services
-- **Combat System**: Turn-based battles with visual sprites and random enemy colors
+- **Advanced Combat**: Turn-based battles with level-based enemies (1-10) and keyboard controls
 - **Progression**: Level-based armor upgrades (helmet → fin guards → advanced → full metal)
-- **Economy**: Betta Bites currency for inn services and shop purchases
-- **Exploration**: Directional movement through rice paddies with random encounters
+- **Economy**: Betta Bites currency with level-scaled rewards
+- **Exploration**: Keyboard navigation through rice paddies with distance-based difficulty
+- **Edge Zone Challenge**: Level 10 enemies in dangerous outer areas
 - **Audio**: Procedural sound effects for all major actions
+- **Submarine Power**: Dunkleosteus submarine provides complete invulnerability
 
 ## Game Mechanics
 
 ### Combat
-- **Actions**: Attack, Bubble Blast skill (3 MP), or flee
-- **Visual Combat**: Player and enemy sprites face each other
-- **Enemy Variety**: 4 enemy types with increasing difficulty
-- **Rewards**: EXP for leveling and Betta Bites for currency
+- **Actions**: Attack, Bubble Blast skill (3 MP), or flee (levels 1-4 only)
+- **Keyboard Controls**: A (Attack), B (Bubble Blast), S (Swim Away)
+- **Visual Combat**: Player and enemy sprites with damage animations
+- **Enemy Levels**: 1-10 scaling based on distance from village
+- **Level-Based Escape**: High-level enemies (5+) prevent fleeing
+- **Rewards**: Scaled EXP and Betta Bites based on enemy level
 
 ### Progression
 - **Armor Evolution**: Sprite changes based on level (3, 5, 7, 10+)
@@ -31,8 +35,10 @@ A browser-based RPG where you play as a young betta fish exploring rice paddies 
 
 ### World
 - **Village Services**: Inn (5 Betta Bites), Shop (submarine), NPC dialogue
-- **Rice Paddies**: 4-directional movement with encounters and treasure
+- **Rice Paddies**: Keyboard navigation (arrow keys) with scaled difficulty zones
+- **Edge Zones**: Extreme challenge areas with Level 10 enemies
 - **Visual Environment**: Tiled backgrounds, village sprite, random rice tufts
+- **Navigation**: Arrow keys for movement, Home key returns to village
 
 ## NPCs & Services
 
@@ -46,10 +52,14 @@ A browser-based RPG where you play as a young betta fish exploring rice paddies 
 
 ## Enemies
 
-- **Aggressive Guppy** (8 HP, 15 EXP): Weakest foe
-- **Territorial Angelfish** (12 HP, 25 EXP): Moderate threat  
-- **Sneaky Catfish** (15 HP, 35 EXP): Strong opponent
-- **Fierce Cichlid** (18 HP, 45 EXP): Most dangerous
+Base stats scale dramatically with level (1-10):
+
+- **Aggressive Guppy**: 8-44 HP, 15-126 EXP
+- **Territorial Angelfish**: 12-66 HP, 25-210 EXP  
+- **Sneaky Catfish**: 15-83 HP, 35-294 EXP
+- **Fierce Cichlid**: 18-99 HP, 45-378 EXP
+
+*Level 10 enemies appear in edge zones with 5.5x HP and 3.7x damage*
 
 ## Technical Info
 
@@ -61,11 +71,17 @@ A browser-based RPG where you play as a young betta fish exploring rice paddies 
 
 ## Quick Start
 
-1. Open `index.html` in a web browser
+1. Open `index.html` in a web browser (or run `python devServer.py`)
 2. Click "Start Adventure" → "Begin Adventure" (uses random defaults)
 3. Talk to villagers, then exit to rice paddies
-4. Battle enemies to gain levels and currency
-5. Use inn to restore health, shop for special items
+4. Use arrow keys to explore, battle enemies for levels and currency
+5. Survive to edge zones for ultimate Level 10 challenges
+6. Use inn to restore health, save for submarine invulnerability
+
+### Controls
+- **World Map**: Arrow keys (move), Home (return to village)
+- **Combat**: A (Attack), B (Bubble Blast), S (Swim Away)
+- **Cheat**: $ (add 100 Betta Bites)
 
 ---
 

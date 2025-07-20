@@ -1,4 +1,4 @@
-# Betta Fish RPG v0.1 - Game Design Document
+# Betta Fish RPG v0.2 - Game Design Document
 
 ## Core Concept
 

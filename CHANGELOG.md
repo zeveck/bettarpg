@@ -2,7 +2,33 @@
 
 ---
 
-## Version 0.2 (Current)
+## Version 0.3 (Current)
+
+### 🛒 Shop System Overhaul
+- **Clickable Items**: Shop items become interactive buttons when affordable
+- **Visual States**: Blue tint for buyable items, normal appearance when disabled
+- **Expanded Inventory**: Added Kelp Snack (3 Betta Bites) and Bubble Water (2 Betta Bites)
+- **Compact Design**: Eliminated separate purchase buttons for cleaner UI
+
+### 🏘️ Village Improvements
+- **Streamlined NPCs**: Removed Old Fisherman and Village Healer to focus gameplay
+- **Enhanced Dialogue**: Bubble now mentions dreams of exploring terraced cities
+- **Renamed Inn**: "Restful Inn" became "Swishy Solace Inn" for more personality
+
+### 💰 Economy Balance
+- **Strategic Pricing**: Inn (5) vs Kelp Snack (3) + Bubble Water (2) = value vs convenience
+- **Consumable Items**: Full HP/MP restoration items for tactical planning
+- **Economic Flow**: Regular combat income supports item purchases
+
+### 🎨 UI Polish
+- **Consistent Theming**: Blue interactive elements match dialogue buttons
+- **Enhanced Readability**: No desaturation on disabled items
+- **Smooth Animations**: Hover effects and lift transitions
+- **Professional Styling**: Clean shop card design with proper visual hierarchy
+
+---
+
+## Version 0.2
 
 ### 🔥 Major New Features
 - **Enemy Level System (1-10)**: Distance-based enemy scaling with visual level indicators
@@ -53,7 +79,7 @@
 
 ### 🎨 Visual & Audio
 - **Pixel Art Graphics**: Complete sprite system replacing emoji placeholders
-- **Progressive Armor**: Visual upgrades at levels 3, 5, 7, 10
+- **Progressive Armor**: Visual upgrades at levels 3, 5, 7
 - **Procedural Audio**: Web Audio API sound generation for all actions
 - **Dynamic Backgrounds**: Tiled water with random rice paddy decorations
 - **Color Customization**: CSS hue-rotation for player and enemy variety

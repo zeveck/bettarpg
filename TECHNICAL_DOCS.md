@@ -1,11 +1,11 @@
-# Betta Fish RPG v0.2 - Technical Documentation
+# Betta Fish RPG v0.3 - Technical Documentation
 
 ## Architecture Overview
 
 ### Core Technologies
 - **HTML5**: Semantic structure with responsive design
-- **CSS3**: Grid/flexbox layouts, animations, hue-rotation filters
-- **Vanilla JavaScript**: ES6+ classes, no external dependencies
+- **CSS3**: Grid/flexbox layouts, animations, layered backgrounds, order-based positioning
+- **Vanilla JavaScript**: ES6+ classes, no external dependencies, comprehensive keyboard handling
 - **Web Audio API**: Procedural sound generation with fallbacks
 
 ### Design Patterns
@@ -16,23 +16,28 @@
 
 ## File Structure
 
-### index.html (167 lines)
+### index.html (175+ lines)
 - **Screen Organization**: 6 main game screens (title, creation, village, dialogue, world-map, combat)
-- **UI Components**: Stats panel, combat interface, village locations
+- **UI Components**: Stats panel, combat interface with swim-away section, village locations
 - **Event Handlers**: Inline onclick handlers for game interactions
-- **Graphics Integration**: Image elements for sprites and backgrounds
+- **Graphics Integration**: Image elements for sprites and layered backgrounds
+- **Accessibility**: Keyboard shortcut indicators with underlined letters
 
-### style.css (580 lines)
-- **Layout Systems**: Flexbox and CSS Grid for responsive design
+### style.css (620+ lines)
+- **Layout Systems**: Flexbox with order-based combat positioning, CSS Grid for responsive design
 - **Screen Management**: Absolute positioning with active state classes
-- **Visual Effects**: Shake animations, floating sprites, transitions
+- **Background Layering**: CSS pseudo-elements for three-tier danger zone visualization
+- **Visual Effects**: Shake animations, floating sprites, directional transforms
+- **Shop Interface**: Interactive item styling with hover states and affordability indicators
 - **Responsive Design**: Mobile breakpoints and adaptive layouts
 
-### script.js (900+ lines)
+### script.js (1100+ lines)
 - **BettaRPG Class**: Main game controller with complete state management
-- **Data Structures**: Player stats, NPC dialogues, enemy definitions
-- **Core Systems**: Combat, progression, economy, audio, graphics
-- **Event Management**: User interactions and screen transitions
+- **Data Structures**: Player stats, NPC dialogues, enemy definitions with level scaling
+- **Core Systems**: Combat with level-based damage/armor, progression, economy, audio, graphics
+- **Keyboard System**: Comprehensive key handling for all screens with context-aware controls
+- **Visual Systems**: Directional sprites, layered backgrounds, dynamic CSS pseudo-elements
+- **Event Management**: User interactions, screen transitions, and state persistence
 
 ## Core Systems
 
@@ -66,7 +71,7 @@ startRandomEncounter() → updateCombatDisplay() → playerAction() → enemyTur
 getPlayerSprite() {
     // Returns appropriate sprite based on:
     // 1. Dunkleosteus submarine (if owned)
-    // 2. Armor level (levels 3, 5, 7, 10+)
+    // 2. Armor level (levels 3, 5, 7+)
     // 3. Base betta sprite
 }
 

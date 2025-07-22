@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Betta Fish RPG</title>
+    <link rel="icon" type="image/png" href="graphics/main_fish/player_betta.png">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -50,36 +51,30 @@
             <h2>Paddy Village</h2>
             <div id="village-area">
                 <div class="location-description">
-                    <p>You swim through the peaceful village of Paddy Village. Rice stalks sway gently in the water above, providing shelter for various bettas going about their daily lives.</p>
+                    <p>Rice stalks sway gently in the water above, providing shelter for various bettas going about their daily lives.</p>
                 </div>
                 
                 <div class="village-locations">
                     <div class="location" onclick="if(game) game.talkToNPC('elder')">
-                        🏛️ Elder's Dwelling
+                        🏛️ <u>E</u>lder's Dwelling
                     </div>
                     <div class="location" onclick="if(game) game.talkToNPC('merchant')">
-                        🛒 Bubble Mart
+                        🛒 <u>F</u>ish Mart
                     </div>
                     <div class="location" onclick="if(game) game.talkToNPC('guard')">
-                        ⚔️ Village Guard
-                    </div>
-                    <div class="location" onclick="if(game) game.talkToNPC('fisherman')">
-                        🎣 Old Fisherman
-                    </div>
-                    <div class="location" onclick="if(game) game.talkToNPC('healer')">
-                        🌿 Village Healer
+                        ⚔️ Village <u>G</u>uard
                     </div>
                     <div class="location" onclick="if(game) game.talkToNPC('bubble')">
-                        ✨ Bubble's Home
+                        ✨ <u>B</u>ubble's Home
                     </div>
                     <div class="location village-center" onclick="if(game) game.talkToNPC('innkeeper')">
-                        🏨 Restful Inn
+                        🏨 Swishy Solace <u>I</u>nn
                     </div>
                 </div>
                 
                 <div class="village-exit">
                     <div class="location" onclick="if(game) game.exitVillage()">
-                        🗺️ Exit to Rice Paddies
+                        🗺️ E<u>x</u>it to Rice Paddies (↓)
                     </div>
                 </div>
                 
@@ -150,17 +145,23 @@
                 <div id="combat-log"></div>
                 
                 <div class="combat-actions">
-                    <button onclick="if(game) game.attack()">Attack</button>
-                    <button onclick="if(game) game.useSkill()">Bubble Blast (MP)</button>
-                    <button id="swim-away-btn" onclick="if(game) game.runAway()">Swim Away</button>
+                    <button onclick="if(game) game.attack()"><u>A</u>ttack</button>
+                    <div class="spell-buttons">
+                        <button id="bubble-blast-btn" onclick="if(game) game.useSkill('bubble')"><u>B</u>ubble Blast (3 MP)</button>
+                        <button id="gravel-grenade-btn" onclick="if(game) game.useSkill('gravel')" style="display: none;">Gravel <u>G</u>renade (5 MP)</button>
+                    </div>
+                    <div class="swim-away-section">
+                        <button id="swim-away-btn" onclick="if(game) game.runAway()"><u>S</u>wim Away</button>
+                        <div id="swim-away-message" class="swim-away-message"></div>
+                    </div>
                 </div>
-                <div id="swim-away-message" class="swim-away-message"></div>
             </div>
         </div>
     </div>
     
     <div id="player-stats">
         <div class="stats-content">
+            <div class="stat player-name-stat"><span id="player-name-display">Player</span></div>
             <div class="stat">HP: <span id="hp">20</span>/<span id="max-hp">20</span></div>
             <div class="stat">MP: <span id="mp">10</span>/<span id="max-mp">10</span></div>
             <div class="stat">Level: <span id="level">1</span></div>
@@ -170,7 +171,30 @@
         <img id="stats-player-sprite" src="graphics/main_fish/player_betta.png" alt="Player Betta">
     </div>
 
-    <div id="version-info">v0.2</div>
+    <div id="version-info">v0.3</div>
+
+    <!-- Congratulations Popup -->
+    <div id="congratulations-popup" class="congratulations-popup">
+        <div class="popup-content">
+            <div class="confetti-container">
+                <div class="confetti"></div>
+                <div class="confetti"></div>
+                <div class="confetti"></div>
+                <div class="confetti"></div>
+                <div class="confetti"></div>
+                <div class="confetti"></div>
+                <div class="confetti"></div>
+                <div class="confetti"></div>
+            </div>
+            <div class="popup-text">
+                <h1>🎉 CONGRATULATIONS! 🎉</h1>
+                <p>You've explored to your paddy's edge!</p>
+                <p class="subtitle">What lies beyond? More adventures await!</p>
+                <p class="dev-note">(In Development)</p>
+                <button id="close-popup" class="celebration-button"><u>C</u>ontinue Swimming</button>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>

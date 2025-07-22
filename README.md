@@ -1,4 +1,4 @@
-# Betta Fish RPG v0.2
+# Betta Fish RPG v0.3
 
 A browser-based RPG where you play as a young betta fish exploring rice paddies and investigating mysterious disappearances.
 
@@ -9,46 +9,48 @@ A browser-based RPG where you play as a young betta fish exploring rice paddies 
 ## Key Features
 
 - **Character Creation**: Random name generator, 5 color choices, instant defaults
-- **Village Hub**: 7 NPCs with branching dialogue and services
-- **Advanced Combat**: Turn-based battles with level-based enemies (1-10) and keyboard controls
-- **Progression**: Level-based armor upgrades (helmet → fin guards → advanced → full metal)
-- **Economy**: Betta Bites currency with level-scaled rewards
-- **Exploration**: Keyboard navigation through rice paddies with distance-based difficulty
-- **Edge Zone Challenge**: Level 10 enemies in dangerous outer areas
-- **Audio**: Procedural sound effects for all major actions
-- **Submarine Power**: Dunkleosteus submarine provides complete invulnerability
+- **Village Hub**: 5 NPCs with branching dialogue and services
+- **Advanced Combat**: Turn-based battles with level-based enemies (1-10) and full keyboard controls
+- **Level Scaling**: Attack damage increases on even levels, magic on odd levels, armor reduces incoming damage
+- **Visual Danger Zones**: Three-tier water backgrounds (light/medium/dark) indicating threat levels
+- **Economy**: Betta Bites currency with consumable items and submarine upgrade
+- **Exploration**: Keyboard navigation with directional fish sprites and safe village exit
+- **Edge Zone Challenge**: Level 10 enemies in dangerous outer areas with escape prevention
+- **Audio**: Procedural sound effects including Gargantuan Gar roar
+- **Submarine Power**: Dunkleosteus submarine provides complete invulnerability and double damage
 
 ## Game Mechanics
 
 ### Combat
-- **Actions**: Attack, Bubble Blast skill (3 MP), or flee (levels 1-4 only)
-- **Keyboard Controls**: A (Attack), B (Bubble Blast), S (Swim Away)
-- **Visual Combat**: Player and enemy sprites with damage animations
-- **Enemy Levels**: 1-10 scaling based on distance from village
-- **Level-Based Escape**: High-level enemies (5+) prevent fleeing
+- **Actions**: Attack, Bubble Blast skill (3 MP), Gravel Grenade (5 MP, level 5+), or flee
+- **Keyboard Controls**: A (Attack), B (Bubble Blast), G (Gravel Grenade), S (Swim Away)
+- **Level Scaling**: Attack improves on even levels, magic on odd levels (Attack: 3-10 at L1, 8-15 at L10)
+- **Armor Protection**: Damage reduction increases with armor (-1/-2/-3 for helmet/armor/full metal)
+- **Visual Combat**: Player and enemy sprites with damage animations and color variation
+- **Enemy Levels**: 1-10 scaling based on distance from village center
+- **Escape System**: High-level enemies (5+) show warnings, very difficult escape chance
 - **Rewards**: Scaled EXP and Betta Bites based on enemy level
 
 ### Progression
-- **Armor Evolution**: Sprite changes based on level (3, 5, 7, 10+)
+- **Armor Evolution**: Sprite changes based on level (3, 5, 7+)
 - **Stats**: HP, MP, Level, EXP tracking
 - **Special Item**: Dunkleosteus submarine (100 Betta Bites) overrides all armor
 
 ### World
-- **Village Services**: Inn (5 Betta Bites), Shop (submarine), NPC dialogue
-- **Rice Paddies**: Keyboard navigation (arrow keys) with scaled difficulty zones
-- **Edge Zones**: Extreme challenge areas with Level 10 enemies
-- **Visual Environment**: Tiled backgrounds, village sprite, random rice tufts
+- **Village Services**: Swishy Solace Inn (5 Betta Bites), Fish Mart (clickable items), NPC dialogue
+- **Rice Paddies**: Keyboard navigation with three-tier danger zone visuals
+- **Safe Exit**: First step from village skips encounters, fish faces movement direction
+- **Edge Zones**: Extreme challenge areas with guaranteed Level 10 encounters
+- **Visual Environment**: Layered water backgrounds (dark edges, medium frame, light center)
 - **Navigation**: Arrow keys for movement, Home key returns to village
 
 ## NPCs & Services
 
 - **Elder Finn**: Story exposition about disappearances
-- **Shopkeeper Coral**: Sells Dunkleosteus submarine for 100 Betta Bites
+- **Shopkeeper Coral**: Sells submarine (100), Kelp Snacks (3 HP), and Bubble Water (2 MP)
 - **Guard Captain Reef**: Investigation details and warnings
-- **Old Fisher Koi**: Environmental observations
-- **Sage Lily**: Healing knowledge and strange symptoms
-- **Bubble the Brave**: Companion hints and adventure enthusiasm
-- **Innkeeper Seaweed**: Rest services (5 Betta Bites for full HP/MP)
+- **Bubble the Brave**: Dreams of exploring terraced cities above
+- **Innkeeper Seaweed**: Rest services at Swishy Solace Inn (5 Betta Bites for full HP/MP)
 
 ## Enemies
 
@@ -80,8 +82,10 @@ Base stats scale dramatically with level (1-10):
 
 ### Controls
 - **World Map**: Arrow keys (move), Home (return to village)
-- **Combat**: A (Attack), B (Bubble Blast), S (Swim Away)
-- **Cheat**: $ (add 100 Betta Bites)
+- **Combat**: A (Attack), B (Bubble Blast), G (Gravel Grenade), S (Swim Away)
+- **Village**: E (Elder), F (Fish Mart), G (Guard), B (Bubble), I (Inn), X (Exit)
+- **Dialogue**: C (Continue), Enter (Continue/Rest), B (Browse), D/K/B (Shop items)
+- **Cheats**: $ (add 100 Betta Bites), % (level up)
 
 ---
 
@@ -91,4 +95,4 @@ Base stats scale dramatically with level (1-10):
 **Code Development:** Entirely written by Claude Code (Anthropic's AI coding assistant)  
 **Graphics:** All pixel art generated by ChatGPT  
 
-*Experience aquatic adventure in authentic betta fish habitats!*
+*Experience aquatic adventure as a brave betta fish!*

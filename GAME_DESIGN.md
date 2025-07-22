@@ -1,4 +1,4 @@
-# Betta Fish RPG v0.2 - Game Design Document
+# Betta Fish RPG v0.3 - Game Design Document
 
 ## Core Concept
 
@@ -17,8 +17,9 @@
 
 ### Accessibility
 - **No Installation**: Runs directly in any modern browser
-- **Simple Interface**: Point-and-click with clear visual feedback
+- **Keyboard Controls**: Complete keyboard navigation for all screens
 - **Quick Start**: Default character options for immediate play
+- **Visual Feedback**: Clear danger zones and directional indicators
 
 ### Engagement
 - **Visual Progression**: Armor upgrades and sprite evolution
@@ -28,26 +29,34 @@
 ## Game Systems
 
 ### Character Progression
-- **Level-Based Armor**: Visual upgrades at levels 3, 5, 7, 10
+- **Level-Based Armor**: Visual upgrades at levels 3, 5, 7 with damage reduction
 - **Traditional Stats**: HP, MP, Level, EXP with clear progression
+- **Alternating Scaling**: Attack improves on even levels, magic on odd levels for balanced growth
+- **Armor Protection**: Damage reduction (-1/-2/-3) based on armor tier
 - **Special Transformation**: Dunkleosteus submarine overrides armor system
 - **Color Persistence**: Player-chosen hue maintained throughout
 
 ### Combat Design
 - **Turn-Based**: Player action → enemy response cycle
-- **Three Actions**: Attack, MP skill, or flee attempt
-- **Visual Combat**: Facing sprites with damage animations
-- **Enemy Variety**: 4 species with increasing difficulty and unique sprites
+- **Multiple Actions**: Attack, Bubble Blast (3 MP), Gravel Grenade (5 MP, level 5+), flee
+- **Level Scaling**: Both player damage and enemy difficulty scale with progression
+- **Visual Combat**: Facing sprites with damage animations and color variation
+- **Enemy Variety**: 4 species + Gargantuan Gar boss with level-based scaling (1-10)
+- **Escape Mechanics**: High-level enemies (5+) make fleeing very difficult
 
 ### Economic Balance
 - **Betta Bites Currency**: Thematic food-based system
 - **Income Sources**: Combat rewards + exploration discoveries
-- **Spending Options**: Inn recovery (5) + submarine purchase (100)
+- **Spending Options**: Inn recovery (5), consumables (Kelp Snacks 3, Bubble Water 2), submarine (100)
+- **Clickable Shop**: Direct item purchasing with visual affordability indicators
 - **Progression Gate**: Submarine requires significant resource accumulation
 
 ### World Design
-- **Hub Structure**: Safe village with 7 functional NPCs
-- **Exploration Grid**: 4-directional movement through rice paddies
+- **Hub Structure**: Safe village with 5 functional NPCs and streamlined interactions
+- **Exploration Grid**: 4-directional movement with directional fish sprites
+- **Visual Danger Zones**: Three-tier water backgrounds indicating threat levels
+- **Safe Village Exit**: Grace period prevents immediate combat after leaving village
+- **Edge Zone Challenge**: Guaranteed Level 10 encounters in outer danger zones
 - **Environmental Systems**: Dynamic backgrounds and decorative elements
 - **Mystery Integration**: NPC dialogue builds narrative tension
 

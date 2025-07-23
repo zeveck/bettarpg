@@ -1,91 +1,65 @@
 # Betta Fish RPG v0.3
 
-A browser-based RPG where you play as a young betta fish exploring rice paddies and investigating mysterious disappearances.
+A browser-based RPG where you play as a young betta fish exploring rice paddies and battling increasingly dangerous foes.
 
 ## Overview
 
-**Betta Fish RPG** is a turn-based RPG set in interconnected rice paddies. Create your betta, explore Paddy Village, battle hostile fish, and uncover the mystery behind vanishing villagers.
+**Betta Fish RPG** is a turn-based RPG set in interconnected rice paddies. Create your betta, explore Paddy Village, and battle hostile fish as you venture into increasingly dangerous waters.
 
-## Key Features
+## Features
 
-- **Character Creation**: Random name generator, 5 color choices, instant defaults
-- **Village Hub**: 5 NPCs with branching dialogue and services
-- **Advanced Combat**: Turn-based battles with level-based enemies (1-10) and full keyboard controls
-- **Level Scaling**: Attack damage increases on even levels, magic on odd levels, armor reduces incoming damage
-- **Visual Danger Zones**: Three-tier water backgrounds (light/medium/dark) indicating threat levels
-- **Economy**: Betta Bites currency with consumable items and submarine upgrade
-- **Exploration**: Keyboard navigation with directional fish sprites and safe village exit
-- **Edge Zone Challenge**: Level 10 enemies in dangerous outer areas with escape prevention
-- **Audio**: Procedural sound effects including Gargantuan Gar roar
-- **Submarine Power**: Dunkleosteus submarine provides complete invulnerability and double damage
+- **Authentic Setting**: Rice paddies, not generic fantasy - bettas' natural habitat
+- **Progressive Challenge**: Visual danger zones guide you from safe village to deadly edge zones
+- **Complete Keyboard Controls**: Full game playable without mouse
+- **Balanced Progression**: Attack and magic improve on alternating levels
+- **Epic Boss Battle**: Face the legendary Gargantuan Gar in the depths
+- **Submarine Transformation**: Become an ancient Dunkleosteus for ultimate power
 
-## Game Mechanics
+## How to Play
 
-### Combat
-- **Actions**: Attack, Bubble Blast skill (3 MP), Gravel Grenade (5 MP, level 5+), or flee
-- **Keyboard Controls**: A (Attack), B (Bubble Blast), G (Gravel Grenade), S (Swim Away)
-- **Level Scaling**: Attack improves on even levels, magic on odd levels (Attack: 3-10 at L1, 8-15 at L10)
-- **Armor Protection**: Damage reduction increases with armor (-1/-2/-3 for helmet/armor/full metal)
-- **Visual Combat**: Player and enemy sprites with damage animations and color variation
-- **Enemy Levels**: 1-10 scaling based on distance from village center
-- **Escape System**: High-level enemies (5+) show warnings, very difficult escape chance
-- **Rewards**: Scaled EXP and Betta Bites based on enemy level
+**Combat**: Turn-based battles with attacks, magic spells, and swift escapes. Enemy difficulty scales with distance from the village center.
 
-### Progression
-- **Armor Evolution**: Sprite changes based on level (3, 5, 7+)
-- **Stats**: HP, MP, Level, EXP tracking
-- **Special Item**: Dunkleosteus submarine (100 Betta Bites) overrides all armor
+**Progression**: Level up to unlock armor upgrades and new abilities. Save Betta Bites for the ultimate submarine transformation.
 
-### World
-- **Village Services**: Swishy Solace Inn (5 Betta Bites), Fish Mart (clickable items), NPC dialogue
-- **Rice Paddies**: Keyboard navigation with three-tier danger zone visuals
-- **Safe Exit**: First step from village skips encounters, fish faces movement direction
-- **Edge Zones**: Extreme challenge areas with guaranteed Level 10 encounters
-- **Visual Environment**: Layered water backgrounds (dark edges, medium frame, light center)
-- **Navigation**: Arrow keys for movement, Home key returns to village
+**Exploration**: Navigate rice paddies with arrow keys. Visual water tones indicate danger levels - venture to the dark edges for the ultimate challenge.
 
-## NPCs & Services
+## Village Life
 
-- **Elder Finn**: Story exposition about disappearances
-- **Shopkeeper Coral**: Sells submarine (100), Kelp Snacks (3 HP), and Bubble Water (2 MP)
-- **Guard Captain Reef**: Investigation details and warnings
-- **Bubble the Brave**: Dreams of exploring terraced cities above
-- **Innkeeper Seaweed**: Rest services at Swishy Solace Inn (5 Betta Bites for full HP/MP)
+Meet the villagers who will guide your adventure: learn the mystery from Elder Finn, gear up at Coral's shop, rest at the Swishy Solace Inn, and discover secrets from the other inhabitants of Paddy Village.
 
-## Enemies
+## Dangers of the Deep
 
-Base stats scale dramatically with level (1-10):
+Face increasingly dangerous fish as you venture further from safety: from aggressive guppies near the village to fierce cichlids in the outer zones. The legendary Gargantuan Gar awaits those brave enough to reach the deepest waters.
 
-- **Aggressive Guppy**: 8-44 HP, 15-126 EXP
-- **Territorial Angelfish**: 12-66 HP, 25-210 EXP  
-- **Sneaky Catfish**: 15-83 HP, 35-294 EXP
-- **Fierce Cichlid**: 18-99 HP, 45-378 EXP
+## Technical Notes
 
-*Level 10 enemies appear in edge zones with 5.5x HP and 3.7x damage*
-
-## Technical Info
-
-- **Files**: `index.html`, `style.css`, `script.js`
-- **Architecture**: Single-class design with screen-based navigation
-- **Graphics**: Pixel art sprites with CSS hue-rotation for colors
-- **Audio**: Web Audio API with graceful fallbacks
-- **Platform**: Modern web browsers, no dependencies
+Browser-based game with no installation required. Uses vanilla HTML5, CSS3, and JavaScript with procedural audio generation. All graphics are pixel art with CSS color filters for variety.
 
 ## Quick Start
 
-1. Open `index.html` in a web browser (or run `python devServer.py`)
-2. Click "Start Adventure" → "Begin Adventure" (uses random defaults)
-3. Talk to villagers, then exit to rice paddies
-4. Use arrow keys to explore, battle enemies for levels and currency
-5. Survive to edge zones for ultimate Level 10 challenges
-6. Use inn to restore health, save for submarine invulnerability
+### Play Online (Easiest)
+**Visit https://bettarpg.com to play immediately in your browser!**
+
+### Local Setup
+1. **Download** all game files to your computer
+2. **Double-click** `index.html` to open in your web browser
+3. Click "Start Adventure" → "Begin Adventure" (uses random defaults)
+4. Talk to villagers, then exit to rice paddies
+5. Use arrow keys to explore, battle enemies for levels and Betta Bites
+6. Survive to edge zones for ultimate Level 10 challenges
+7. Use inn to restore health, save for submarine invulnerability
+
+### Network Setup (Optional)
+If you want to access the game from other devices on your network:
+1. Install Python and Flask: `pip install flask`
+2. Run `python devServer.py` in the game folder  
+3. Access via `http://your-ip:5000` from any device
 
 ### Controls
-- **World Map**: Arrow keys (move), Home (return to village)
-- **Combat**: A (Attack), B (Bubble Blast), G (Gravel Grenade), S (Swim Away)
-- **Village**: E (Elder), F (Fish Mart), G (Guard), B (Bubble), I (Inn), X (Exit)
-- **Dialogue**: C (Continue), Enter (Continue/Rest), B (Browse), D/K/B (Shop items)
-- **Cheats**: $ (add 100 Betta Bites), % (level up)
+- **Arrow keys**: Navigate the rice paddies
+- **Letter keys**: Interact with NPCs and combat actions (shown on screen)
+- **Home key**: Return to village from anywhere
+- **Cheats**: $ (Betta Bites), % (level up)
 
 ---
 

@@ -1,4 +1,4 @@
-# Betta Fish RPG v0.3 - Game Design Document
+# Betta Fish RPG v0.4 - Game Design Document
 
 ## Core Concept
 
@@ -63,7 +63,8 @@
 ## Technical Implementation
 
 ### Architecture
-- **Single Class**: `BettaRPG` manages all game state
+- **Modular ES6**: 8-module architecture with clear separation of concerns
+- **Configuration-Driven**: Central `GameConfig` and `GameStrings` for all constants and text
 - **Screen System**: Modular areas with smooth transitions
 - **Event-Driven**: Clean separation of UI and game logic
 - **Asset Management**: Efficient sprite and audio handling

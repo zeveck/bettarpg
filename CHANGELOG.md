@@ -2,7 +2,7 @@
 
 ---
 
-## Version 0.3 (Current)
+## Version 0.4 (Current)
 
 ### 🛒 Shop System Overhaul
 - **Clickable Items**: Shop items become interactive buttons when affordable

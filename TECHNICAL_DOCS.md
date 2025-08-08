@@ -1,18 +1,20 @@
-# Betta Fish RPG v0.3 - Technical Documentation
+# Betta Fish RPG v0.4 - Technical Documentation
 
 ## Architecture Overview
 
 ### Core Technologies
 - **HTML5**: Semantic structure with responsive design
 - **CSS3**: Grid/flexbox layouts, animations, layered backgrounds, order-based positioning
-- **Vanilla JavaScript**: ES6+ classes, no external dependencies, comprehensive keyboard handling
+- **Vanilla JavaScript**: ES6+ modular classes, no external dependencies, comprehensive keyboard handling
 - **Web Audio API**: Procedural sound generation with fallbacks
+- **Configuration System**: Centralized GameConfig and GameStrings for constants and localization
 
 ### Design Patterns
-- **Singleton**: Single game instance manages all state
+- **Modular Architecture**: 8-module ES6 system with clear boundaries
+- **Configuration-Driven**: Central constants and strings management
+- **Dependency Injection**: Clean module initialization and wiring
 - **State Machine**: Screen-based navigation system
 - **Event-Driven**: UI updates trigger game logic changes
-- **Module Pattern**: Encapsulated functionality within class methods
 
 ## File Structure
 
@@ -31,26 +33,47 @@
 - **Shop Interface**: Interactive item styling with hover states and affordability indicators
 - **Responsive Design**: Mobile breakpoints and adaptive layouts
 
-### script.js (1100+ lines)
-- **BettaRPG Class**: Main game controller with complete state management
-- **Data Structures**: Player stats, NPC dialogues, enemy definitions with level scaling
-- **Core Systems**: Combat with level-based damage/armor, progression, economy, audio, graphics
-- **Keyboard System**: Comprehensive key handling for all screens with context-aware controls
-- **Visual Systems**: Directional sprites, layered backgrounds, dynamic CSS pseudo-elements
-- **Event Management**: User interactions, screen transitions, and state persistence
+### src/ modules (8 ES6 modules)
+- **config.js**: GameConfig and GameStrings - centralized constants and text
+- **audio.js**: AudioManager - Web Audio API wrapper
+- **player.js**: Player - character state, progression, combat mechanics
+- **npc.js**: NPCManager - village characters and dialogue trees
+- **dialog.js**: DialogManager - modal dialog system
+- **combat.js**: CombatManager - battle system and enemy management
+- **world.js**: WorldManager - exploration, encounters, map generation
+- **ui.js**: UIManager - DOM manipulation and screen management
+- **core.js**: BettaRPG - module coordination and public API
+
+### script.js (generated)
+- **Built File**: Concatenated modules with exports stripped for browser compatibility
+- **Build System**: Simple module concatenation via build.mjs
 
 ## Core Systems
 
+### Configuration System
+```javascript
+// All game constants centralized
+GameConfig.PLAYER.STARTING_STATS = { hp: 20, mp: 10, level: 1, ... }
+GameConfig.COMBAT.SPELLS.BUBBLE_BLAST = { mpCost: 3, damageMin: 5, ... }
+GameConfig.ENEMIES.FIERCE_CICHLID = { baseHp: 18, baseDamage: 8, ... }
+GameConfig.ECONOMY.SHOP_ITEMS.SUBMARINE = { cost: 100, effect: '...' }
+
+// All game text centralized
+GameStrings.NPCS.ELDER_FINN.DIALOGUES = ['Welcome, young one...', ...]
+GameStrings.COMBAT.ENEMY_APPEARS = 'A wild {enemyName} (Level {level}) appears!'
+GameStrings.UI.BUTTONS.START_ADVENTURE = 'Start Adventure'
+```
+
 ### Character System
 ```javascript
-player: {
-    name: string,           // Auto-generated or user input
-    color: string,          // Hue filter selection
-    level: number,          // Progression level (1+)
-    hp/maxHp: number,       // Health points
-    mp/maxMp: number,       // Magic points  
-    exp/expToNext: number,  // Experience system
-    bettaBites: number      // Currency
+// Player class uses configuration
+class Player {
+    constructor() {
+        const stats = GameConfig.PLAYER.STARTING_STATS;
+        this.hp = stats.hp;
+        this.level = stats.level;
+        // ...
+    }
 }
 ```
 
@@ -68,18 +91,20 @@ startRandomEncounter() → updateCombatDisplay() → playerAction() → enemyTur
 
 ### Graphics Management
 ```javascript
-getPlayerSprite() {
-    // Returns appropriate sprite based on:
-    // 1. Dunkleosteus submarine (if owned)
-    // 2. Armor level (levels 3, 5, 7+)
-    // 3. Base betta sprite
+// Sprite selection from configuration
+getSprite() {
+    if (this.hasDunkleosteusSub) {
+        return `graphics/artifacts/${GameConfig.PLAYER.ARMOR_SYSTEM.SUBMARINE.sprite}`;
+    }
+    const armorLevels = GameConfig.PLAYER.ARMOR_SYSTEM.LEVELS;
+    // Returns appropriate sprite based on level
 }
 
-// Color System
-CSS hue-rotate() + saturation for:
-- Player color customization (5 preset options)
-- Enemy color randomization (0-360° hue)
-- No filters for submarine sprite
+// Color System from configuration
+getColorFilter() {
+    const colorConfig = GameConfig.UI.COLORS[this.color?.toUpperCase()];
+    return colorConfig ? colorConfig.filter : 'none';
+}
 ```
 
 ### Audio Implementation
@@ -94,13 +119,17 @@ playSound(type) {
 
 ### Economy System
 ```javascript
-// Income Sources
-- Combat victories: 1-5 Betta Bites
-- Exploration finds: 1-3 Betta Bites (random)
+// Configuration-driven economy
+GameConfig.ECONOMY.SHOP_ITEMS = {
+    SUBMARINE: { cost: 100, effect: 'submarine_transformation' },
+    KELP_SNACK: { cost: 3, effect: 'restore_hp' },
+    BUBBLE_WATER: { cost: 2, effect: 'restore_mp' }
+};
 
-// Spending Options  
-- Inn rest: 5 Betta Bites (full HP/MP restore)
-- Dunkleosteus submarine: 100 Betta Bites (permanent transformation)
+GameConfig.ECONOMY.INCOME_SOURCES = {
+    COMBAT_BASE: { min: 1, max: 5 },
+    TREASURE_BASE: { min: 1, max: 3 }
+};
 ```
 
 ## Screen Management
@@ -129,35 +158,72 @@ showScreen(screenId) {
 
 ### NPCs
 ```javascript
-npcs: {
-    [id]: {
-        name: string,
-        dialogues: string[],
-        isInn?: boolean,      // Service flag
-        isShop?: boolean      // Service flag
+// NPCs defined in configuration
+GameStrings.NPCS.ELDER_FINN = {
+    NAME: "Elder Finn",
+    DIALOGUES: [
+        "Welcome, young one. I sense great potential in you.",
+        "There have been strange happenings lately...",
+        // ...
+    ]
+};
+
+// NPCManager uses configuration
+class NPCManager {
+    constructor() {
+        this.npcs = {
+            elder: {
+                name: GameStrings.NPCS.ELDER_FINN.NAME,
+                dialogues: GameStrings.NPCS.ELDER_FINN.DIALOGUES
+            }
+        };
     }
 }
 ```
 
 ### Enemies
 ```javascript
-enemies: [
-    {
-        name: string,
-        hp/maxHp: number,
-        attack: number,
-        exp: number,
-        sprite: string,       // Graphics path
-        attacks: string[]     // Combat descriptions
-    }
-]
+// Enemies defined in configuration
+GameConfig.ENEMIES.FIERCE_CICHLID = {
+    name: 'Fierce Cichlid',
+    baseHp: 18,
+    baseDamage: 8,
+    baseExp: 45,
+    sprite: 'fierce_cichlid.png',
+    attacks: [
+        'The Fierce Cichlid charges with incredible force!',
+        'The cichlid displays bright colors before attacking!',
+        'The fierce fish uses its powerful jaws in a devastating bite!'
+    ]
+};
+
+// CombatManager converts config to runtime format
+creatEnemyFromConfig(enemyConfig) {
+    return {
+        name: enemyConfig.name,
+        hp: enemyConfig.baseHp,
+        maxHp: enemyConfig.baseHp,
+        attack: enemyConfig.baseDamage,
+        exp: enemyConfig.baseExp,
+        sprite: `graphics/enemies/${enemyConfig.sprite}`,
+        attacks: enemyConfig.attacks
+    };
+}
 ```
 
 ### Name Generation
 ```javascript
-betteNames: [72 entries]
-// Categories: aquatic, gems, nature, personality, fun
-// Random selection on character creation
+// Names defined in configuration
+GameStrings.CHARACTER_CREATION.RANDOM_NAMES = [
+    "Bubbles", "Finley", "Shimmer", "Sparkle", "Azure", "Coral", "Pearl",
+    // 72 total names across categories: aquatic, gems, nature, personality, fun
+];
+
+// Used during character creation
+generateRandomName() {
+    const names = GameStrings.CHARACTER_CREATION.RANDOM_NAMES;
+    return names[Math.floor(Math.random() * names.length)];
+}
 ```
 
 ## Performance Optimizations
@@ -194,9 +260,10 @@ betteNames: [72 entries]
 ## Development Guidelines
 
 ### Code Organization
-- **Single Class**: All game logic in BettaRPG class
+- **Modular Architecture**: 8 ES6 modules with clear separation of concerns
+- **Configuration-Driven**: All constants and strings centralized in GameConfig/GameStrings
 - **Method Naming**: Clear, descriptive function names
-- **State Management**: Centralized player and game state
+- **State Management**: Distributed across specialized modules with clean interfaces
 - **Error Handling**: Graceful fallbacks for missing elements
 
 ### Asset Management

@@ -53,24 +53,19 @@ export class CombatManager {
     
     // Calculate enemy level based on distance from village center using config
     calculateEnemyLevel(x, y) {
-        // Edge zone gets max level enemies
-        if (this.world.isInEdgeZone(x, y)) {
-            return GameConfig.WORLD.DANGER_ZONES.LEVEL_SCALING.EXTREME.min;
-        }
-        
         // Calculate actual distance from village center
         const distance = this.world.getDistanceFromVillage(x, y);
         
-        // Use config-defined danger zones
+        // Use config-defined danger zones based on distance only
         const zones = GameConfig.WORLD.DANGER_ZONES;
         let levelRange;
         
         if (distance <= zones.SAFE_RADIUS) {
-            levelRange = zones.LEVEL_SCALING.SAFE;
-        } else if (distance <= zones.MEDIUM_RADIUS) {
-            levelRange = zones.LEVEL_SCALING.MEDIUM;
+            levelRange = zones.LEVEL_SCALING.SAFE;        // Light blue water
+        } else if (distance <= zones.DANGEROUS_RADIUS) {
+            levelRange = zones.LEVEL_SCALING.DANGEROUS;   // Medium blue water
         } else {
-            levelRange = zones.LEVEL_SCALING.DANGEROUS;
+            levelRange = zones.LEVEL_SCALING.EXTREME;     // Dark blue water
         }
         
         // Random level within the range for this zone
@@ -104,14 +99,14 @@ export class CombatManager {
     startRandomEncounter(playerX, playerY) {
         let enemyIndex;
         
-        // Check if in edge zone
-        const isEdgeZone = this.world.isInEdgeZone(playerX, playerY);
+        // Calculate enemy level based on distance from village
+        const enemyLevel = this.calculateEnemyLevel(playerX, playerY);
         
-        // Edge zone enemies are always max level
-        const enemyLevel = isEdgeZone ? GameConfig.WORLD.DANGER_ZONES.LEVEL_SCALING.EXTREME.min : this.calculateEnemyLevel(playerX, playerY);
+        // Prehistoric Gar spawns in extreme zone (dark water) until defeated
+        const distance = this.world.getDistanceFromVillage(playerX, playerY);
+        const isExtremeZone = distance > GameConfig.WORLD.DANGER_ZONES.DANGEROUS_RADIUS;
         
-        // Prehistoric Gar spawns in edge zone until defeated
-        if (isEdgeZone && !this.hasDefeatedGar) {
+        if (isExtremeZone && !this.hasDefeatedGar) {
             enemyIndex = 4; // Prehistoric Gar
         } else {
             // All other cases spawn from the first 4 enemies
@@ -149,7 +144,7 @@ export class CombatManager {
         this.audio.playSound('combatstart');
         
         this.addToCombatLog(StringFormatter.format(GameStrings.COMBAT.COMBAT_BEGINS, {
-            playerName: this.player.name,
+            playerName: this.player.getName(),
             enemyName: this.currentEnemy.name
         }));
         
@@ -168,7 +163,7 @@ export class CombatManager {
         const attackDescription = attackDescriptions[Math.floor(Math.random() * attackDescriptions.length)];
         
         this.audio.playSound('attack');
-        this.addToCombatLog(`${this.player.name} ${attackDescription} for ${damage} damage!`);
+        this.addToCombatLog(`${this.player.getName()} ${attackDescription} for ${damage} damage!`);
         
         // Add shake animation to enemy sprite when taking damage
         this.shakeEnemySprite();
@@ -196,14 +191,14 @@ export class CombatManager {
             const bubbleDescription = bubbleDescriptions[Math.floor(Math.random() * bubbleDescriptions.length)];
             
             this.createBubbleEffect();
-            this.addToCombatLog(`${this.player.name} ${bubbleDescription} for ${damage} damage!`);
+            this.addToCombatLog(`${this.player.getName()} ${bubbleDescription} for ${damage} damage!`);
         } else if (spellType === 'gravel') {
             // Random gravel spell descriptions from configuration
             const gravelDescriptions = GameStrings.COMBAT.GRAVEL_DESCRIPTIONS;
             const gravelDescription = gravelDescriptions[Math.floor(Math.random() * gravelDescriptions.length)];
             
             this.createGravelEffect();
-            this.addToCombatLog(`${this.player.name} ${gravelDescription} for ${damage} damage!`);
+            this.addToCombatLog(`${this.player.getName()} ${gravelDescription} for ${damage} damage!`);
         }
         
         return this.checkForVictory();
@@ -418,7 +413,7 @@ export class CombatManager {
         if (willLevelUp) {
             // Add level up messages first (but don't level up yet)
             this.addToCombatLog(StringFormatter.format(GameStrings.COMBAT.LEVEL_UP, {
-                newLevel: this.player.level + 1
+                newLevel: this.player.getLevel() + 1
             }));
             
             // Brief delay for fanfare to play, then do level up and play level up sound
@@ -432,9 +427,9 @@ export class CombatManager {
                 
                 // Armor upgrade messages - use config-defined armor levels
                 const armorLevels = GameConfig.PLAYER.ARMOR_SYSTEM.LEVELS;
-                if (armorLevels[this.player.level]) {
+                if (armorLevels[this.player.getLevel()]) {
                     const armorLevelKeys = Object.keys(armorLevels).map(Number).sort();
-                    const currentArmorIndex = armorLevelKeys.indexOf(this.player.level);
+                    const currentArmorIndex = armorLevelKeys.indexOf(this.player.getLevel());
                     
                     const armorMessages = [
                         null, // Level 1 has no upgrade message

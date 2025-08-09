@@ -177,11 +177,8 @@ export class GameConfig {
     
     // === WORLD GENERATION ===
     static WORLD = {
-        MAP_SIZE: 30,
-        VILLAGE_CENTER: { x: 15, y: 15 },
-        EDGE_ZONE: {
-            BOUNDARY_PERCENT: 15  // Edge zone is outer 15% of map (15% and 85% boundaries)
-        },
+        MAP_SIZE: 20,
+        VILLAGE_CENTER: { x: 10, y: 10 },
         
         ENCOUNTER_RATES: {
             COMBAT: 0.30,      // 30% chance
@@ -191,14 +188,12 @@ export class GameConfig {
         },
         
         DANGER_ZONES: {
-            SAFE_RADIUS: 17,        // Distance from village center
-            MEDIUM_RADIUS: 25,      // Medium danger zone
-            EXTREME_RADIUS: 30,     // Edge zones
+            SAFE_RADIUS: 4,         // Distance from village center - Light blue water
+            DANGEROUS_RADIUS: 7,    // Medium danger zone - Medium blue water
             LEVEL_SCALING: {
-                SAFE: { min: 1, max: 2 },
-                MEDIUM: { min: 2, max: 4 },
-                DANGEROUS: { min: 3, max: 5 },
-                EXTREME: { min: 10, max: 10 }  // Max level enemies
+                SAFE: { min: 1, max: 2 },       // Light blue water
+                DANGEROUS: { min: 3, max: 5 },  // Medium blue water  
+                EXTREME: { min: 10, max: 10 }   // Dark blue water
             }
         }
     };
@@ -214,9 +209,7 @@ export class GameConfig {
         },
         
         INCOME_SOURCES: {
-            COMBAT_BASE: { min: 1, max: 5 },
-            TREASURE_BASE: { min: 1, max: 3 },
-            CHEAT_AMOUNT: 100       // $ key cheat
+            TREASURE_BASE: { min: 1, max: 3 }
         }
     };
     
@@ -234,13 +227,6 @@ export class GameConfig {
             PURPLE: { filter: 'hue-rotate(270deg) saturate(1.8)', name: 'Purple' },
             GREEN: { filter: 'hue-rotate(130deg) saturate(1.6)', name: 'Green' },
             GOLD: { filter: 'hue-rotate(50deg) saturate(2) brightness(1.2)', name: 'Gold' }
-        },
-        
-        ANIMATIONS: {
-            DAMAGE_SHAKE_DURATION: 500,  // milliseconds
-            DEATH_FLIP_DELAY: 1000,
-            COMBAT_DELAY: 1500,
-            FANFARE_DELAY: 800
         }
     };
     
@@ -297,8 +283,7 @@ export class GameStrings {
             SUBTITLE: "Adventure awaits in the aquatic realm!",
             CREATE_YOUR_BETTA: "Create Your Betta",
             COMBAT_TITLE: "Combat!",
-            VILLAGE_TITLE: "Paddy Village",
-            WORLD_MAP_TITLE: "The Rice Paddies"
+            VILLAGE_TITLE: "Paddy Village"
         },
         
         COLORS: {
@@ -397,15 +382,7 @@ export class GameStrings {
     static COMBAT = {
         COMBAT_BEGINS: "Combat begins! {playerName} vs {enemyName}",
         ENEMY_APPEARS: "A wild {enemyName} (Level {level}) appears!",
-        PLAYER_ATTACKS: "{playerName} attacks!",
-        PLAYER_DEALS_DAMAGE: "{playerName} deals {damage} damage!",
-        PLAYER_CASTS_SPELL: "{playerName} casts {spellName}!",
-        PLAYER_SPELL_DAMAGE: "The {spellName} deals {damage} damage!",
-        
-        ENEMY_ATTACKS: "{enemyName} attacks!",
-        ENEMY_DEALS_DAMAGE: "{enemyName} deals {damage} damage!",
         ENEMY_DEFEATED: "Defeated {enemyName}!",
-        
         VICTORY_REWARDS: "Victory! You gained {exp} EXP and {bettaBites} Betta Bites!",
         LEVEL_UP: "Level up! Now level {newLevel}!",
         HP_MP_INCREASE: "HP increased by {hpIncrease}! MP increased by {mpIncrease}!",
@@ -419,9 +396,6 @@ export class GameStrings {
         NOT_ENOUGH_MP: "Not enough MP to cast {spellName}!",
         SPELL_UNLOCKED_AT_LEVEL: "{spellName} unlocks at level {level}!",
         
-        SWIM_AWAY_SUCCESS: "{playerName} swims away quickly!",
-        SWIM_AWAY_BLOCKED: "⚡ The enemy is too fast to escape! ⚡",
-        
         PLAYER_DEFEATED: "You have been defeated!",
         PLAYER_LOST_BETTA_BITES: "You lost {amount} Betta Bites...",
         PLAYER_RECOVERY: "You wake up back in the village, feeling groggy but alive.",
@@ -429,7 +403,8 @@ export class GameStrings {
         ESCAPE_FAILED: "You try to escape, but the enemy is too fast!",
         ESCAPE_BARELY_SUCCESS: "You barely manage to slip away!",
         DEFEAT_RECOVERY: "You wake up back in the village, rescued by other bettas. You feel fully recovered!",
-        DEFEAT_RECOVERY_WITH_LOSS: "You wake up back in the village, rescued by other bettas. You lost {amount} Betta Bites but feel fully recovered!",
+        DEFEAT_RECOVERY_RESCUED: "You wake up back in the village, rescued by other bettas.",
+        DEFEAT_RECOVERY_LOSS: "You lost {amount} Betta Bites but feel fully recovered!",
         
         PREHISTORIC_GAR_ROAR: "🦕 The Prehistoric Gar lets out a thunderous roar instead of attacking! 🦕",
         
@@ -590,7 +565,8 @@ export class GameStrings {
     static SYSTEM = {
         CHEATS: {
             BETTA_BITES_ADDED: "💰 Cheat activated! +100 Betta Bites!",
-            LEVEL_UP_APPLIED: "Cheat: Level up applied!"
+            LEVEL_UP_APPLIED: "⬆️ Cheat activated! Level up applied!",
+            HP_MP_RESTORED: "💊 Cheat activated! HP and MP fully restored!"
         },
         
         CONGRATULATIONS: {

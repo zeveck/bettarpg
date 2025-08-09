@@ -180,11 +180,8 @@ class GameConfig {
     
     // === WORLD GENERATION ===
     static WORLD = {
-        MAP_SIZE: 30,
-        VILLAGE_CENTER: { x: 15, y: 15 },
-        EDGE_ZONE: {
-            BOUNDARY_PERCENT: 15  // Edge zone is outer 15% of map (15% and 85% boundaries)
-        },
+        MAP_SIZE: 20,
+        VILLAGE_CENTER: { x: 10, y: 10 },
         
         ENCOUNTER_RATES: {
             COMBAT: 0.30,      // 30% chance
@@ -194,14 +191,12 @@ class GameConfig {
         },
         
         DANGER_ZONES: {
-            SAFE_RADIUS: 17,        // Distance from village center
-            MEDIUM_RADIUS: 25,      // Medium danger zone
-            EXTREME_RADIUS: 30,     // Edge zones
+            SAFE_RADIUS: 4,         // Distance from village center - Light blue water
+            DANGEROUS_RADIUS: 7,    // Medium danger zone - Medium blue water
             LEVEL_SCALING: {
-                SAFE: { min: 1, max: 2 },
-                MEDIUM: { min: 2, max: 4 },
-                DANGEROUS: { min: 3, max: 5 },
-                EXTREME: { min: 10, max: 10 }  // Max level enemies
+                SAFE: { min: 1, max: 2 },       // Light blue water
+                DANGEROUS: { min: 3, max: 5 },  // Medium blue water  
+                EXTREME: { min: 10, max: 10 }   // Dark blue water
             }
         }
     };
@@ -217,9 +212,7 @@ class GameConfig {
         },
         
         INCOME_SOURCES: {
-            COMBAT_BASE: { min: 1, max: 5 },
-            TREASURE_BASE: { min: 1, max: 3 },
-            CHEAT_AMOUNT: 100       // $ key cheat
+            TREASURE_BASE: { min: 1, max: 3 }
         }
     };
     
@@ -237,13 +230,6 @@ class GameConfig {
             PURPLE: { filter: 'hue-rotate(270deg) saturate(1.8)', name: 'Purple' },
             GREEN: { filter: 'hue-rotate(130deg) saturate(1.6)', name: 'Green' },
             GOLD: { filter: 'hue-rotate(50deg) saturate(2) brightness(1.2)', name: 'Gold' }
-        },
-        
-        ANIMATIONS: {
-            DAMAGE_SHAKE_DURATION: 500,  // milliseconds
-            DEATH_FLIP_DELAY: 1000,
-            COMBAT_DELAY: 1500,
-            FANFARE_DELAY: 800
         }
     };
     
@@ -432,7 +418,8 @@ class GameStrings {
         ESCAPE_FAILED: "You try to escape, but the enemy is too fast!",
         ESCAPE_BARELY_SUCCESS: "You barely manage to slip away!",
         DEFEAT_RECOVERY: "You wake up back in the village, rescued by other bettas. You feel fully recovered!",
-        DEFEAT_RECOVERY_WITH_LOSS: "You wake up back in the village, rescued by other bettas. You lost {amount} Betta Bites but feel fully recovered!",
+        DEFEAT_RECOVERY_RESCUED: "You wake up back in the village, rescued by other bettas.",
+        DEFEAT_RECOVERY_LOSS: "You lost {amount} Betta Bites but feel fully recovered!",
         
         PREHISTORIC_GAR_ROAR: "🦕 The Prehistoric Gar lets out a thunderous roar instead of attacking! 🦕",
         
@@ -593,7 +580,8 @@ class GameStrings {
     static SYSTEM = {
         CHEATS: {
             BETTA_BITES_ADDED: "💰 Cheat activated! +100 Betta Bites!",
-            LEVEL_UP_APPLIED: "Cheat: Level up applied!"
+            LEVEL_UP_APPLIED: "⬆️ Cheat activated! Level up applied!",
+            HP_MP_RESTORED: "💊 Cheat activated! HP and MP fully restored!"
         },
         
         CONGRATULATIONS: {
@@ -663,7 +651,7 @@ class AudioManager {
         try {
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
         } catch (e) {
-            console.log('Web Audio API not supported');
+            // Web Audio API not supported - graceful fallback
         }
     }
     
@@ -1241,14 +1229,6 @@ class NPCManager {
         return npc ? npc.name : 'Unknown NPC';
     }
     
-    getNPCIds() {
-        return Object.keys(this.npcs);
-    }
-    
-    getNPCList() {
-        return Object.keys(this.npcs);
-    }
-    
     // Service type checking
     isShopNPC(npcId) {
         const npc = this.npcs[npcId];
@@ -1534,24 +1514,19 @@ class CombatManager {
     
     // Calculate enemy level based on distance from village center using config
     calculateEnemyLevel(x, y) {
-        // Edge zone gets max level enemies
-        if (this.world.isInEdgeZone(x, y)) {
-            return GameConfig.WORLD.DANGER_ZONES.LEVEL_SCALING.EXTREME.min;
-        }
-        
         // Calculate actual distance from village center
         const distance = this.world.getDistanceFromVillage(x, y);
         
-        // Use config-defined danger zones
+        // Use config-defined danger zones based on distance only
         const zones = GameConfig.WORLD.DANGER_ZONES;
         let levelRange;
         
         if (distance <= zones.SAFE_RADIUS) {
-            levelRange = zones.LEVEL_SCALING.SAFE;
-        } else if (distance <= zones.MEDIUM_RADIUS) {
-            levelRange = zones.LEVEL_SCALING.MEDIUM;
+            levelRange = zones.LEVEL_SCALING.SAFE;        // Light blue water
+        } else if (distance <= zones.DANGEROUS_RADIUS) {
+            levelRange = zones.LEVEL_SCALING.DANGEROUS;   // Medium blue water
         } else {
-            levelRange = zones.LEVEL_SCALING.DANGEROUS;
+            levelRange = zones.LEVEL_SCALING.EXTREME;     // Dark blue water
         }
         
         // Random level within the range for this zone
@@ -1585,14 +1560,14 @@ class CombatManager {
     startRandomEncounter(playerX, playerY) {
         let enemyIndex;
         
-        // Check if in edge zone
-        const isEdgeZone = this.world.isInEdgeZone(playerX, playerY);
+        // Calculate enemy level based on distance from village
+        const enemyLevel = this.calculateEnemyLevel(playerX, playerY);
         
-        // Edge zone enemies are always max level
-        const enemyLevel = isEdgeZone ? GameConfig.WORLD.DANGER_ZONES.LEVEL_SCALING.EXTREME.min : this.calculateEnemyLevel(playerX, playerY);
+        // Prehistoric Gar spawns in extreme zone (dark water) until defeated
+        const distance = this.world.getDistanceFromVillage(playerX, playerY);
+        const isExtremeZone = distance > GameConfig.WORLD.DANGER_ZONES.DANGEROUS_RADIUS;
         
-        // Prehistoric Gar spawns in edge zone until defeated
-        if (isEdgeZone && !this.hasDefeatedGar) {
+        if (isExtremeZone && !this.hasDefeatedGar) {
             enemyIndex = 4; // Prehistoric Gar
         } else {
             // All other cases spawn from the first 4 enemies
@@ -1630,7 +1605,7 @@ class CombatManager {
         this.audio.playSound('combatstart');
         
         this.addToCombatLog(StringFormatter.format(GameStrings.COMBAT.COMBAT_BEGINS, {
-            playerName: this.player.name,
+            playerName: this.player.getName(),
             enemyName: this.currentEnemy.name
         }));
         
@@ -1649,7 +1624,7 @@ class CombatManager {
         const attackDescription = attackDescriptions[Math.floor(Math.random() * attackDescriptions.length)];
         
         this.audio.playSound('attack');
-        this.addToCombatLog(`${this.player.name} ${attackDescription} for ${damage} damage!`);
+        this.addToCombatLog(`${this.player.getName()} ${attackDescription} for ${damage} damage!`);
         
         // Add shake animation to enemy sprite when taking damage
         this.shakeEnemySprite();
@@ -1677,14 +1652,14 @@ class CombatManager {
             const bubbleDescription = bubbleDescriptions[Math.floor(Math.random() * bubbleDescriptions.length)];
             
             this.createBubbleEffect();
-            this.addToCombatLog(`${this.player.name} ${bubbleDescription} for ${damage} damage!`);
+            this.addToCombatLog(`${this.player.getName()} ${bubbleDescription} for ${damage} damage!`);
         } else if (spellType === 'gravel') {
             // Random gravel spell descriptions from configuration
             const gravelDescriptions = GameStrings.COMBAT.GRAVEL_DESCRIPTIONS;
             const gravelDescription = gravelDescriptions[Math.floor(Math.random() * gravelDescriptions.length)];
             
             this.createGravelEffect();
-            this.addToCombatLog(`${this.player.name} ${gravelDescription} for ${damage} damage!`);
+            this.addToCombatLog(`${this.player.getName()} ${gravelDescription} for ${damage} damage!`);
         }
         
         return this.checkForVictory();
@@ -1899,7 +1874,7 @@ class CombatManager {
         if (willLevelUp) {
             // Add level up messages first (but don't level up yet)
             this.addToCombatLog(StringFormatter.format(GameStrings.COMBAT.LEVEL_UP, {
-                newLevel: this.player.level + 1
+                newLevel: this.player.getLevel() + 1
             }));
             
             // Brief delay for fanfare to play, then do level up and play level up sound
@@ -1913,9 +1888,9 @@ class CombatManager {
                 
                 // Armor upgrade messages - use config-defined armor levels
                 const armorLevels = GameConfig.PLAYER.ARMOR_SYSTEM.LEVELS;
-                if (armorLevels[this.player.level]) {
+                if (armorLevels[this.player.getLevel()]) {
                     const armorLevelKeys = Object.keys(armorLevels).map(Number).sort();
-                    const currentArmorIndex = armorLevelKeys.indexOf(this.player.level);
+                    const currentArmorIndex = armorLevelKeys.indexOf(this.player.getLevel());
                     
                     const armorMessages = [
                         null, // Level 1 has no upgrade message
@@ -2223,8 +2198,8 @@ class WorldManager {
                         sprite: 'graphics/map/bettahome.png'
                     };
                 }
-                // Village area (3x3 around center)
-                else if (Math.abs(x - this.VILLAGE_CENTER.x) <= 1 && Math.abs(y - this.VILLAGE_CENTER.y) <= 1) {
+                // Village area (just center tile)
+                else if (x === this.VILLAGE_CENTER.x && y === this.VILLAGE_CENTER.y) {
                     map[y][x] = {
                         type: 'village_area',
                         sprite: 'graphics/map/water-tile.png'
@@ -2269,17 +2244,6 @@ class WorldManager {
     }
     
     
-    // Check if coordinates are in deep water edge zone
-    isInEdgeZone(x = this.currentX, y = this.currentY) {
-        // Convert to percentage using config boundary
-        const boundaryPercent = GameConfig.WORLD.EDGE_ZONE.BOUNDARY_PERCENT;
-        const xPercent = (x / this.WORLD_SIZE) * 100;
-        const yPercent = (y / this.WORLD_SIZE) * 100;
-        const edgeThreshold = 100 - boundaryPercent;
-        
-        return (xPercent <= boundaryPercent || xPercent >= edgeThreshold || 
-                yPercent <= boundaryPercent || yPercent >= edgeThreshold);
-    }
     
     movePlayer(direction) {
         let newX = this.currentX;
@@ -2301,9 +2265,9 @@ class WorldManager {
         this.currentX = newX;
         this.currentY = newY;
         
-        // Check if entering/leaving village (3x3 area around center)
+        // Check if entering/leaving village (center tile only)
         const wasInVillage = this.inVillage;
-        this.inVillage = (Math.abs(newX - this.VILLAGE_CENTER.x) <= 1 && Math.abs(newY - this.VILLAGE_CENTER.y) <= 1);
+        this.inVillage = (newX === this.VILLAGE_CENTER.x && newY === this.VILLAGE_CENTER.y);
         
         // Village entry message
         if (!wasInVillage && this.inVillage) {
@@ -2339,8 +2303,9 @@ class WorldManager {
     
     // Encounter system
     checkForEncounter() {
-        // In edge zone (deep water): guaranteed combat encounters
-        if (this.isInEdgeZone()) {
+        // In extreme zone (dark water): guaranteed combat encounters
+        const distance = this.getDistanceFromVillage();
+        if (distance > GameConfig.WORLD.DANGER_ZONES.DANGEROUS_RADIUS) {
             return this.createCombatEncounter();
         }
         
@@ -2362,9 +2327,10 @@ class WorldManager {
     createCombatEncounter() {
         const enemy = this.combat.startRandomEncounter(this.currentX, this.currentY);
         
-        // Add edge zone warning message if in edge zone
+        // Add extreme zone warning message if in dark water
         let message = null;
-        if (this.isInEdgeZone()) {
+        const distance = this.getDistanceFromVillage();
+        if (distance > GameConfig.WORLD.DANGER_ZONES.DANGEROUS_RADIUS) {
             message = GameStrings.EXPLORATION.DANGER_WARNINGS.EDGE_ZONE;
         }
         
@@ -2453,8 +2419,8 @@ class WorldManager {
     
     leaveVillage() {
         if (this.inVillage) {
-            // Position player south of village area when exiting
-            // Village area is 3x3 around center, so place south of village area
+            // Position player south of village when exiting
+            // Village is just center tile, so place south of center
             this.currentX = this.VILLAGE_CENTER.x; // Keep X at village center
             this.currentY = this.VILLAGE_CENTER.y + 2; // Move south of village area
             this.inVillage = false;
@@ -2514,7 +2480,7 @@ class WorldManager {
                 return this.player.acquireSubmarine();
                 
             case "kelp_snack":
-                const hpHealed = this.player.healHP(this.player.maxHp);
+                const hpHealed = this.player.healHP(this.player.getMaxHP());
                 const message = StringFormatter.format(GameStrings.SHOP.CONFIRMATIONS.KELP_SNACK, { hpHealed });
                 return { 
                     success: true, 
@@ -2522,8 +2488,8 @@ class WorldManager {
                 };
                 
             case "bubble_water":
-                const mpBefore = this.player.mp;
-                const actualRestore = this.player.healMP(this.player.maxMp);
+                const mpBefore = this.player.getMP();
+                const actualRestore = this.player.healMP(this.player.getMaxMP());
                 return { 
                     success: true, 
                     message: StringFormatter.format(GameStrings.SHOP.CONFIRMATIONS.BUBBLE_WATER, { mpRestored: actualRestore })
@@ -3266,6 +3232,13 @@ class UIManager {
             }
         }
         
+        if (key === '+') {
+            event.preventDefault();
+            this.player.fullHeal();
+            this.displayMessage(GameStrings.SYSTEM.CHEATS.HP_MP_RESTORED);
+            this.updateAllDisplays();
+        }
+        
     }
     
     // Screen management
@@ -3562,18 +3535,6 @@ class UIManager {
             return;
         }
         
-        // Log position and distance info for debugging
-        const location = this.world.getCurrentLocation();
-        const distance = this.world.getDistanceFromVillage();
-        console.log(`Position: (${location.x}, ${location.y}) | Distance from village: ${distance.toFixed(1)} | Screen size: 30x30 tiles`);
-        console.log(`Zone info: Safe ≤17, Medium ≤25, Dangerous >25, Edge zone at 30`);
-        
-        // Determine current zone
-        let zone = 'Edge';
-        if (distance <= 17) zone = 'Safe (levels 1-2)';
-        else if (distance <= 25) zone = 'Medium (levels 2-4)';  
-        else if (distance <= 29) zone = 'Dangerous (levels 3-5)';
-        console.log(`Current zone: ${zone}`);
         
         // Update screen based on location change
         const wasInVillage = this.currentScreen === 'village';
@@ -3633,7 +3594,8 @@ class UIManager {
             case 'mystery':
                 this.displayMessage(encounter.message);
                 if (encounter.effectMessage) {
-                    setTimeout(() => this.displayMessage(encounter.effectMessage), GameConfig.UI.ANIMATIONS.DEATH_FLIP_DELAY);
+                    const MYSTERY_MESSAGE_DELAY = 1000; // Delay before showing second mystery message
+                    setTimeout(() => this.displayMessage(encounter.effectMessage), MYSTERY_MESSAGE_DELAY);
                 }
                 break;
         }
@@ -3676,18 +3638,18 @@ class UIManager {
         this.updateAllDisplays();
         
         // Update player name in combat
-        this.setTextContent('player-name-combat', this.player.name);
+        this.setTextContent('player-name-combat', this.player.getName());
         
         // Update enemy info (using correct HTML IDs)
         this.setTextContent('enemy-name', enemy.name);
         this.setTextContent('enemy-level', `Level ${enemy.level}`);
         
         // Update HP bars
-        this.updateHPBar('player-hp-bar', this.player.hp, this.player.maxHp);
+        this.updateHPBar('player-hp-bar', this.player.getHP(), this.player.getMaxHP());
         this.updateHPBar('enemy-hp-bar', enemy.hp, enemy.maxHp);
         
         // Update HP text
-        this.setTextContent('player-hp-text', `${this.player.hp}/${this.player.maxHp}`);
+        this.setTextContent('player-hp-text', `${this.player.getHP()}/${this.player.getMaxHP()}`);
         this.setTextContent('enemy-hp-text', `${enemy.hp}/${enemy.maxHp}`);
         
         // Update overall player stats in sidebar during combat
@@ -3812,7 +3774,8 @@ class UIManager {
         } else {
             // If combat ended for other reasons, show final updates
             this.updateCombatLog();
-            setTimeout(() => this.endCombat(), GameConfig.UI.ANIMATIONS.COMBAT_DELAY);
+            const COMBAT_END_DELAY = 1500; // Give player time to see final combat state
+            setTimeout(() => this.endCombat(), COMBAT_END_DELAY);
         }
     }
     
@@ -3872,7 +3835,8 @@ class UIManager {
         } else {
             // If combat ended for other reasons, show final updates
             this.updateCombatLog();
-            setTimeout(() => this.endCombat(), GameConfig.UI.ANIMATIONS.COMBAT_DELAY);
+            const COMBAT_END_DELAY = 1500; // Give player time to see final combat state
+            setTimeout(() => this.endCombat(), COMBAT_END_DELAY);
         }
     }
     
@@ -3884,7 +3848,8 @@ class UIManager {
         if (success || !this.combat.isCombatActive()) {
             // Show swim away message and add to encounter log
             this.displayMessage(GameStrings.COMBAT.ESCAPE_SUCCESS);
-            setTimeout(() => this.endCombat(), GameConfig.UI.ANIMATIONS.DEATH_FLIP_DELAY);
+            const ESCAPE_MESSAGE_DELAY = 1000; // Wait for escape message to be read
+            setTimeout(() => this.endCombat(), ESCAPE_MESSAGE_DELAY);
         }
     }
     
@@ -3909,7 +3874,8 @@ class UIManager {
         
         // If there was a level up, wait for level up sound to complete before ending combat
         if (victoryResult.levelUp) {
-            setTimeout(() => this.endCombat(), GameConfig.UI.ANIMATIONS.DEATH_FLIP_DELAY); // Wait for level up sequence
+            const LEVEL_UP_SEQUENCE_DELAY = 1000; // Wait for level up fanfare and messages
+            setTimeout(() => this.endCombat(), LEVEL_UP_SEQUENCE_DELAY);
         } else {
             // End combat immediately if no level up
             this.endCombat();
@@ -3923,9 +3889,9 @@ class UIManager {
         // Get defeat information from combat
         const defeatInfo = this.combat.loseCombat();
         
-        // Add enemy appearance message to world map log
+        // Add "last thing you remember" message to world map log
         if (defeatInfo.defeatedByEnemy) {
-            this.displayMessage(`A wild ${defeatInfo.defeatedByEnemy.name} (Level ${defeatInfo.defeatedByEnemy.level}) appears!`);
+            this.displayMessage(`The last thing you remember is a wild ${defeatInfo.defeatedByEnemy.name}!`);
         }
         
         // Update combat display to show defeat (HP at 0 and death animation)
@@ -3950,7 +3916,8 @@ class UIManager {
             
             // Show revival message
             if (defeatInfo.bettaBitesLost > 0) {
-                this.displayMessage(StringFormatter.format(GameStrings.COMBAT.DEFEAT_RECOVERY_WITH_LOSS, { 
+                this.displayMessage(GameStrings.COMBAT.DEFEAT_RECOVERY_RESCUED);
+                this.displayMessage(StringFormatter.format(GameStrings.COMBAT.DEFEAT_RECOVERY_LOSS, { 
                     amount: defeatInfo.bettaBitesLost 
                 }));
             } else {
@@ -4069,24 +4036,6 @@ class UIManager {
         this.showEnhancedDialogue(dialogueData);
     }
     
-    generateDialogueOptions(dialogueData) {
-        let options = '';
-        
-        if (dialogueData.hasMoreDialogue) {
-            options += `<button onclick="game.ui.continueDialogue()">${GameStrings.UI.BUTTONS.CONTINUE}</button>`;
-        } else {
-            if (dialogueData.isShop) {
-                options += `<button onclick="game.ui.openShopFromDialogue()">${GameStrings.UI.BUTTONS.BROWSE_ITEMS}</button>`;
-            }
-            if (dialogueData.isInn) {
-                options += `<button onclick="game.ui.restAtInn()">${GameStrings.UI.BUTTONS.REST}</button>`;
-            }
-            options += `<button onclick="game.ui.endDialogue()">${GameStrings.UI.BUTTONS.GOODBYE}</button>`;
-        }
-        
-        return options;
-    }
-    
     showEnhancedDialogue(dialogueData) {
         // Set up the dialogue screen HTML elements
         const npcNameElement = document.getElementById('npc-name');
@@ -4135,40 +4084,6 @@ class UIManager {
         }
     }
     
-    handleDialogueChoice(choice, dialogueData) {
-        if (!choice || choice < 1) {
-            this.endDialogue();
-            return;
-        }
-        
-        if (dialogueData.hasMoreDialogue) {
-            if (choice === 1) {
-                this.continueDialogue();
-            } else {
-                this.endDialogue();
-            }
-            return;
-        }
-        
-        // Handle end-of-dialogue options
-        let optionIndex = 1;
-        
-        if (dialogueData.isShop && choice === optionIndex) {
-            this.openShopFromDialogue();
-            return;
-        }
-        if (dialogueData.isShop) optionIndex++;
-        
-        if (dialogueData.isInn && choice === optionIndex) {
-            this.restAtInnFromDialogue();
-            return;
-        }
-        if (dialogueData.isInn) optionIndex++;
-        
-        // Goodbye option
-        this.endDialogue();
-    }
-    
     continueDialogue() {
         const result = this.world.nextDialogue();
         if (!result.success) {
@@ -4213,7 +4128,7 @@ class UIManager {
                 <div class="shop-items">
                     ${shopItemsHTML}
                 </div>
-                <div class="shop-footer">${StringFormatter.format(GameStrings.SHOP.INLINE_SHOP.FOOTER, { bettaBites: this.player.bettaBites })}</div>
+                <div class="shop-footer">${StringFormatter.format(GameStrings.SHOP.INLINE_SHOP.FOOTER, { bettaBites: this.player.getBettaBites() })}</div>
             `;
         }
         
@@ -4308,7 +4223,7 @@ class UIManager {
         }
         
         // Update HP bar in combat
-        this.updateHPBar('player-hp-bar', this.player.hp, this.player.maxHp);
+        this.updateHPBar('player-hp-bar', this.player.getHP(), this.player.getMaxHP());
     }
     
     
@@ -4436,43 +4351,87 @@ class UIManager {
             existingStyle.remove();
         }
         
-        // Base layer - dark water for entire background (outermost danger zone)
-        gameContainer.style.backgroundImage = 'url(graphics/map/water-tile-dark.png)';
-        gameContainer.style.backgroundRepeat = 'repeat';
-        gameContainer.style.backgroundSize = '64px 64px';
+        // Generate tile-based background
+        this.generateTiledBackground().then(backgroundUrl => {
+            gameContainer.style.backgroundImage = `url(${backgroundUrl})`;
+            gameContainer.style.backgroundRepeat = 'no-repeat';
+            gameContainer.style.backgroundSize = '100% 100%';
+        }).catch(error => {
+            console.error('Failed to generate tile background:', error);
+            // Fallback to old system
+            gameContainer.style.backgroundImage = 'url(graphics/map/water-tile-dark.png)';
+            gameContainer.style.backgroundRepeat = 'repeat';
+            gameContainer.style.backgroundSize = '64px 64px';
+        });
+    }
+    
+    // Generate a pre-rendered background with tiles based on distance zones
+    async generateTiledBackground() {
+        const mapSize = GameConfig.WORLD.MAP_SIZE;
+        const tileSize = 64; // Each tile is 64x64 pixels
+        const canvasSize = mapSize * tileSize;
         
-        // Create three-layer system: light center, medium frame, dark edges
-        const style = document.createElement('style');
-        style.id = 'dynamic-world-style';
-        style.textContent = `
-            #world-map::before {
-                content: '';
-                position: absolute;
-                top: 15%;
-                left: 15%;
-                width: 70%;
-                height: 70%;
-                background-image: url(graphics/map/water-tile-darkish.png);
-                background-repeat: repeat;
-                background-size: 64px 64px;
-                z-index: -2;
-                pointer-events: none;
+        // Create canvas for rendering
+        const canvas = document.createElement('canvas');
+        canvas.width = canvasSize;
+        canvas.height = canvasSize;
+        const ctx = canvas.getContext('2d');
+        
+        // Load water tile images
+        const waterTiles = await this.loadWaterTileImages();
+        
+        for (let y = 0; y < mapSize; y++) {
+            for (let x = 0; x < mapSize; x++) {
+                const distance = this.world.getDistanceFromVillage(x, y);
+                const tileImage = this.getTileImageForDistance(distance, waterTiles);
+                
+                // Draw tile at correct position
+                ctx.drawImage(tileImage, x * tileSize, y * tileSize, tileSize, tileSize);
             }
-            #world-map::after {
-                content: '';
-                position: absolute;
-                top: 30%;
-                left: 30%;
-                width: 40%;
-                height: 40%;
-                background-image: url(graphics/map/water-tile2.png);
-                background-repeat: repeat;
-                background-size: 64px 64px;
-                z-index: -1;
-                pointer-events: none;
-            }
-        `;
-        document.head.appendChild(style);
+        }
+        
+        // Convert canvas to data URL for use as background image
+        return canvas.toDataURL('image/png');
+    }
+    
+    // Load all water tile images
+    async loadWaterTileImages() {
+        const imagePromises = [
+            this.loadImage('graphics/map/water-tile2.png'),        // Light water (safe)
+            this.loadImage('graphics/map/water-tile-darkish.png'), // Medium water (dangerous)
+            this.loadImage('graphics/map/water-tile-dark.png')     // Dark water (extreme)
+        ];
+        
+        const [lightWater, mediumWater, darkWater] = await Promise.all(imagePromises);
+        
+        return {
+            light: lightWater,
+            medium: mediumWater,
+            dark: darkWater
+        };
+    }
+    
+    // Helper to load image as promise
+    loadImage(src) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+            img.src = src;
+        });
+    }
+    
+    // Determine which tile image to use based on distance from village
+    getTileImageForDistance(distance, waterTiles) {
+        const zones = GameConfig.WORLD.DANGER_ZONES;
+        
+        if (distance <= zones.SAFE_RADIUS) {
+            return waterTiles.light;    // Safe zone: light blue water
+        } else if (distance <= zones.DANGEROUS_RADIUS) {
+            return waterTiles.medium;   // Dangerous zone: medium blue water
+        } else {
+            return waterTiles.dark;     // Extreme zone: dark blue water
+        }
     }
     
     showRicePaddies() {
@@ -4515,7 +4474,7 @@ class UIManager {
         
         const player = document.createElement('img');
         player.src = this.player.getSprite();
-        player.className = this.player.hasDunkleosteusSub ? 'map-player submarine' : 'map-player';
+        player.className = this.player.hasSubmarine() ? 'map-player submarine' : 'map-player';
         player.style.position = 'absolute';
         player.style.left = `${this.playerMapPosition.x}%`;
         player.style.top = `${this.playerMapPosition.y}%`;
@@ -4527,7 +4486,7 @@ class UIManager {
         player.style.width = '32px';
         player.style.height = '32px';
         
-        if (this.player.hasDunkleosteusSub) {
+        if (this.player.hasSubmarine()) {
             player.style.filter = 'none';
         } else {
             player.style.filter = this.player.getColorFilter();
@@ -4539,8 +4498,8 @@ class UIManager {
     updatePlayerMapPosition() {
         const location = this.world.getCurrentLocation();
         // Convert grid coordinates to percentage (assuming 30x30 grid)
-        this.playerMapPosition.x = (location.x / 30) * 100;
-        this.playerMapPosition.y = (location.y / 30) * 100;
+        this.playerMapPosition.x = (location.x / GameConfig.WORLD.MAP_SIZE) * 100;
+        this.playerMapPosition.y = (location.y / GameConfig.WORLD.MAP_SIZE) * 100;
         
         if (this.currentScreen === 'world-map') {
             this.showPlayerOnMap();
@@ -4637,11 +4596,7 @@ class BettaRPG {
     getVersion() {
         return {
             version: GameConfig.GAME.VERSION,
-            website: GameConfig.GAME.WEBSITE,
-            name: 'Betta Fish RPG',
-            architecture: 'Modular',
-            modules: ['Config', 'Audio', 'Player', 'NPC', 'Dialog', 'Combat', 'World', 'UI', 'Core'],
-            buildDate: new Date().toISOString()
+            website: GameConfig.GAME.WEBSITE
         };
     }
 }

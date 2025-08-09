@@ -253,10 +253,179 @@ Instead of CSS percentage overlays, **render each tile individually** with the a
 - **Memory usage**: 900 DOM elements vs 3 CSS pseudo-elements
 
 ### Optimization Options
+
 1. **Canvas rendering**: Draw tiles to a canvas instead of DOM elements (better performance)
 2. **Chunk system**: Group 3x3 or 5x5 tiles that share the same texture
 3. **Pre-rendered backgrounds**: Generate the full map as an image server-side
 4. **CSS Grid**: Use CSS Grid with data attributes for water depth
+5. **Background image generation**: Create a single composite background image dynamically
+
+### Detailed Performance Analysis for Solution 3
+
+#### DOM Element Approach (Worst Case)
+- **30x30**: 900 `<div>` elements with background images
+- **20x20**: 400 `<div>` elements 
+- **Memory**: ~50-100KB for DOM structure
+- **Render time**: 10-50ms on modern browsers
+- **Acceptable for**: Desktop, modern mobile
+- **Issues**: Can be sluggish on older devices
+
+#### CSS Grid Approach (Better)
+```css
+.world-grid {
+    display: grid;
+    grid-template-columns: repeat(30, 1fr);
+    grid-template-rows: repeat(30, 1fr);
+}
+.tile { background-image: var(--tile-texture); }
+```
+- **Pros**: Browser-optimized layout, easier responsive handling
+- **Cons**: Still 900 DOM elements
+- **Performance**: ~20% better than absolute positioning
+
+#### Canvas Rendering (Best Performance)
+```javascript
+// Draw all 900 tiles to a single canvas
+const canvas = document.getElementById('world-canvas');
+const ctx = canvas.getContext('2d');
+
+for (let y = 0; y < 30; y++) {
+    for (let x = 0; x < 30; x++) {
+        const tileTexture = getTileForDistance(x, y);
+        ctx.drawImage(tileTexture, x * tileSize, y * tileSize);
+    }
+}
+```
+
+**Pros:**
+- Single DOM element, hardware accelerated
+- Smooth scaling and crisp pixel art rendering
+- Excellent performance (renders in ~5ms)
+- Can add tile-based effects, animations, transitions
+- Easy to implement dynamic lighting, weather effects
+- Perfect for future features like fog of war, tile highlighting
+
+**Cons:**
+- **Layer management complexity**: Player, rice paddies, village need to be separate layers
+- **Event handling**: Need to translate mouse clicks to tile coordinates manually
+- **Responsive design**: Requires manual handling of canvas scaling/resizing
+- **Accessibility**: Screen readers can't interpret canvas content (need aria-labels)
+- **CSS integration**: Can't use CSS for styling overlays as easily
+- **Browser compatibility**: Very old browsers might have issues (IE11-)
+- **Memory usage**: Large canvases use more GPU memory than DOM elements
+- **Debugging**: Harder to inspect individual tiles in dev tools
+
+#### Pre-rendered Composite (Simplest)
+Generate a single 960x960px background image with all tiles:
+```javascript
+// At game start, create composite background
+const compositeCanvas = document.createElement('canvas');
+// ... render all tiles to canvas
+const backgroundUrl = compositeCanvas.toDataURL();
+document.getElementById('world-map').style.backgroundImage = `url(${backgroundUrl})`;
+```
+- **Pros**: Zero ongoing performance cost, works like current CSS system
+- **Cons**: Fixed resolution, harder to make responsive
+- **Best for**: Your use case where the map doesn't change during play
+
+### Implementation Complexity Estimates
+
+#### Low Complexity: Pre-rendered Background
+```javascript
+// ~50 lines of code
+function generateWorldBackground() {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    for (let y = 0; y < GRID_SIZE; y++) {
+        for (let x = 0; x < GRID_SIZE; x++) {
+            const distance = getDistanceFromVillage(x, y);
+            const tileType = getTileTypeForDistance(distance);
+            drawTileAt(ctx, x, y, tileType);
+        }
+    }
+    
+    return canvas.toDataURL();
+}
+```
+
+#### Medium Complexity: CSS Grid
+```javascript
+// ~100-150 lines
+function createTileGrid() {
+    const container = document.getElementById('world-map');
+    container.className = 'world-grid';
+    
+    for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.style.backgroundImage = getTileTexture(i);
+        container.appendChild(tile);
+    }
+}
+```
+
+#### High Complexity: Canvas with Overlays
+```javascript
+// ~200-300 lines
+// Need to handle canvas rendering, player positioning, rice paddies, etc.
+```
+
+### Real-World Performance Testing
+
+Modern browser benchmarks for tile rendering:
+- **400 tiles (20x20)**: Negligible performance impact on any device from 2015+
+- **900 tiles (30x30)**: Fine on desktop, slight lag on older mobile
+- **Canvas approach**: Handles 10,000+ tiles smoothly
+
+### Recommendation for Solution 3
+
+**Start with Pre-rendered Background approach:**
+1. Generate composite background at game load
+2. Use it exactly like current CSS system
+3. Perfect visual-mechanical alignment
+4. Minimal performance impact
+5. Easy to implement (~1-2 hours work)
+
+**If that works well, consider upgrading to:**
+- CSS Grid for easier maintenance
+- Canvas for maximum performance and effects
+
+**Grid size recommendation for Solution 3:**
+- **20x20** if you want to be conservative (400 tiles, definitely no performance issues)
+- **30x30** if you like the current exploration space (900 tiles, probably fine)
+- **25x25** as a compromise (625 tiles, good balance)
+
+### Canvas Rendering Specific Considerations for Your Game
+
+**Your current overlay elements that would need special handling:**
+1. **Player sprite**: Currently positioned with CSS transforms
+2. **Rice paddy tufts**: Scattered decorative elements
+3. **Village building**: Central sprite
+4. **UI elements**: Movement buttons, stats panel
+
+**Solutions for overlay complexity:**
+1. **Layered approach**: Canvas background + DOM overlays (recommended)
+2. **All-canvas**: Render everything to canvas (more work)
+3. **Hybrid**: Canvas tiles + CSS/DOM for interactive elements
+
+**Canvas-specific challenges for your game:**
+- **Player movement animation**: Would need to redraw canvas or use separate layer
+- **Mouse interaction**: Rice paddy clicking would need coordinate translation
+- **Screen scaling**: Canvas needs explicit resize handling vs CSS auto-scaling
+- **HiDPI displays**: Need devicePixelRatio handling for crisp rendering
+
+**Why canvas might NOT be worth it for you:**
+- Your current CSS system already works well
+- You're not doing real-time tile updates or animations
+- The visual quality difference would be minimal
+- Added complexity for marginal benefit
+
+**When canvas WOULD be worth it:**
+- If you want to add tile-based effects later (water ripples, shadows, etc.)
+- If you plan dynamic tile changes (seasonal changes, day/night, etc.)
+- If you want perfect pixel-level control over tile positioning
+- If you need to support very large maps (100x100+) efficiently
 
 ## Comparison of All Three Solutions
 
@@ -390,13 +559,92 @@ To address the cons:
    - Many successful games use 3 difficulty tiers
    - Clear visual communication > complex progression
 
+## Grid Size Analysis: 30x30 vs 20x20
+
+### Current 30x30 Grid
+- **900 tiles** total (if rendering individually)
+- Village at (15,15), max distance to corner = 21.2 tiles
+- Allows for distance-based zones up to ~21 tiles
+
+### Alternative: 20x20 Grid
+- **400 tiles** total - 56% fewer tiles!
+- Village at (10,10), max distance to corner = 14.1 tiles
+- More manageable for tile-based rendering
+
+### Impact of 20x20 Grid
+
+**Pros:**
+- **Performance**: 400 tiles is much more reasonable than 900
+- **Simplicity**: Easier to work with round numbers (center at 10,10)
+- **Visual clarity**: Fewer tiles means each can be slightly larger
+- **Memory**: Significantly less DOM elements or canvas operations
+
+**Cons:**
+- **Reduced exploration space**: 44% less area to explore
+- **Tighter zones**: Maximum distance only 14.1 tiles
+- **Less room for variance**: Fewer unique positions for encounters
+- **Existing coordinate system**: Would need to update village center, spawn points, etc.
+
+### Revised Zone Boundaries for 20x20
+
+With a 20x20 grid and village at (10,10):
+
+```javascript
+// For 20x20 grid
+DANGER_ZONES: {
+    SAFE_RADIUS: 5,          // Light water (distance ≤5)
+    DANGEROUS_RADIUS: 9,     // Medium water (distance 5-9)
+    // Dark water (distance >9, up to max 14.1)
+    
+    LEVEL_SCALING: {
+        SAFE: { min: 1, max: 2 },
+        DANGEROUS: { min: 3, max: 5 },
+        EXTREME: { min: 10, max: 10 }
+    }
+}
+```
+
+### Visual CSS Adjustments for 20x20
+
+The CSS percentages would need slight adjustment:
+- **Light water**: 25% to 75% (center 50% = tiles 5-15)
+- **Medium water**: 10% to 90% (middle 80% = tiles 2-18)
+- **Dark water**: Outer 10% (tiles 0-2 and 18-20)
+
+### Is 20x20 "Bad"?
+
+**Not at all!** Many successful games use smaller grids:
+- Original Pokemon Red/Blue: Town maps were often 20x20 or smaller
+- Classic RPGs: Many used 16x16 or 24x24 for dungeons
+- Tactics games: Often 10x10 to 20x20 for battlefields
+
+**20x20 is actually quite reasonable** for a browser-based RPG, especially considering:
+1. The entire map is visible at once (no scrolling)
+2. Movement is one tile at a time
+3. The game focuses on encounters, not exploration minutiae
+4. Simpler is often better for indie games
+
+### Recommendation for Grid Size
+
+**Stick with 30x30 for now** because:
+1. All current content is balanced around it
+2. The CSS visual system already works with it
+3. We're not actually rendering individual tiles (using CSS layers)
+
+**But if implementing tile-based rendering (Solution 3):**
+- 20x20 would be perfectly fine
+- Could even consider 25x25 as a middle ground (625 tiles)
+- The smaller grid would make tile rendering much more viable
+
+The grid size isn't sacred - it's just a coordinate system. What matters is that zones, visuals, and gameplay align properly.
+
 ## Additional Considerations
 
 ### Screen Size Responsiveness
-The current system displays the entire 30x30 map scaled to fit the browser window. This means:
+The current system displays the entire map scaled to fit the browser window. This means:
 - On small screens, tiles appear tiny
 - On large screens, tiles appear huge
-- But the gameplay area remains 30x30 tiles regardless
+- But the gameplay area remains the same regardless
 
 Consider implementing a **viewport system** where only a portion of the map is visible, allowing for:
 - Larger effective world (50x50 or 100x100)

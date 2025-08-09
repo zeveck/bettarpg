@@ -39,8 +39,8 @@ export class WorldManager {
                         sprite: 'graphics/map/bettahome.png'
                     };
                 }
-                // Village area (3x3 around center)
-                else if (Math.abs(x - this.VILLAGE_CENTER.x) <= 1 && Math.abs(y - this.VILLAGE_CENTER.y) <= 1) {
+                // Village area (just center tile)
+                else if (x === this.VILLAGE_CENTER.x && y === this.VILLAGE_CENTER.y) {
                     map[y][x] = {
                         type: 'village_area',
                         sprite: 'graphics/map/water-tile.png'
@@ -85,17 +85,6 @@ export class WorldManager {
     }
     
     
-    // Check if coordinates are in deep water edge zone
-    isInEdgeZone(x = this.currentX, y = this.currentY) {
-        // Convert to percentage using config boundary
-        const boundaryPercent = GameConfig.WORLD.EDGE_ZONE.BOUNDARY_PERCENT;
-        const xPercent = (x / this.WORLD_SIZE) * 100;
-        const yPercent = (y / this.WORLD_SIZE) * 100;
-        const edgeThreshold = 100 - boundaryPercent;
-        
-        return (xPercent <= boundaryPercent || xPercent >= edgeThreshold || 
-                yPercent <= boundaryPercent || yPercent >= edgeThreshold);
-    }
     
     movePlayer(direction) {
         let newX = this.currentX;
@@ -117,9 +106,9 @@ export class WorldManager {
         this.currentX = newX;
         this.currentY = newY;
         
-        // Check if entering/leaving village (3x3 area around center)
+        // Check if entering/leaving village (center tile only)
         const wasInVillage = this.inVillage;
-        this.inVillage = (Math.abs(newX - this.VILLAGE_CENTER.x) <= 1 && Math.abs(newY - this.VILLAGE_CENTER.y) <= 1);
+        this.inVillage = (newX === this.VILLAGE_CENTER.x && newY === this.VILLAGE_CENTER.y);
         
         // Village entry message
         if (!wasInVillage && this.inVillage) {
@@ -155,8 +144,9 @@ export class WorldManager {
     
     // Encounter system
     checkForEncounter() {
-        // In edge zone (deep water): guaranteed combat encounters
-        if (this.isInEdgeZone()) {
+        // In extreme zone (dark water): guaranteed combat encounters
+        const distance = this.getDistanceFromVillage();
+        if (distance > GameConfig.WORLD.DANGER_ZONES.DANGEROUS_RADIUS) {
             return this.createCombatEncounter();
         }
         
@@ -178,9 +168,10 @@ export class WorldManager {
     createCombatEncounter() {
         const enemy = this.combat.startRandomEncounter(this.currentX, this.currentY);
         
-        // Add edge zone warning message if in edge zone
+        // Add extreme zone warning message if in dark water
         let message = null;
-        if (this.isInEdgeZone()) {
+        const distance = this.getDistanceFromVillage();
+        if (distance > GameConfig.WORLD.DANGER_ZONES.DANGEROUS_RADIUS) {
             message = GameStrings.EXPLORATION.DANGER_WARNINGS.EDGE_ZONE;
         }
         
@@ -269,8 +260,8 @@ export class WorldManager {
     
     leaveVillage() {
         if (this.inVillage) {
-            // Position player south of village area when exiting
-            // Village area is 3x3 around center, so place south of village area
+            // Position player south of village when exiting
+            // Village is just center tile, so place south of center
             this.currentX = this.VILLAGE_CENTER.x; // Keep X at village center
             this.currentY = this.VILLAGE_CENTER.y + 2; // Move south of village area
             this.inVillage = false;
@@ -330,7 +321,7 @@ export class WorldManager {
                 return this.player.acquireSubmarine();
                 
             case "kelp_snack":
-                const hpHealed = this.player.healHP(this.player.maxHp);
+                const hpHealed = this.player.healHP(this.player.getMaxHP());
                 const message = StringFormatter.format(GameStrings.SHOP.CONFIRMATIONS.KELP_SNACK, { hpHealed });
                 return { 
                     success: true, 
@@ -338,8 +329,8 @@ export class WorldManager {
                 };
                 
             case "bubble_water":
-                const mpBefore = this.player.mp;
-                const actualRestore = this.player.healMP(this.player.maxMp);
+                const mpBefore = this.player.getMP();
+                const actualRestore = this.player.healMP(this.player.getMaxMP());
                 return { 
                     success: true, 
                     message: StringFormatter.format(GameStrings.SHOP.CONFIRMATIONS.BUBBLE_WATER, { mpRestored: actualRestore })

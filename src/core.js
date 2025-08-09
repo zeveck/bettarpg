@@ -71,11 +71,7 @@ export class BettaRPG {
     getVersion() {
         return {
             version: GameConfig.GAME.VERSION,
-            website: GameConfig.GAME.WEBSITE,
-            name: 'Betta Fish RPG',
-            architecture: 'Modular',
-            modules: ['Config', 'Audio', 'Player', 'NPC', 'Dialog', 'Combat', 'World', 'UI', 'Core'],
-            buildDate: new Date().toISOString()
+            website: GameConfig.GAME.WEBSITE
         };
     }
 }

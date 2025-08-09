@@ -114,14 +114,6 @@ export class NPCManager {
         return npc ? npc.name : 'Unknown NPC';
     }
     
-    getNPCIds() {
-        return Object.keys(this.npcs);
-    }
-    
-    getNPCList() {
-        return Object.keys(this.npcs);
-    }
-    
     // Service type checking
     isShopNPC(npcId) {
         const npc = this.npcs[npcId];

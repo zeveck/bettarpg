@@ -54,12 +54,20 @@ export class GameConfig {
                 unlockLevel: 1,
                 sound: 'bubble'
             },
+            HAPPY_BALLOON_TIME: {
+                name: 'Happy Balloon Time',
+                mpCost: 4,
+                damageMin: 0,  // No damage - befriends instead
+                damageMax: 0,  // No damage - befriends instead
+                unlockLevel: 7,
+                sound: 'party'
+            },
             GRAVEL_GRENADE: {
                 name: 'Gravel Grenade', 
                 mpCost: 5,
                 damageMin: 8,
                 damageMax: 15,
-                unlockLevel: 5,
+                unlockLevel: 4,
                 sound: 'gravel'
             }
         },
@@ -225,8 +233,8 @@ export class GameConfig {
             RED: { filter: 'hue-rotate(0deg) saturate(1.2)', name: 'Red' },
             BLUE: { filter: 'hue-rotate(180deg) saturate(1.3)', name: 'Blue' },
             PURPLE: { filter: 'hue-rotate(270deg) saturate(1.8)', name: 'Purple' },
-            GREEN: { filter: 'hue-rotate(130deg) saturate(1.6)', name: 'Green' },
-            GOLD: { filter: 'hue-rotate(50deg) saturate(2) brightness(1.2)', name: 'Gold' }
+            GREEN: { filter: 'hue-rotate(140deg) saturate(1.2) brightness(0.85)', name: 'Green' },
+            ORANGE: { filter: 'hue-rotate(30deg) saturate(1.8) brightness(1.1)', name: 'Orange' }
         }
     };
     
@@ -238,7 +246,7 @@ export class GameStrings {
     // === UI LABELS & BUTTONS ===
     static UI = {
         BUTTONS: {
-            BEGIN_ADVENTURE: "Begin Adventure", 
+            START_GAME: "Swim to Village", 
             START_ADVENTURE: "Start Adventure",
             CONTINUE: "Continue...",
             GOODBYE: "Goodbye",
@@ -254,7 +262,7 @@ export class GameStrings {
             NO: "No",
             THANKS: "Thanks!",
             AMAZING: "Amazing!",
-            RANDOM_NAME: "Random Name",
+            NEW_NAME: "New Name",
             CONTINUE_SWIMMING: "Continue Swimming"
         },
         
@@ -291,7 +299,7 @@ export class GameStrings {
             BLUE: "Blue", 
             PURPLE: "Purple",
             GREEN: "Green",
-            GOLD: "Gold"
+            ORANGE: "Orange"
         }
     };
     
@@ -428,6 +436,13 @@ export class GameStrings {
             "creates a devastating stone storm",
             "launches a powerful gravel grenade",
             "summons a whirlwind of crushing rocks"
+        ],
+        
+        BALLOON_DESCRIPTIONS: [
+            "throws a magical party with colorful balloons",
+            "creates an irresistible celebration",
+            "starts a friendship festival",
+            "channels pure joy and happiness"
         ],
         
         ENEMY_ATTACK_DEFLECTED: "{enemyName} {attackDescription} but the ancient armor deflects all damage!",

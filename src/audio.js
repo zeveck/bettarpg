@@ -67,6 +67,47 @@ export class AudioManager {
                 oscillator.stop(this.audioContext.currentTime + 0.3);
                 break;
                 
+            case 'party':
+                // Happy party sound with cute melody
+                const partyNotes = [523, 659, 784, 659, 523, 784, 1047, 784]; // C-E-G pattern (happy arpeggios)
+                const noteDuration = 0.15;
+                
+                partyNotes.forEach((freq, i) => {
+                    const noteOsc = this.audioContext.createOscillator();
+                    const noteGain = this.audioContext.createGain();
+                    
+                    noteOsc.connect(noteGain);
+                    noteGain.connect(this.audioContext.destination);
+                    
+                    noteOsc.type = 'sine';
+                    noteOsc.frequency.setValueAtTime(freq, this.audioContext.currentTime + i * noteDuration);
+                    
+                    // Bouncy volume envelope
+                    noteGain.gain.setValueAtTime(0, this.audioContext.currentTime + i * noteDuration);
+                    noteGain.gain.linearRampToValueAtTime(0.2, this.audioContext.currentTime + i * noteDuration + 0.02);
+                    noteGain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + i * noteDuration + noteDuration);
+                    
+                    noteOsc.start(this.audioContext.currentTime + i * noteDuration);
+                    noteOsc.stop(this.audioContext.currentTime + i * noteDuration + noteDuration);
+                });
+                
+                // Add a party noise/whistle at the end
+                const whistle = this.audioContext.createOscillator();
+                const whistleGain = this.audioContext.createGain();
+                whistle.connect(whistleGain);
+                whistleGain.connect(this.audioContext.destination);
+                
+                whistle.type = 'sine';
+                whistle.frequency.setValueAtTime(800, this.audioContext.currentTime + partyNotes.length * noteDuration);
+                whistle.frequency.exponentialRampToValueAtTime(1600, this.audioContext.currentTime + partyNotes.length * noteDuration + 0.3);
+                
+                whistleGain.gain.setValueAtTime(0.15, this.audioContext.currentTime + partyNotes.length * noteDuration);
+                whistleGain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + partyNotes.length * noteDuration + 0.3);
+                
+                whistle.start(this.audioContext.currentTime + partyNotes.length * noteDuration);
+                whistle.stop(this.audioContext.currentTime + partyNotes.length * noteDuration + 0.3);
+                break;
+                
             case 'fanfare':
                 // Play a longer victory fanfare
                 const fanfareNotes = [262, 330, 392, 523, 659, 523]; // C, E, G, C, E, C

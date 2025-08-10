@@ -113,6 +113,10 @@ export class Player {
             const spell = GameConfig.COMBAT.SPELLS.BUBBLE_BLAST;
             return this.level >= spell.unlockLevel;
         }
+        if (spellType === 'party') {
+            const spell = GameConfig.COMBAT.SPELLS.HAPPY_BALLOON_TIME;
+            return this.level >= spell.unlockLevel;
+        }
         if (spellType === 'gravel') {
             const spell = GameConfig.COMBAT.SPELLS.GRAVEL_GRENADE;
             return this.level >= spell.unlockLevel;
@@ -127,6 +131,10 @@ export class Player {
             const spell = GameConfig.COMBAT.SPELLS.BUBBLE_BLAST;
             return this.mp >= spell.mpCost;
         }
+        if (spellType === 'party') {
+            const spell = GameConfig.COMBAT.SPELLS.HAPPY_BALLOON_TIME;
+            return this.mp >= spell.mpCost;
+        }
         if (spellType === 'gravel') {
             const spell = GameConfig.COMBAT.SPELLS.GRAVEL_GRENADE;
             return this.mp >= spell.mpCost;
@@ -139,6 +147,10 @@ export class Player {
         
         if (spellType === 'bubble') {
             this.mp -= GameConfig.COMBAT.SPELLS.BUBBLE_BLAST.mpCost;
+            return true;
+        }
+        if (spellType === 'party') {
+            this.mp -= GameConfig.COMBAT.SPELLS.HAPPY_BALLOON_TIME.mpCost;
             return true;
         }
         if (spellType === 'gravel') {
@@ -169,6 +181,13 @@ export class Player {
         
         if (spellType === 'bubble') {
             const spell = GameConfig.COMBAT.SPELLS.BUBBLE_BLAST;
+            const minDamage = spell.damageMin + magicBonus;
+            const maxDamage = spell.damageMax + magicBonus;
+            return Math.floor(Math.random() * (maxDamage - minDamage + 1)) + minDamage;
+        }
+        
+        if (spellType === 'party') {
+            const spell = GameConfig.COMBAT.SPELLS.HAPPY_BALLOON_TIME;
             const minDamage = spell.damageMin + magicBonus;
             const maxDamage = spell.damageMax + magicBonus;
             return Math.floor(Math.random() * (maxDamage - minDamage + 1)) + minDamage;

@@ -57,12 +57,20 @@ class GameConfig {
                 unlockLevel: 1,
                 sound: 'bubble'
             },
+            HAPPY_BALLOON_TIME: {
+                name: 'Happy Balloon Time',
+                mpCost: 4,
+                damageMin: 0,  // No damage - befriends instead
+                damageMax: 0,  // No damage - befriends instead
+                unlockLevel: 7,
+                sound: 'party'
+            },
             GRAVEL_GRENADE: {
                 name: 'Gravel Grenade', 
                 mpCost: 5,
                 damageMin: 8,
                 damageMax: 15,
-                unlockLevel: 5,
+                unlockLevel: 4,
                 sound: 'gravel'
             }
         },
@@ -228,8 +236,8 @@ class GameConfig {
             RED: { filter: 'hue-rotate(0deg) saturate(1.2)', name: 'Red' },
             BLUE: { filter: 'hue-rotate(180deg) saturate(1.3)', name: 'Blue' },
             PURPLE: { filter: 'hue-rotate(270deg) saturate(1.8)', name: 'Purple' },
-            GREEN: { filter: 'hue-rotate(130deg) saturate(1.6)', name: 'Green' },
-            GOLD: { filter: 'hue-rotate(50deg) saturate(2) brightness(1.2)', name: 'Gold' }
+            GREEN: { filter: 'hue-rotate(140deg) saturate(1.2) brightness(0.85)', name: 'Green' },
+            ORANGE: { filter: 'hue-rotate(30deg) saturate(1.8) brightness(1.1)', name: 'Orange' }
         }
     };
     
@@ -241,7 +249,7 @@ class GameStrings {
     // === UI LABELS & BUTTONS ===
     static UI = {
         BUTTONS: {
-            BEGIN_ADVENTURE: "Begin Adventure", 
+            START_GAME: "Swim to Village", 
             START_ADVENTURE: "Start Adventure",
             CONTINUE: "Continue...",
             GOODBYE: "Goodbye",
@@ -257,7 +265,7 @@ class GameStrings {
             NO: "No",
             THANKS: "Thanks!",
             AMAZING: "Amazing!",
-            RANDOM_NAME: "Random Name",
+            NEW_NAME: "New Name",
             CONTINUE_SWIMMING: "Continue Swimming"
         },
         
@@ -286,8 +294,7 @@ class GameStrings {
             SUBTITLE: "Adventure awaits in the aquatic realm!",
             CREATE_YOUR_BETTA: "Create Your Betta",
             COMBAT_TITLE: "Combat!",
-            VILLAGE_TITLE: "Paddy Village",
-            WORLD_MAP_TITLE: "The Rice Paddies"
+            VILLAGE_TITLE: "Paddy Village"
         },
         
         COLORS: {
@@ -295,7 +302,7 @@ class GameStrings {
             BLUE: "Blue", 
             PURPLE: "Purple",
             GREEN: "Green",
-            GOLD: "Gold"
+            ORANGE: "Orange"
         }
     };
     
@@ -386,15 +393,7 @@ class GameStrings {
     static COMBAT = {
         COMBAT_BEGINS: "Combat begins! {playerName} vs {enemyName}",
         ENEMY_APPEARS: "A wild {enemyName} (Level {level}) appears!",
-        PLAYER_ATTACKS: "{playerName} attacks!",
-        PLAYER_DEALS_DAMAGE: "{playerName} deals {damage} damage!",
-        PLAYER_CASTS_SPELL: "{playerName} casts {spellName}!",
-        PLAYER_SPELL_DAMAGE: "The {spellName} deals {damage} damage!",
-        
-        ENEMY_ATTACKS: "{enemyName} attacks!",
-        ENEMY_DEALS_DAMAGE: "{enemyName} deals {damage} damage!",
         ENEMY_DEFEATED: "Defeated {enemyName}!",
-        
         VICTORY_REWARDS: "Victory! You gained {exp} EXP and {bettaBites} Betta Bites!",
         LEVEL_UP: "Level up! Now level {newLevel}!",
         HP_MP_INCREASE: "HP increased by {hpIncrease}! MP increased by {mpIncrease}!",
@@ -407,9 +406,6 @@ class GameStrings {
         
         NOT_ENOUGH_MP: "Not enough MP to cast {spellName}!",
         SPELL_UNLOCKED_AT_LEVEL: "{spellName} unlocks at level {level}!",
-        
-        SWIM_AWAY_SUCCESS: "{playerName} swims away quickly!",
-        SWIM_AWAY_BLOCKED: "⚡ The enemy is too fast to escape! ⚡",
         
         PLAYER_DEFEATED: "You have been defeated!",
         PLAYER_LOST_BETTA_BITES: "You lost {amount} Betta Bites...",
@@ -443,6 +439,13 @@ class GameStrings {
             "creates a devastating stone storm",
             "launches a powerful gravel grenade",
             "summons a whirlwind of crushing rocks"
+        ],
+        
+        BALLOON_DESCRIPTIONS: [
+            "throws a magical party with colorful balloons",
+            "creates an irresistible celebration",
+            "starts a friendship festival",
+            "channels pure joy and happiness"
         ],
         
         ENEMY_ATTACK_DEFLECTED: "{enemyName} {attackDescription} but the ancient armor deflects all damage!",
@@ -703,6 +706,47 @@ class AudioManager {
                 oscillator.stop(this.audioContext.currentTime + 0.3);
                 break;
                 
+            case 'party':
+                // Happy party sound with cute melody
+                const partyNotes = [523, 659, 784, 659, 523, 784, 1047, 784]; // C-E-G pattern (happy arpeggios)
+                const noteDuration = 0.15;
+                
+                partyNotes.forEach((freq, i) => {
+                    const noteOsc = this.audioContext.createOscillator();
+                    const noteGain = this.audioContext.createGain();
+                    
+                    noteOsc.connect(noteGain);
+                    noteGain.connect(this.audioContext.destination);
+                    
+                    noteOsc.type = 'sine';
+                    noteOsc.frequency.setValueAtTime(freq, this.audioContext.currentTime + i * noteDuration);
+                    
+                    // Bouncy volume envelope
+                    noteGain.gain.setValueAtTime(0, this.audioContext.currentTime + i * noteDuration);
+                    noteGain.gain.linearRampToValueAtTime(0.2, this.audioContext.currentTime + i * noteDuration + 0.02);
+                    noteGain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + i * noteDuration + noteDuration);
+                    
+                    noteOsc.start(this.audioContext.currentTime + i * noteDuration);
+                    noteOsc.stop(this.audioContext.currentTime + i * noteDuration + noteDuration);
+                });
+                
+                // Add a party noise/whistle at the end
+                const whistle = this.audioContext.createOscillator();
+                const whistleGain = this.audioContext.createGain();
+                whistle.connect(whistleGain);
+                whistleGain.connect(this.audioContext.destination);
+                
+                whistle.type = 'sine';
+                whistle.frequency.setValueAtTime(800, this.audioContext.currentTime + partyNotes.length * noteDuration);
+                whistle.frequency.exponentialRampToValueAtTime(1600, this.audioContext.currentTime + partyNotes.length * noteDuration + 0.3);
+                
+                whistleGain.gain.setValueAtTime(0.15, this.audioContext.currentTime + partyNotes.length * noteDuration);
+                whistleGain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + partyNotes.length * noteDuration + 0.3);
+                
+                whistle.start(this.audioContext.currentTime + partyNotes.length * noteDuration);
+                whistle.stop(this.audioContext.currentTime + partyNotes.length * noteDuration + 0.3);
+                break;
+                
             case 'fanfare':
                 // Play a longer victory fanfare
                 const fanfareNotes = [262, 330, 392, 523, 659, 523]; // C, E, G, C, E, C
@@ -918,6 +962,10 @@ class Player {
             const spell = GameConfig.COMBAT.SPELLS.BUBBLE_BLAST;
             return this.level >= spell.unlockLevel;
         }
+        if (spellType === 'party') {
+            const spell = GameConfig.COMBAT.SPELLS.HAPPY_BALLOON_TIME;
+            return this.level >= spell.unlockLevel;
+        }
         if (spellType === 'gravel') {
             const spell = GameConfig.COMBAT.SPELLS.GRAVEL_GRENADE;
             return this.level >= spell.unlockLevel;
@@ -932,6 +980,10 @@ class Player {
             const spell = GameConfig.COMBAT.SPELLS.BUBBLE_BLAST;
             return this.mp >= spell.mpCost;
         }
+        if (spellType === 'party') {
+            const spell = GameConfig.COMBAT.SPELLS.HAPPY_BALLOON_TIME;
+            return this.mp >= spell.mpCost;
+        }
         if (spellType === 'gravel') {
             const spell = GameConfig.COMBAT.SPELLS.GRAVEL_GRENADE;
             return this.mp >= spell.mpCost;
@@ -944,6 +996,10 @@ class Player {
         
         if (spellType === 'bubble') {
             this.mp -= GameConfig.COMBAT.SPELLS.BUBBLE_BLAST.mpCost;
+            return true;
+        }
+        if (spellType === 'party') {
+            this.mp -= GameConfig.COMBAT.SPELLS.HAPPY_BALLOON_TIME.mpCost;
             return true;
         }
         if (spellType === 'gravel') {
@@ -974,6 +1030,13 @@ class Player {
         
         if (spellType === 'bubble') {
             const spell = GameConfig.COMBAT.SPELLS.BUBBLE_BLAST;
+            const minDamage = spell.damageMin + magicBonus;
+            const maxDamage = spell.damageMax + magicBonus;
+            return Math.floor(Math.random() * (maxDamage - minDamage + 1)) + minDamage;
+        }
+        
+        if (spellType === 'party') {
+            const spell = GameConfig.COMBAT.SPELLS.HAPPY_BALLOON_TIME;
             const minDamage = spell.damageMin + magicBonus;
             const maxDamage = spell.damageMax + magicBonus;
             return Math.floor(Math.random() * (maxDamage - minDamage + 1)) + minDamage;
@@ -1471,6 +1534,7 @@ class CombatManager {
         this.player = player;
         this.audio = audioManager;
         this.world = null; // Will be set after WorldManager is created
+        this.ui = null; // Will be set after UIManager is created
         
         // Combat state
         this.currentEnemy = null;
@@ -1509,6 +1573,11 @@ class CombatManager {
     // Module interface: Set world manager reference after construction
     setWorldManager(worldManager) {
         this.world = worldManager;
+    }
+    
+    // Module interface: Set UI manager reference after construction
+    setUIManager(uiManager) {
+        this.ui = uiManager;
     }
     
     
@@ -1637,23 +1706,37 @@ class CombatManager {
         if (!this.combatActive || !this.currentEnemy) return;
         if (!this.player.canCastSpell(spellType)) return;
         
-        const damage = this.player.calculateMagicDamage(spellType);
-        this.currentEnemy.hp = Math.max(0, this.currentEnemy.hp - damage);
-        
         this.player.castSpell(spellType);
         this.audio.playSound(spellType);
         
-        // Add shake animation to enemy sprite when taking damage
-        this.shakeEnemySprite();
-        
         if (spellType === 'bubble') {
+            const damage = this.player.calculateMagicDamage(spellType);
+            this.currentEnemy.hp = Math.max(0, this.currentEnemy.hp - damage);
+            this.shakeEnemySprite();
+            
             // Random bubble spell descriptions from configuration
             const bubbleDescriptions = GameStrings.COMBAT.BUBBLE_DESCRIPTIONS;
             const bubbleDescription = bubbleDescriptions[Math.floor(Math.random() * bubbleDescriptions.length)];
             
             this.createBubbleEffect();
             this.addToCombatLog(`${this.player.getName()} ${bubbleDescription} for ${damage} damage!`);
+        } else if (spellType === 'party') {
+            // Happy Balloon Time - befriend the enemy instead of damaging
+            this.createBalloonEffect();
+            this.addPartyHatToEnemy();
+            
+            // Special friendship message
+            this.addToCombatLog(`${this.player.getName()} throws a magical party!`);
+            this.addToCombatLog(`${this.currentEnemy.name} is having such a good time!`);
+            
+            // Set enemy HP to 0 to trigger victory, but mark as befriended
+            this.currentEnemy.befriended = true;
+            this.currentEnemy.hp = 0;
         } else if (spellType === 'gravel') {
+            const damage = this.player.calculateMagicDamage(spellType);
+            this.currentEnemy.hp = Math.max(0, this.currentEnemy.hp - damage);
+            this.shakeEnemySprite();
+            
             // Random gravel spell descriptions from configuration
             const gravelDescriptions = GameStrings.COMBAT.GRAVEL_DESCRIPTIONS;
             const gravelDescription = gravelDescriptions[Math.floor(Math.random() * gravelDescriptions.length)];
@@ -1683,6 +1766,10 @@ class CombatManager {
             };
         } else {
             this.enemyTurn();
+            // Check if player died after enemy turn
+            if (!this.player.isAlive) {
+                return { playerDefeated: true };
+            }
         }
         return null;
     }
@@ -1768,6 +1855,14 @@ class CombatManager {
                 
                 this.audio.playSound('wound');
                 this.shakePlayerSprite();
+                
+                // Check if player died from this delayed attack
+                if (!this.player.isAlive) {
+                    // Notify UI that player has been defeated
+                    if (this.ui) {
+                        this.ui.checkAndHandlePlayerDefeat();
+                    }
+                }
             }
         }, attackConfig.delay);
     }
@@ -1782,7 +1877,7 @@ class CombatManager {
     
     // Try to run away from combat
     runAway() {
-        if (!this.combatActive) return false;
+        if (!this.combatActive) return { escaped: false };
         
         // High level enemies are harder to escape from
         const escapeConfig = GameConfig.COMBAT.RUN_AWAY;
@@ -1790,14 +1885,18 @@ class CombatManager {
             if (Math.random() > escapeConfig.difficultEscapeChance) {
                 this.addToCombatLog(GameStrings.COMBAT.ESCAPE_FAILED);
                 this.enemyTurn();
-                return false;
+                // Check if player died after enemy attack on failed escape
+                if (!this.player.isAlive) {
+                    return { escaped: false, playerDefeated: true };
+                }
+                return { escaped: false };
             }
         }
         
         this.combatActive = false;
         this.currentEnemy = null;
         this.addToCombatLog(GameStrings.COMBAT.ESCAPE_BARELY_SUCCESS);
-        return true;
+        return { escaped: true };
     }
     
     // UI calls this to show enemy death animation and complete victory
@@ -1829,10 +1928,12 @@ class CombatManager {
     processVictoryImmediate(enemy) {
         const exp = enemy.exp;
         
-        // Flip enemy fish to show defeat immediately
-        const enemyFish = document.getElementById('enemy-fish-combat');
-        if (enemyFish) {
-            enemyFish.style.transform = 'scaleX(-1) scaleY(-1)';
+        // Only flip enemy fish if defeated, not befriended
+        if (!enemy.befriended) {
+            const enemyFish = document.getElementById('enemy-fish-combat');
+            if (enemyFish) {
+                enemyFish.style.transform = 'scaleX(-1) scaleY(-1)';
+            }
         }
         
         // Calculate Betta Bites rewards using configuration
@@ -1850,10 +1951,14 @@ class CombatManager {
         this.player.gainExp(exp);
         this.player.gainBettaBites(bettaBites);
         
-        this.addToCombatLog(StringFormatter.format(GameStrings.COMBAT.VICTORY_REWARDS, {
-            exp: exp,
-            bettaBites: bettaBites
-        }));
+        if (enemy.befriended) {
+            this.addToCombatLog(`${enemy.name} becomes your friend! You gained ${exp} EXP and ${bettaBites} Betta Bites!`);
+        } else {
+            this.addToCombatLog(StringFormatter.format(GameStrings.COMBAT.VICTORY_REWARDS, {
+                exp: exp,
+                bettaBites: bettaBites
+            }));
+        }
         
         // Check for level up but don't do it yet
         const willLevelUp = this.player.gainExp(0); // Check without adding more exp
@@ -2051,6 +2156,71 @@ class CombatManager {
         }, 2000);
     }
     
+    createBalloonEffect() {
+        const container = document.createElement('div');
+        container.className = 'balloon-container';
+        container.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9998;
+        `;
+        
+        document.getElementById('game-container').appendChild(container);
+        
+        // Create many colorful balloons
+        const balloonCount = Math.floor(Math.random() * 10) + 15; // 15-25 balloons
+        const colors = ['#FF69B4', '#FFD700', '#87CEEB', '#98FB98', '#DDA0DD', '#F0E68C', '#FF6347', '#40E0D0'];
+        
+        for (let i = 0; i < balloonCount; i++) {
+            setTimeout(() => {
+                const balloon = document.createElement('div');
+                balloon.className = 'party-balloon';
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const size = Math.random() * 30 + 25; // 25-55px
+                const startX = Math.random() * 100;
+                
+                balloon.style.cssText = `
+                    position: absolute;
+                    width: ${size}px;
+                    height: ${size * 1.2}px;
+                    background: radial-gradient(ellipse at 30% 30%, ${color}, ${color}dd);
+                    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+                    left: ${startX}%;
+                    bottom: -100px;
+                    opacity: 0.9;
+                    animation: balloon-rise ${Math.random() * 2 + 3}s ease-out forwards;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                `;
+                
+                // Add balloon string
+                const string = document.createElement('div');
+                string.style.cssText = `
+                    position: absolute;
+                    width: 1px;
+                    height: 50px;
+                    background: #666;
+                    left: 50%;
+                    top: 100%;
+                    transform: translateX(-50%);
+                `;
+                balloon.appendChild(string);
+                
+                container.appendChild(balloon);
+            }, i * 100);
+        }
+        
+        // Clean up after animation
+        setTimeout(() => {
+            if (container.parentNode) {
+                container.parentNode.removeChild(container);
+            }
+        }, 5000);
+    }
+    
     createGiantGarEffect() {
         const giantGar = document.createElement('img');
         giantGar.src = 'graphics/enemies/prehistoric_gar.png';
@@ -2073,6 +2243,58 @@ class CombatManager {
                 giantGar.parentNode.removeChild(giantGar);
             }
         }, 3000);
+    }
+    
+    addPartyHatToEnemy() {
+        const enemyFish = document.getElementById('enemy-fish-combat');
+        if (!enemyFish) return;
+        
+        // Create party hat element
+        const partyHat = document.createElement('div');
+        partyHat.className = 'party-hat';
+        partyHat.style.cssText = `
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-bottom: 40px solid #FFD700;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+        `;
+        
+        // Add stripes to the hat
+        const stripe1 = document.createElement('div');
+        stripe1.style.cssText = `
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 30px solid #FF69B4;
+            top: 10px;
+            left: -15px;
+        `;
+        partyHat.appendChild(stripe1);
+        
+        // Add pom-pom on top
+        const pompom = document.createElement('div');
+        pompom.style.cssText = `
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #FF0000;
+            border-radius: 50%;
+            top: -8px;
+            left: -6px;
+        `;
+        partyHat.appendChild(pompom);
+        
+        // Position the hat relative to the enemy sprite
+        enemyFish.style.position = 'relative';
+        enemyFish.appendChild(partyHat);
     }
     
     // Combat log management
@@ -2758,29 +2980,54 @@ class UIManager {
         if (attackBtn) {
             const [attackButtonText] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.ATTACK]);
             attackBtn.innerHTML = attackButtonText.html;
+            attackBtn.dataset.key = attackButtonText.key;
         }
         
         const swimAwayBtn = document.getElementById('swim-away-btn');
         if (swimAwayBtn) {
             const [swimAwayButtonText] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.SWIM_AWAY]);
             swimAwayBtn.innerHTML = swimAwayButtonText.html;
+            swimAwayBtn.dataset.key = swimAwayButtonText.key;
         }
         
-        // Navigation buttons
+        // Navigation buttons - use automated system for shortcuts
+        const navigationButtons = StringFormatter.processButtonTexts([
+            GameStrings.LOCATIONS.WORLD_MAP.MOVEMENT.SWIM_NORTH,
+            GameStrings.LOCATIONS.WORLD_MAP.MOVEMENT.SWIM_SOUTH,
+            GameStrings.LOCATIONS.WORLD_MAP.MOVEMENT.SWIM_EAST,
+            GameStrings.LOCATIONS.WORLD_MAP.MOVEMENT.SWIM_WEST,
+            GameStrings.LOCATIONS.WORLD_MAP.MOVEMENT.RETURN_TO_VILLAGE
+        ]);
+        
         const swimNorthBtn = document.getElementById('swim-north-btn');
-        if (swimNorthBtn) swimNorthBtn.textContent = GameStrings.LOCATIONS.WORLD_MAP.MOVEMENT.SWIM_NORTH;
+        if (swimNorthBtn) {
+            swimNorthBtn.innerHTML = navigationButtons[0].html;
+            swimNorthBtn.dataset.key = navigationButtons[0].key;
+        }
         
         const swimSouthBtn = document.getElementById('swim-south-btn');
-        if (swimSouthBtn) swimSouthBtn.textContent = GameStrings.LOCATIONS.WORLD_MAP.MOVEMENT.SWIM_SOUTH;
+        if (swimSouthBtn) {
+            swimSouthBtn.innerHTML = navigationButtons[1].html;
+            swimSouthBtn.dataset.key = navigationButtons[1].key;
+        }
         
         const swimEastBtn = document.getElementById('swim-east-btn');
-        if (swimEastBtn) swimEastBtn.textContent = GameStrings.LOCATIONS.WORLD_MAP.MOVEMENT.SWIM_EAST;
+        if (swimEastBtn) {
+            swimEastBtn.innerHTML = navigationButtons[2].html;
+            swimEastBtn.dataset.key = navigationButtons[2].key;
+        }
         
         const swimWestBtn = document.getElementById('swim-west-btn');
-        if (swimWestBtn) swimWestBtn.textContent = GameStrings.LOCATIONS.WORLD_MAP.MOVEMENT.SWIM_WEST;
+        if (swimWestBtn) {
+            swimWestBtn.innerHTML = navigationButtons[3].html;
+            swimWestBtn.dataset.key = navigationButtons[3].key;
+        }
         
         const returnVillageBtn = document.getElementById('return-village-btn');
-        if (returnVillageBtn) returnVillageBtn.textContent = GameStrings.LOCATIONS.WORLD_MAP.MOVEMENT.RETURN_TO_VILLAGE;
+        if (returnVillageBtn) {
+            returnVillageBtn.innerHTML = navigationButtons[4].html;
+            returnVillageBtn.dataset.key = navigationButtons[4].key;
+        }
         
         // Spell buttons - these will be updated dynamically with MP costs
         this.updateSpellButtons();
@@ -2793,7 +3040,11 @@ class UIManager {
         if (nameInput) nameInput.placeholder = GameStrings.UI.LABELS.ENTER_NAME;
         
         const randomNameBtn = document.getElementById('random-name-btn');
-        if (randomNameBtn) randomNameBtn.textContent = GameStrings.UI.BUTTONS.RANDOM_NAME;
+        if (randomNameBtn) {
+            const [newNameButton] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.NEW_NAME]);
+            randomNameBtn.innerHTML = newNameButton.html;
+            randomNameBtn.dataset.key = newNameButton.key;
+        }
         
         const colorLabels = document.querySelectorAll('label');
         colorLabels.forEach(label => {
@@ -2803,7 +3054,12 @@ class UIManager {
         });
         
         const createCharacterBtn = document.getElementById('create-character');
-        if (createCharacterBtn) createCharacterBtn.textContent = GameStrings.UI.BUTTONS.BEGIN_ADVENTURE;
+        if (createCharacterBtn) {
+            const [startGameButton] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.START_GAME]);
+            createCharacterBtn.innerHTML = startGameButton.html;
+            createCharacterBtn.dataset.key = startGameButton.key;
+            createCharacterBtn.disabled = true; // Initially disabled until name and color are selected
+        }
         
         // Character preview labels
         const namePreviewLabel = document.querySelector('#character-preview p:first-child');
@@ -2816,15 +3072,40 @@ class UIManager {
             colorPreviewLabel.innerHTML = `${GameStrings.UI.LABELS.COLOR_PREVIEW} <span id="preview-color">${GameStrings.UI.LABELS.CHOOSE_A_COLOR}</span>`;
         }
         
-        // Color option labels
+        // Color option labels - now using automated system
         const colorOptions = document.querySelectorAll('.color-option');
+        const colorTexts = [];
+        const colorMap = {};
+        
         colorOptions.forEach(option => {
             const color = option.dataset.color;
-            if (color === 'red') option.textContent = GameStrings.UI.COLORS.RED;
-            else if (color === 'blue') option.textContent = GameStrings.UI.COLORS.BLUE;
-            else if (color === 'purple') option.textContent = GameStrings.UI.COLORS.PURPLE;
-            else if (color === 'green') option.textContent = GameStrings.UI.COLORS.GREEN;
-            else if (color === 'gold') option.textContent = GameStrings.UI.COLORS.GOLD;
+            if (color === 'red') {
+                colorTexts.push(GameStrings.UI.COLORS.RED);
+                colorMap['red'] = colorTexts.length - 1;
+            } else if (color === 'blue') {
+                colorTexts.push(GameStrings.UI.COLORS.BLUE);
+                colorMap['blue'] = colorTexts.length - 1;
+            } else if (color === 'purple') {
+                colorTexts.push(GameStrings.UI.COLORS.PURPLE);
+                colorMap['purple'] = colorTexts.length - 1;
+            } else if (color === 'green') {
+                colorTexts.push(GameStrings.UI.COLORS.GREEN);
+                colorMap['green'] = colorTexts.length - 1;
+            } else if (color === 'orange') {
+                colorTexts.push(GameStrings.UI.COLORS.ORANGE);
+                colorMap['orange'] = colorTexts.length - 1;
+            }
+        });
+        
+        const processedColors = StringFormatter.processButtonTexts(colorTexts);
+        
+        colorOptions.forEach(option => {
+            const color = option.dataset.color;
+            const index = colorMap[color];
+            if (index !== undefined) {
+                option.innerHTML = processedColors[index].html;
+                option.dataset.key = processedColors[index].key;
+            }
         });
         
         // Congratulations popup
@@ -2845,7 +3126,10 @@ class UIManager {
         
         const [congratsButton] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.CONTINUE_SWIMMING]);
         const congratsBtn = document.getElementById('close-popup');
-        if (congratsBtn) congratsBtn.innerHTML = congratsButton.html;
+        if (congratsBtn) {
+            congratsBtn.innerHTML = congratsButton.html;
+            congratsBtn.dataset.key = congratsButton.key;
+        }
         
         // Title screen strings
         const titleH1 = document.querySelector('#title-screen h1');
@@ -2855,7 +3139,11 @@ class UIManager {
         if (titleSubtitle) titleSubtitle.textContent = GameStrings.UI.SCREENS.SUBTITLE;
         
         const startBtn = document.querySelector('button[onclick*="startCharacterCreation"]');
-        if (startBtn) startBtn.textContent = GameStrings.UI.BUTTONS.START_ADVENTURE;
+        if (startBtn) {
+            const [startButton] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.START_ADVENTURE]);
+            startBtn.innerHTML = startButton.html;
+            startBtn.dataset.key = startButton.key;
+        }
         
         // Character creation screen title
         const charCreationTitle = document.querySelector('#character-creation h2');
@@ -2868,6 +3156,15 @@ class UIManager {
             const spell = GameConfig.COMBAT.SPELLS.BUBBLE_BLAST;
             const [bubbleButton] = StringFormatter.processButtonTexts([`Bubble Blast (${spell.mpCost} MP)`]);
             bubbleBtn.innerHTML = bubbleButton.html;
+            bubbleBtn.dataset.key = bubbleButton.key;
+        }
+        
+        const balloonBtn = document.getElementById('happy-balloon-btn');
+        if (balloonBtn) {
+            const spell = GameConfig.COMBAT.SPELLS.HAPPY_BALLOON_TIME;
+            const [balloonButton] = StringFormatter.processButtonTexts([`Happy Balloon Time (${spell.mpCost} MP)`]);
+            balloonBtn.innerHTML = balloonButton.html;
+            balloonBtn.dataset.key = balloonButton.key;
         }
         
         const gravelBtn = document.getElementById('gravel-grenade-btn');
@@ -2875,6 +3172,7 @@ class UIManager {
             const spell = GameConfig.COMBAT.SPELLS.GRAVEL_GRENADE;
             const [gravelButton] = StringFormatter.processButtonTexts([`Gravel Grenade (${spell.mpCost} MP)`]);
             gravelBtn.innerHTML = gravelButton.html;
+            gravelBtn.dataset.key = gravelButton.key;
         }
     }
     
@@ -2910,10 +3208,12 @@ class UIManager {
     
     
     handleGlobalKeyboard(event) {
+        const key = event.key.toLowerCase();
+        
         // Handle congratulations popup first (highest priority)
         const popup = document.getElementById('congratulations-popup');
         if (popup && popup.classList.contains('show')) {
-            if (event.key.toLowerCase() === 'c' || event.key === 'Enter') {
+            if (key === 'c' || event.key === 'Enter') {
                 event.preventDefault();
                 event.stopPropagation();
                 this.hideCongratulationsPopup();
@@ -2936,6 +3236,68 @@ class UIManager {
         // Handle shop keyboard shortcuts
         if (this.shopOpen) {
             this.handleShopKeyboard(event);
+            return;
+        }
+        
+        // Handle character creation arrow keys and shortcuts (but not when typing in name field)
+        if (this.currentScreen === 'character-creation') {
+            const nameInput = document.getElementById('betta-name');
+            const isNameFieldFocused = document.activeElement === nameInput;
+            
+            // Tab key to toggle name field focus
+            if (key === 'tab') {
+                event.preventDefault();
+                if (nameInput) {
+                    if (isNameFieldFocused) {
+                        // If already focused, blur to allow other shortcuts
+                        nameInput.blur();
+                    } else {
+                        // If not focused, focus the field
+                        nameInput.focus();
+                    }
+                }
+                return;
+            }
+            
+            // Arrow keys for color cycling (only when not in name field)
+            if (!isNameFieldFocused && (key === 'arrowleft' || key === 'arrowright')) {
+                event.preventDefault();
+                this.cycleColorSelection(key === 'arrowright' ? 1 : -1);
+                return;
+            }
+            
+            // Check button shortcuts using data-key attributes from automated system
+            // Only process shortcuts when not typing in the name field
+            if (!isNameFieldFocused) {
+                const buttons = document.querySelectorAll('button[data-key]');
+                buttons.forEach(button => {
+                    if (button.dataset.key === key && !button.disabled) {
+                        event.preventDefault();
+                        button.click();
+                        return;
+                    }
+                });
+            }
+            
+            // Letter keys for color selection (only when not in name field)
+            // Now using the automated key assignments from processButtonTexts
+            if (!isNameFieldFocused) {
+                const colorOptions = document.querySelectorAll('.color-option');
+                colorOptions.forEach(option => {
+                    if (option.dataset.key === key) {
+                        event.preventDefault();
+                        option.click();
+                        return;
+                    }
+                });
+            }
+        }
+        
+        // Handle title screen shortcuts
+        if (this.currentScreen === 'title-screen' && key === 's') {
+            event.preventDefault();
+            const startButton = document.querySelector('button[onclick*="startCharacterCreation"]');
+            if (startButton) startButton.click();
             return;
         }
         
@@ -3136,6 +3498,19 @@ class UIManager {
                         this.combat.displayCombatMessage(StringFormatter.format(GameStrings.COMBAT.NOT_ENOUGH_MP, { spellName: GameConfig.COMBAT.SPELLS.BUBBLE_BLAST.name }));
                         this.updateCombatLog();
                     }
+                    break;
+                case 'h':
+                    event.preventDefault();
+                    if (this.player.hasSpell('party')) {
+                        if (this.player.canCastSpell('party')) {
+                            this.playerCastSpell('party');
+                        } else {
+                            // Not enough MP
+                            this.combat.displayCombatMessage(StringFormatter.format(GameStrings.COMBAT.NOT_ENOUGH_MP, { spellName: GameConfig.COMBAT.SPELLS.HAPPY_BALLOON_TIME.name }));
+                            this.updateCombatLog();
+                        }
+                    }
+                    // If player doesn't have spell yet, silently ignore
                     break;
                 case 'g':
                     event.preventDefault();
@@ -3468,8 +3843,8 @@ class UIManager {
                         red: 'hue-rotate(0deg) saturate(1.2)',
                         blue: 'hue-rotate(180deg) saturate(1.3)',
                         purple: 'hue-rotate(270deg) saturate(1.8)',
-                        green: 'hue-rotate(130deg) saturate(1.6)',
-                        gold: 'hue-rotate(50deg) saturate(2) brightness(1.2)'
+                        green: 'hue-rotate(140deg) saturate(1.2) brightness(0.85)',
+                        orange: 'hue-rotate(30deg) saturate(1.8) brightness(1.1)'
                     };
                     bettaPreview.style.filter = filters[selectedColor] || 'none';
                 }
@@ -3498,12 +3873,52 @@ class UIManager {
         if (createButton) {
             if (name && color) {
                 createButton.disabled = false;
-                createButton.textContent = GameStrings.UI.BUTTONS.BEGIN_ADVENTURE;
+                const [startButton] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.START_GAME]);
+                createButton.innerHTML = startButton.html;
+                createButton.dataset.key = startButton.key;
             } else {
                 createButton.disabled = true;
                 createButton.textContent = name ? GameStrings.UI.LABELS.CHOOSE_COLOR : color ? GameStrings.UI.LABELS.ENTER_NAME : GameStrings.UI.LABELS.ENTER_NAME_AND_CHOOSE_COLOR;
             }
         }
+    }
+    
+    cycleColorSelection(direction) {
+        const colorOptions = document.querySelectorAll('.color-option');
+        const colors = Array.from(colorOptions).map(opt => opt.dataset.color);
+        
+        // Find currently selected color
+        let currentIndex = -1;
+        colorOptions.forEach((opt, index) => {
+            if (opt.classList.contains('selected')) {
+                currentIndex = index;
+            }
+        });
+        
+        // If no selection, start at first
+        if (currentIndex === -1) currentIndex = 0;
+        
+        // Calculate new index with wrapping
+        let newIndex = currentIndex + direction;
+        if (newIndex < 0) newIndex = colors.length - 1;
+        if (newIndex >= colors.length) newIndex = 0;
+        
+        // Click the new color option to trigger all the update logic
+        if (colorOptions[newIndex]) {
+            colorOptions[newIndex].click();
+        }
+    }
+    
+    // Select color by name
+    selectColorByName(colorName) {
+        const colorOptions = document.querySelectorAll('.color-option');
+        
+        // Find the color option with matching data-color attribute
+        colorOptions.forEach(option => {
+            if (option.dataset.color === colorName) {
+                option.click();
+            }
+        });
     }
     
     // Movement handling
@@ -3684,10 +4099,21 @@ class UIManager {
         
         // Manage spell button visibility and states
         const bubbleBtn = document.getElementById('bubble-blast-btn');
+        const balloonBtn = document.getElementById('happy-balloon-btn');
         const gravelBtn = document.getElementById('gravel-grenade-btn');
         
         if (bubbleBtn) {
             bubbleBtn.disabled = !this.player.canCastSpell('bubble');
+        }
+        
+        if (balloonBtn) {
+            // Show/hide balloon button based on spell availability
+            if (this.player.hasSpell('party')) {
+                balloonBtn.style.display = 'inline-block';
+                balloonBtn.disabled = !this.player.canCastSpell('party');
+            } else {
+                balloonBtn.style.display = 'none';
+            }
         }
         
         if (gravelBtn) {
@@ -3715,11 +4141,22 @@ class UIManager {
         
         // Always enable spell buttons - let click handlers show MP messages
         const bubbleBtn = document.getElementById('bubble-blast-btn');
+        const balloonBtn = document.getElementById('happy-balloon-btn');
         const gravelBtn = document.getElementById('gravel-grenade-btn');
         
         if (bubbleBtn) {
             bubbleBtn.removeAttribute('disabled');
             bubbleBtn.style.display = 'block';
+        }
+        
+        if (balloonBtn) {
+            // Show balloon button if player has the spell
+            if (this.player.hasSpell('party')) {
+                balloonBtn.removeAttribute('disabled');
+                balloonBtn.style.display = 'block';
+            } else {
+                balloonBtn.style.display = 'none'; // Hide until spell is available
+            }
         }
         
         if (gravelBtn) {
@@ -3737,7 +4174,7 @@ class UIManager {
     }
     
     disableCombatButtons() {
-        const buttons = ['bubble-blast-btn', 'gravel-grenade-btn', 'swim-away-btn'];
+        const buttons = ['bubble-blast-btn', 'happy-balloon-btn', 'gravel-grenade-btn', 'swim-away-btn'];
         buttons.forEach(id => {
             document.getElementById(id)?.setAttribute('disabled', 'true');
         });
@@ -3748,7 +4185,8 @@ class UIManager {
         const result = this.combat.attack();
         
         // Check if player died during enemy response
-        if (this.checkAndHandlePlayerDefeat()) {
+        if (result && result.playerDefeated) {
+            this.checkAndHandlePlayerDefeat();
             return;
         }
         
@@ -3800,7 +4238,14 @@ class UIManager {
         // Check if spell can be cast first and provide feedback
         if (!this.player.canCastSpell(spellType)) {
             // Since UI only shows available spells based on level, failure must be insufficient MP
-            const spellName = spellType === 'bubble' ? GameConfig.COMBAT.SPELLS.BUBBLE_BLAST.name : GameConfig.COMBAT.SPELLS.GRAVEL_GRENADE.name;
+            let spellName;
+            if (spellType === 'bubble') {
+                spellName = GameConfig.COMBAT.SPELLS.BUBBLE_BLAST.name;
+            } else if (spellType === 'party') {
+                spellName = GameConfig.COMBAT.SPELLS.HAPPY_BALLOON_TIME.name;
+            } else {
+                spellName = GameConfig.COMBAT.SPELLS.GRAVEL_GRENADE.name;
+            }
             this.combat.displayCombatMessage(StringFormatter.format(GameStrings.COMBAT.NOT_ENOUGH_MP, { spellName }));
             this.updateCombatLog();
             return;
@@ -3809,7 +4254,8 @@ class UIManager {
         const result = this.combat.useSkill(spellType);
         
         // Check if player died during enemy response
-        if (this.checkAndHandlePlayerDefeat()) {
+        if (result && result.playerDefeated) {
+            this.checkAndHandlePlayerDefeat();
             return;
         }
         
@@ -3841,11 +4287,18 @@ class UIManager {
     }
     
     playerRunAway() {
-        const success = this.combat.runAway();
+        const result = this.combat.runAway();
         this.updateCombatDisplay();
         this.updateCombatLog(); // Update combat log to show swim away message
         
-        if (success || !this.combat.isCombatActive()) {
+        // Check if player died from retaliation attack
+        if (result.playerDefeated) {
+            this.checkAndHandlePlayerDefeat();
+            return;
+        }
+        
+        // If escape succeeded, end combat
+        if (result.escaped || !this.combat.isCombatActive()) {
             // Show swim away message and add to encounter log
             this.displayMessage(GameStrings.COMBAT.ESCAPE_SUCCESS);
             const ESCAPE_MESSAGE_DELAY = 1000; // Wait for escape message to be read
@@ -4541,6 +4994,7 @@ class BettaRPG {
         this.combat.setWorldManager(this.world); // Set world reference after creation
         this.ui = new UIManager(this.player, this.audio, this.combat, this.world);
         this.ui.setCoreManager(this); // Set core reference for version info
+        this.combat.setUIManager(this.ui); // Set UI reference for death handling
         
     }
     

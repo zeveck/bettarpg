@@ -16,6 +16,7 @@ export class BettaRPG {
         this.combat.setWorldManager(this.world); // Set world reference after creation
         this.ui = new UIManager(this.player, this.audio, this.combat, this.world);
         this.ui.setCoreManager(this); // Set core reference for version info
+        this.combat.setUIManager(this.ui); // Set UI reference for death handling
         
     }
     

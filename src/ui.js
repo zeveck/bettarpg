@@ -170,29 +170,54 @@ export class UIManager {
         if (attackBtn) {
             const [attackButtonText] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.ATTACK]);
             attackBtn.innerHTML = attackButtonText.html;
+            attackBtn.dataset.key = attackButtonText.key;
         }
         
         const swimAwayBtn = document.getElementById('swim-away-btn');
         if (swimAwayBtn) {
             const [swimAwayButtonText] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.SWIM_AWAY]);
             swimAwayBtn.innerHTML = swimAwayButtonText.html;
+            swimAwayBtn.dataset.key = swimAwayButtonText.key;
         }
         
-        // Navigation buttons
+        // Navigation buttons - use automated system for shortcuts
+        const navigationButtons = StringFormatter.processButtonTexts([
+            GameStrings.LOCATIONS.WORLD_MAP.MOVEMENT.SWIM_NORTH,
+            GameStrings.LOCATIONS.WORLD_MAP.MOVEMENT.SWIM_SOUTH,
+            GameStrings.LOCATIONS.WORLD_MAP.MOVEMENT.SWIM_EAST,
+            GameStrings.LOCATIONS.WORLD_MAP.MOVEMENT.SWIM_WEST,
+            GameStrings.LOCATIONS.WORLD_MAP.MOVEMENT.RETURN_TO_VILLAGE
+        ]);
+        
         const swimNorthBtn = document.getElementById('swim-north-btn');
-        if (swimNorthBtn) swimNorthBtn.textContent = GameStrings.LOCATIONS.WORLD_MAP.MOVEMENT.SWIM_NORTH;
+        if (swimNorthBtn) {
+            swimNorthBtn.innerHTML = navigationButtons[0].html;
+            swimNorthBtn.dataset.key = navigationButtons[0].key;
+        }
         
         const swimSouthBtn = document.getElementById('swim-south-btn');
-        if (swimSouthBtn) swimSouthBtn.textContent = GameStrings.LOCATIONS.WORLD_MAP.MOVEMENT.SWIM_SOUTH;
+        if (swimSouthBtn) {
+            swimSouthBtn.innerHTML = navigationButtons[1].html;
+            swimSouthBtn.dataset.key = navigationButtons[1].key;
+        }
         
         const swimEastBtn = document.getElementById('swim-east-btn');
-        if (swimEastBtn) swimEastBtn.textContent = GameStrings.LOCATIONS.WORLD_MAP.MOVEMENT.SWIM_EAST;
+        if (swimEastBtn) {
+            swimEastBtn.innerHTML = navigationButtons[2].html;
+            swimEastBtn.dataset.key = navigationButtons[2].key;
+        }
         
         const swimWestBtn = document.getElementById('swim-west-btn');
-        if (swimWestBtn) swimWestBtn.textContent = GameStrings.LOCATIONS.WORLD_MAP.MOVEMENT.SWIM_WEST;
+        if (swimWestBtn) {
+            swimWestBtn.innerHTML = navigationButtons[3].html;
+            swimWestBtn.dataset.key = navigationButtons[3].key;
+        }
         
         const returnVillageBtn = document.getElementById('return-village-btn');
-        if (returnVillageBtn) returnVillageBtn.textContent = GameStrings.LOCATIONS.WORLD_MAP.MOVEMENT.RETURN_TO_VILLAGE;
+        if (returnVillageBtn) {
+            returnVillageBtn.innerHTML = navigationButtons[4].html;
+            returnVillageBtn.dataset.key = navigationButtons[4].key;
+        }
         
         // Spell buttons - these will be updated dynamically with MP costs
         this.updateSpellButtons();
@@ -205,7 +230,11 @@ export class UIManager {
         if (nameInput) nameInput.placeholder = GameStrings.UI.LABELS.ENTER_NAME;
         
         const randomNameBtn = document.getElementById('random-name-btn');
-        if (randomNameBtn) randomNameBtn.textContent = GameStrings.UI.BUTTONS.RANDOM_NAME;
+        if (randomNameBtn) {
+            const [newNameButton] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.NEW_NAME]);
+            randomNameBtn.innerHTML = newNameButton.html;
+            randomNameBtn.dataset.key = newNameButton.key;
+        }
         
         const colorLabels = document.querySelectorAll('label');
         colorLabels.forEach(label => {
@@ -215,7 +244,12 @@ export class UIManager {
         });
         
         const createCharacterBtn = document.getElementById('create-character');
-        if (createCharacterBtn) createCharacterBtn.textContent = GameStrings.UI.BUTTONS.BEGIN_ADVENTURE;
+        if (createCharacterBtn) {
+            const [startGameButton] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.START_GAME]);
+            createCharacterBtn.innerHTML = startGameButton.html;
+            createCharacterBtn.dataset.key = startGameButton.key;
+            createCharacterBtn.disabled = true; // Initially disabled until name and color are selected
+        }
         
         // Character preview labels
         const namePreviewLabel = document.querySelector('#character-preview p:first-child');
@@ -228,15 +262,40 @@ export class UIManager {
             colorPreviewLabel.innerHTML = `${GameStrings.UI.LABELS.COLOR_PREVIEW} <span id="preview-color">${GameStrings.UI.LABELS.CHOOSE_A_COLOR}</span>`;
         }
         
-        // Color option labels
+        // Color option labels - now using automated system
         const colorOptions = document.querySelectorAll('.color-option');
+        const colorTexts = [];
+        const colorMap = {};
+        
         colorOptions.forEach(option => {
             const color = option.dataset.color;
-            if (color === 'red') option.textContent = GameStrings.UI.COLORS.RED;
-            else if (color === 'blue') option.textContent = GameStrings.UI.COLORS.BLUE;
-            else if (color === 'purple') option.textContent = GameStrings.UI.COLORS.PURPLE;
-            else if (color === 'green') option.textContent = GameStrings.UI.COLORS.GREEN;
-            else if (color === 'gold') option.textContent = GameStrings.UI.COLORS.GOLD;
+            if (color === 'red') {
+                colorTexts.push(GameStrings.UI.COLORS.RED);
+                colorMap['red'] = colorTexts.length - 1;
+            } else if (color === 'blue') {
+                colorTexts.push(GameStrings.UI.COLORS.BLUE);
+                colorMap['blue'] = colorTexts.length - 1;
+            } else if (color === 'purple') {
+                colorTexts.push(GameStrings.UI.COLORS.PURPLE);
+                colorMap['purple'] = colorTexts.length - 1;
+            } else if (color === 'green') {
+                colorTexts.push(GameStrings.UI.COLORS.GREEN);
+                colorMap['green'] = colorTexts.length - 1;
+            } else if (color === 'orange') {
+                colorTexts.push(GameStrings.UI.COLORS.ORANGE);
+                colorMap['orange'] = colorTexts.length - 1;
+            }
+        });
+        
+        const processedColors = StringFormatter.processButtonTexts(colorTexts);
+        
+        colorOptions.forEach(option => {
+            const color = option.dataset.color;
+            const index = colorMap[color];
+            if (index !== undefined) {
+                option.innerHTML = processedColors[index].html;
+                option.dataset.key = processedColors[index].key;
+            }
         });
         
         // Congratulations popup
@@ -257,7 +316,10 @@ export class UIManager {
         
         const [congratsButton] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.CONTINUE_SWIMMING]);
         const congratsBtn = document.getElementById('close-popup');
-        if (congratsBtn) congratsBtn.innerHTML = congratsButton.html;
+        if (congratsBtn) {
+            congratsBtn.innerHTML = congratsButton.html;
+            congratsBtn.dataset.key = congratsButton.key;
+        }
         
         // Title screen strings
         const titleH1 = document.querySelector('#title-screen h1');
@@ -267,7 +329,11 @@ export class UIManager {
         if (titleSubtitle) titleSubtitle.textContent = GameStrings.UI.SCREENS.SUBTITLE;
         
         const startBtn = document.querySelector('button[onclick*="startCharacterCreation"]');
-        if (startBtn) startBtn.textContent = GameStrings.UI.BUTTONS.START_ADVENTURE;
+        if (startBtn) {
+            const [startButton] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.START_ADVENTURE]);
+            startBtn.innerHTML = startButton.html;
+            startBtn.dataset.key = startButton.key;
+        }
         
         // Character creation screen title
         const charCreationTitle = document.querySelector('#character-creation h2');
@@ -280,6 +346,15 @@ export class UIManager {
             const spell = GameConfig.COMBAT.SPELLS.BUBBLE_BLAST;
             const [bubbleButton] = StringFormatter.processButtonTexts([`Bubble Blast (${spell.mpCost} MP)`]);
             bubbleBtn.innerHTML = bubbleButton.html;
+            bubbleBtn.dataset.key = bubbleButton.key;
+        }
+        
+        const balloonBtn = document.getElementById('happy-balloon-btn');
+        if (balloonBtn) {
+            const spell = GameConfig.COMBAT.SPELLS.HAPPY_BALLOON_TIME;
+            const [balloonButton] = StringFormatter.processButtonTexts([`Happy Balloon Time (${spell.mpCost} MP)`]);
+            balloonBtn.innerHTML = balloonButton.html;
+            balloonBtn.dataset.key = balloonButton.key;
         }
         
         const gravelBtn = document.getElementById('gravel-grenade-btn');
@@ -287,6 +362,7 @@ export class UIManager {
             const spell = GameConfig.COMBAT.SPELLS.GRAVEL_GRENADE;
             const [gravelButton] = StringFormatter.processButtonTexts([`Gravel Grenade (${spell.mpCost} MP)`]);
             gravelBtn.innerHTML = gravelButton.html;
+            gravelBtn.dataset.key = gravelButton.key;
         }
     }
     
@@ -322,10 +398,12 @@ export class UIManager {
     
     
     handleGlobalKeyboard(event) {
+        const key = event.key.toLowerCase();
+        
         // Handle congratulations popup first (highest priority)
         const popup = document.getElementById('congratulations-popup');
         if (popup && popup.classList.contains('show')) {
-            if (event.key.toLowerCase() === 'c' || event.key === 'Enter') {
+            if (key === 'c' || event.key === 'Enter') {
                 event.preventDefault();
                 event.stopPropagation();
                 this.hideCongratulationsPopup();
@@ -348,6 +426,68 @@ export class UIManager {
         // Handle shop keyboard shortcuts
         if (this.shopOpen) {
             this.handleShopKeyboard(event);
+            return;
+        }
+        
+        // Handle character creation arrow keys and shortcuts (but not when typing in name field)
+        if (this.currentScreen === 'character-creation') {
+            const nameInput = document.getElementById('betta-name');
+            const isNameFieldFocused = document.activeElement === nameInput;
+            
+            // Tab key to toggle name field focus
+            if (key === 'tab') {
+                event.preventDefault();
+                if (nameInput) {
+                    if (isNameFieldFocused) {
+                        // If already focused, blur to allow other shortcuts
+                        nameInput.blur();
+                    } else {
+                        // If not focused, focus the field
+                        nameInput.focus();
+                    }
+                }
+                return;
+            }
+            
+            // Arrow keys for color cycling (only when not in name field)
+            if (!isNameFieldFocused && (key === 'arrowleft' || key === 'arrowright')) {
+                event.preventDefault();
+                this.cycleColorSelection(key === 'arrowright' ? 1 : -1);
+                return;
+            }
+            
+            // Check button shortcuts using data-key attributes from automated system
+            // Only process shortcuts when not typing in the name field
+            if (!isNameFieldFocused) {
+                const buttons = document.querySelectorAll('button[data-key]');
+                buttons.forEach(button => {
+                    if (button.dataset.key === key && !button.disabled) {
+                        event.preventDefault();
+                        button.click();
+                        return;
+                    }
+                });
+            }
+            
+            // Letter keys for color selection (only when not in name field)
+            // Now using the automated key assignments from processButtonTexts
+            if (!isNameFieldFocused) {
+                const colorOptions = document.querySelectorAll('.color-option');
+                colorOptions.forEach(option => {
+                    if (option.dataset.key === key) {
+                        event.preventDefault();
+                        option.click();
+                        return;
+                    }
+                });
+            }
+        }
+        
+        // Handle title screen shortcuts
+        if (this.currentScreen === 'title-screen' && key === 's') {
+            event.preventDefault();
+            const startButton = document.querySelector('button[onclick*="startCharacterCreation"]');
+            if (startButton) startButton.click();
             return;
         }
         
@@ -548,6 +688,19 @@ export class UIManager {
                         this.combat.displayCombatMessage(StringFormatter.format(GameStrings.COMBAT.NOT_ENOUGH_MP, { spellName: GameConfig.COMBAT.SPELLS.BUBBLE_BLAST.name }));
                         this.updateCombatLog();
                     }
+                    break;
+                case 'h':
+                    event.preventDefault();
+                    if (this.player.hasSpell('party')) {
+                        if (this.player.canCastSpell('party')) {
+                            this.playerCastSpell('party');
+                        } else {
+                            // Not enough MP
+                            this.combat.displayCombatMessage(StringFormatter.format(GameStrings.COMBAT.NOT_ENOUGH_MP, { spellName: GameConfig.COMBAT.SPELLS.HAPPY_BALLOON_TIME.name }));
+                            this.updateCombatLog();
+                        }
+                    }
+                    // If player doesn't have spell yet, silently ignore
                     break;
                 case 'g':
                     event.preventDefault();
@@ -880,8 +1033,8 @@ export class UIManager {
                         red: 'hue-rotate(0deg) saturate(1.2)',
                         blue: 'hue-rotate(180deg) saturate(1.3)',
                         purple: 'hue-rotate(270deg) saturate(1.8)',
-                        green: 'hue-rotate(130deg) saturate(1.6)',
-                        gold: 'hue-rotate(50deg) saturate(2) brightness(1.2)'
+                        green: 'hue-rotate(140deg) saturate(1.2) brightness(0.85)',
+                        orange: 'hue-rotate(30deg) saturate(1.8) brightness(1.1)'
                     };
                     bettaPreview.style.filter = filters[selectedColor] || 'none';
                 }
@@ -910,12 +1063,52 @@ export class UIManager {
         if (createButton) {
             if (name && color) {
                 createButton.disabled = false;
-                createButton.textContent = GameStrings.UI.BUTTONS.BEGIN_ADVENTURE;
+                const [startButton] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.START_GAME]);
+                createButton.innerHTML = startButton.html;
+                createButton.dataset.key = startButton.key;
             } else {
                 createButton.disabled = true;
                 createButton.textContent = name ? GameStrings.UI.LABELS.CHOOSE_COLOR : color ? GameStrings.UI.LABELS.ENTER_NAME : GameStrings.UI.LABELS.ENTER_NAME_AND_CHOOSE_COLOR;
             }
         }
+    }
+    
+    cycleColorSelection(direction) {
+        const colorOptions = document.querySelectorAll('.color-option');
+        const colors = Array.from(colorOptions).map(opt => opt.dataset.color);
+        
+        // Find currently selected color
+        let currentIndex = -1;
+        colorOptions.forEach((opt, index) => {
+            if (opt.classList.contains('selected')) {
+                currentIndex = index;
+            }
+        });
+        
+        // If no selection, start at first
+        if (currentIndex === -1) currentIndex = 0;
+        
+        // Calculate new index with wrapping
+        let newIndex = currentIndex + direction;
+        if (newIndex < 0) newIndex = colors.length - 1;
+        if (newIndex >= colors.length) newIndex = 0;
+        
+        // Click the new color option to trigger all the update logic
+        if (colorOptions[newIndex]) {
+            colorOptions[newIndex].click();
+        }
+    }
+    
+    // Select color by name
+    selectColorByName(colorName) {
+        const colorOptions = document.querySelectorAll('.color-option');
+        
+        // Find the color option with matching data-color attribute
+        colorOptions.forEach(option => {
+            if (option.dataset.color === colorName) {
+                option.click();
+            }
+        });
     }
     
     // Movement handling
@@ -1096,10 +1289,21 @@ export class UIManager {
         
         // Manage spell button visibility and states
         const bubbleBtn = document.getElementById('bubble-blast-btn');
+        const balloonBtn = document.getElementById('happy-balloon-btn');
         const gravelBtn = document.getElementById('gravel-grenade-btn');
         
         if (bubbleBtn) {
             bubbleBtn.disabled = !this.player.canCastSpell('bubble');
+        }
+        
+        if (balloonBtn) {
+            // Show/hide balloon button based on spell availability
+            if (this.player.hasSpell('party')) {
+                balloonBtn.style.display = 'inline-block';
+                balloonBtn.disabled = !this.player.canCastSpell('party');
+            } else {
+                balloonBtn.style.display = 'none';
+            }
         }
         
         if (gravelBtn) {
@@ -1127,11 +1331,22 @@ export class UIManager {
         
         // Always enable spell buttons - let click handlers show MP messages
         const bubbleBtn = document.getElementById('bubble-blast-btn');
+        const balloonBtn = document.getElementById('happy-balloon-btn');
         const gravelBtn = document.getElementById('gravel-grenade-btn');
         
         if (bubbleBtn) {
             bubbleBtn.removeAttribute('disabled');
             bubbleBtn.style.display = 'block';
+        }
+        
+        if (balloonBtn) {
+            // Show balloon button if player has the spell
+            if (this.player.hasSpell('party')) {
+                balloonBtn.removeAttribute('disabled');
+                balloonBtn.style.display = 'block';
+            } else {
+                balloonBtn.style.display = 'none'; // Hide until spell is available
+            }
         }
         
         if (gravelBtn) {
@@ -1149,7 +1364,7 @@ export class UIManager {
     }
     
     disableCombatButtons() {
-        const buttons = ['bubble-blast-btn', 'gravel-grenade-btn', 'swim-away-btn'];
+        const buttons = ['bubble-blast-btn', 'happy-balloon-btn', 'gravel-grenade-btn', 'swim-away-btn'];
         buttons.forEach(id => {
             document.getElementById(id)?.setAttribute('disabled', 'true');
         });
@@ -1160,7 +1375,8 @@ export class UIManager {
         const result = this.combat.attack();
         
         // Check if player died during enemy response
-        if (this.checkAndHandlePlayerDefeat()) {
+        if (result && result.playerDefeated) {
+            this.checkAndHandlePlayerDefeat();
             return;
         }
         
@@ -1212,7 +1428,14 @@ export class UIManager {
         // Check if spell can be cast first and provide feedback
         if (!this.player.canCastSpell(spellType)) {
             // Since UI only shows available spells based on level, failure must be insufficient MP
-            const spellName = spellType === 'bubble' ? GameConfig.COMBAT.SPELLS.BUBBLE_BLAST.name : GameConfig.COMBAT.SPELLS.GRAVEL_GRENADE.name;
+            let spellName;
+            if (spellType === 'bubble') {
+                spellName = GameConfig.COMBAT.SPELLS.BUBBLE_BLAST.name;
+            } else if (spellType === 'party') {
+                spellName = GameConfig.COMBAT.SPELLS.HAPPY_BALLOON_TIME.name;
+            } else {
+                spellName = GameConfig.COMBAT.SPELLS.GRAVEL_GRENADE.name;
+            }
             this.combat.displayCombatMessage(StringFormatter.format(GameStrings.COMBAT.NOT_ENOUGH_MP, { spellName }));
             this.updateCombatLog();
             return;
@@ -1221,7 +1444,8 @@ export class UIManager {
         const result = this.combat.useSkill(spellType);
         
         // Check if player died during enemy response
-        if (this.checkAndHandlePlayerDefeat()) {
+        if (result && result.playerDefeated) {
+            this.checkAndHandlePlayerDefeat();
             return;
         }
         
@@ -1253,11 +1477,18 @@ export class UIManager {
     }
     
     playerRunAway() {
-        const success = this.combat.runAway();
+        const result = this.combat.runAway();
         this.updateCombatDisplay();
         this.updateCombatLog(); // Update combat log to show swim away message
         
-        if (success || !this.combat.isCombatActive()) {
+        // Check if player died from retaliation attack
+        if (result.playerDefeated) {
+            this.checkAndHandlePlayerDefeat();
+            return;
+        }
+        
+        // If escape succeeded, end combat
+        if (result.escaped || !this.combat.isCombatActive()) {
             // Show swim away message and add to encounter log
             this.displayMessage(GameStrings.COMBAT.ESCAPE_SUCCESS);
             const ESCAPE_MESSAGE_DELAY = 1000; // Wait for escape message to be read

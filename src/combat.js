@@ -10,6 +10,7 @@ export class CombatManager {
         this.player = player;
         this.audio = audioManager;
         this.world = null; // Will be set after WorldManager is created
+        this.ui = null; // Will be set after UIManager is created
         
         // Combat state
         this.currentEnemy = null;
@@ -48,6 +49,11 @@ export class CombatManager {
     // Module interface: Set world manager reference after construction
     setWorldManager(worldManager) {
         this.world = worldManager;
+    }
+    
+    // Module interface: Set UI manager reference after construction
+    setUIManager(uiManager) {
+        this.ui = uiManager;
     }
     
     
@@ -176,23 +182,37 @@ export class CombatManager {
         if (!this.combatActive || !this.currentEnemy) return;
         if (!this.player.canCastSpell(spellType)) return;
         
-        const damage = this.player.calculateMagicDamage(spellType);
-        this.currentEnemy.hp = Math.max(0, this.currentEnemy.hp - damage);
-        
         this.player.castSpell(spellType);
         this.audio.playSound(spellType);
         
-        // Add shake animation to enemy sprite when taking damage
-        this.shakeEnemySprite();
-        
         if (spellType === 'bubble') {
+            const damage = this.player.calculateMagicDamage(spellType);
+            this.currentEnemy.hp = Math.max(0, this.currentEnemy.hp - damage);
+            this.shakeEnemySprite();
+            
             // Random bubble spell descriptions from configuration
             const bubbleDescriptions = GameStrings.COMBAT.BUBBLE_DESCRIPTIONS;
             const bubbleDescription = bubbleDescriptions[Math.floor(Math.random() * bubbleDescriptions.length)];
             
             this.createBubbleEffect();
             this.addToCombatLog(`${this.player.getName()} ${bubbleDescription} for ${damage} damage!`);
+        } else if (spellType === 'party') {
+            // Happy Balloon Time - befriend the enemy instead of damaging
+            this.createBalloonEffect();
+            this.addPartyHatToEnemy();
+            
+            // Special friendship message
+            this.addToCombatLog(`${this.player.getName()} throws a magical party!`);
+            this.addToCombatLog(`${this.currentEnemy.name} is having such a good time!`);
+            
+            // Set enemy HP to 0 to trigger victory, but mark as befriended
+            this.currentEnemy.befriended = true;
+            this.currentEnemy.hp = 0;
         } else if (spellType === 'gravel') {
+            const damage = this.player.calculateMagicDamage(spellType);
+            this.currentEnemy.hp = Math.max(0, this.currentEnemy.hp - damage);
+            this.shakeEnemySprite();
+            
             // Random gravel spell descriptions from configuration
             const gravelDescriptions = GameStrings.COMBAT.GRAVEL_DESCRIPTIONS;
             const gravelDescription = gravelDescriptions[Math.floor(Math.random() * gravelDescriptions.length)];
@@ -222,6 +242,10 @@ export class CombatManager {
             };
         } else {
             this.enemyTurn();
+            // Check if player died after enemy turn
+            if (!this.player.isAlive) {
+                return { playerDefeated: true };
+            }
         }
         return null;
     }
@@ -307,6 +331,14 @@ export class CombatManager {
                 
                 this.audio.playSound('wound');
                 this.shakePlayerSprite();
+                
+                // Check if player died from this delayed attack
+                if (!this.player.isAlive) {
+                    // Notify UI that player has been defeated
+                    if (this.ui) {
+                        this.ui.checkAndHandlePlayerDefeat();
+                    }
+                }
             }
         }, attackConfig.delay);
     }
@@ -321,7 +353,7 @@ export class CombatManager {
     
     // Try to run away from combat
     runAway() {
-        if (!this.combatActive) return false;
+        if (!this.combatActive) return { escaped: false };
         
         // High level enemies are harder to escape from
         const escapeConfig = GameConfig.COMBAT.RUN_AWAY;
@@ -329,14 +361,18 @@ export class CombatManager {
             if (Math.random() > escapeConfig.difficultEscapeChance) {
                 this.addToCombatLog(GameStrings.COMBAT.ESCAPE_FAILED);
                 this.enemyTurn();
-                return false;
+                // Check if player died after enemy attack on failed escape
+                if (!this.player.isAlive) {
+                    return { escaped: false, playerDefeated: true };
+                }
+                return { escaped: false };
             }
         }
         
         this.combatActive = false;
         this.currentEnemy = null;
         this.addToCombatLog(GameStrings.COMBAT.ESCAPE_BARELY_SUCCESS);
-        return true;
+        return { escaped: true };
     }
     
     // UI calls this to show enemy death animation and complete victory
@@ -368,10 +404,12 @@ export class CombatManager {
     processVictoryImmediate(enemy) {
         const exp = enemy.exp;
         
-        // Flip enemy fish to show defeat immediately
-        const enemyFish = document.getElementById('enemy-fish-combat');
-        if (enemyFish) {
-            enemyFish.style.transform = 'scaleX(-1) scaleY(-1)';
+        // Only flip enemy fish if defeated, not befriended
+        if (!enemy.befriended) {
+            const enemyFish = document.getElementById('enemy-fish-combat');
+            if (enemyFish) {
+                enemyFish.style.transform = 'scaleX(-1) scaleY(-1)';
+            }
         }
         
         // Calculate Betta Bites rewards using configuration
@@ -389,10 +427,14 @@ export class CombatManager {
         this.player.gainExp(exp);
         this.player.gainBettaBites(bettaBites);
         
-        this.addToCombatLog(StringFormatter.format(GameStrings.COMBAT.VICTORY_REWARDS, {
-            exp: exp,
-            bettaBites: bettaBites
-        }));
+        if (enemy.befriended) {
+            this.addToCombatLog(`${enemy.name} becomes your friend! You gained ${exp} EXP and ${bettaBites} Betta Bites!`);
+        } else {
+            this.addToCombatLog(StringFormatter.format(GameStrings.COMBAT.VICTORY_REWARDS, {
+                exp: exp,
+                bettaBites: bettaBites
+            }));
+        }
         
         // Check for level up but don't do it yet
         const willLevelUp = this.player.gainExp(0); // Check without adding more exp
@@ -590,6 +632,71 @@ export class CombatManager {
         }, 2000);
     }
     
+    createBalloonEffect() {
+        const container = document.createElement('div');
+        container.className = 'balloon-container';
+        container.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9998;
+        `;
+        
+        document.getElementById('game-container').appendChild(container);
+        
+        // Create many colorful balloons
+        const balloonCount = Math.floor(Math.random() * 10) + 15; // 15-25 balloons
+        const colors = ['#FF69B4', '#FFD700', '#87CEEB', '#98FB98', '#DDA0DD', '#F0E68C', '#FF6347', '#40E0D0'];
+        
+        for (let i = 0; i < balloonCount; i++) {
+            setTimeout(() => {
+                const balloon = document.createElement('div');
+                balloon.className = 'party-balloon';
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const size = Math.random() * 30 + 25; // 25-55px
+                const startX = Math.random() * 100;
+                
+                balloon.style.cssText = `
+                    position: absolute;
+                    width: ${size}px;
+                    height: ${size * 1.2}px;
+                    background: radial-gradient(ellipse at 30% 30%, ${color}, ${color}dd);
+                    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+                    left: ${startX}%;
+                    bottom: -100px;
+                    opacity: 0.9;
+                    animation: balloon-rise ${Math.random() * 2 + 3}s ease-out forwards;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                `;
+                
+                // Add balloon string
+                const string = document.createElement('div');
+                string.style.cssText = `
+                    position: absolute;
+                    width: 1px;
+                    height: 50px;
+                    background: #666;
+                    left: 50%;
+                    top: 100%;
+                    transform: translateX(-50%);
+                `;
+                balloon.appendChild(string);
+                
+                container.appendChild(balloon);
+            }, i * 100);
+        }
+        
+        // Clean up after animation
+        setTimeout(() => {
+            if (container.parentNode) {
+                container.parentNode.removeChild(container);
+            }
+        }, 5000);
+    }
+    
     createGiantGarEffect() {
         const giantGar = document.createElement('img');
         giantGar.src = 'graphics/enemies/prehistoric_gar.png';
@@ -612,6 +719,58 @@ export class CombatManager {
                 giantGar.parentNode.removeChild(giantGar);
             }
         }, 3000);
+    }
+    
+    addPartyHatToEnemy() {
+        const enemyFish = document.getElementById('enemy-fish-combat');
+        if (!enemyFish) return;
+        
+        // Create party hat element
+        const partyHat = document.createElement('div');
+        partyHat.className = 'party-hat';
+        partyHat.style.cssText = `
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-bottom: 40px solid #FFD700;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+        `;
+        
+        // Add stripes to the hat
+        const stripe1 = document.createElement('div');
+        stripe1.style.cssText = `
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 30px solid #FF69B4;
+            top: 10px;
+            left: -15px;
+        `;
+        partyHat.appendChild(stripe1);
+        
+        // Add pom-pom on top
+        const pompom = document.createElement('div');
+        pompom.style.cssText = `
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #FF0000;
+            border-radius: 50%;
+            top: -8px;
+            left: -6px;
+        `;
+        partyHat.appendChild(pompom);
+        
+        // Position the hat relative to the enemy sprite
+        enemyFish.style.position = 'relative';
+        enemyFish.appendChild(partyHat);
     }
     
     // Combat log management

@@ -832,8 +832,8 @@ button:disabled {
 }
 
 .betta-village {
-    width: 100px;
-    height: 100px;
+    width: 56px;
+    height: 56px;
     image-rendering: pixelated;
     image-rendering: -moz-crisp-edges;
     image-rendering: crisp-edges;
@@ -1066,24 +1066,57 @@ button:disabled {
     }
 }
 
-/* Balloon Rise Animation */
-@keyframes balloon-rise {
+/* Rainbow HP Bar Animation for Happy Balloon Time */
+@keyframes rainbow-hp {
+    0% { background: linear-gradient(90deg, #ff0000, #ff0000); }
+    14% { background: linear-gradient(90deg, #ff7f00, #ff7f00); }
+    28% { background: linear-gradient(90deg, #ffff00, #ffff00); }
+    42% { background: linear-gradient(90deg, #00ff00, #00ff00); }
+    57% { background: linear-gradient(90deg, #0000ff, #0000ff); }
+    71% { background: linear-gradient(90deg, #4b0082, #4b0082); }
+    85% { background: linear-gradient(90deg, #9400d3, #9400d3); }
+    100% { background: linear-gradient(90deg, #ff0000, #ff0000); }
+}
+
+.hp-fill.rainbow-friendship {
+    animation: rainbow-hp 1s linear infinite;
+    width: 100% !important; /* Keep bar full during rainbow animation */
+}
+
+/* Smooth Continuous Balloon Rise */
+@keyframes balloon-smooth-rise {
     0% {
-        transform: translateY(0) rotate(0deg);
-        opacity: 0.9;
+        transform: translateY(0) translateX(0) rotate(0deg);
+        opacity: 0;
     }
-    10% {
-        opacity: 1;
+    5% {
+        opacity: 0.85;
     }
-    50% {
-        transform: translateY(-50vh) rotate(5deg);
+    30% {
+        transform: translateY(-36vh) translateX(8px) rotate(1deg);
     }
-    90% {
-        opacity: 1;
+    60% {
+        transform: translateY(-72vh) translateX(-6px) rotate(-1deg);
+    }
+    95% {
+        opacity: 0.85;
+        transform: translateY(-114vh) translateX(4px) rotate(0.5deg);
     }
     100% {
-        transform: translateY(-120vh) rotate(-5deg);
+        transform: translateY(-120vh) translateX(0) rotate(0deg);
         opacity: 0;
+    }
+}
+
+/* Peace achievement popup animation */
+@keyframes fadeInScale {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
     }
 }
 

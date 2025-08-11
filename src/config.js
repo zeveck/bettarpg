@@ -54,14 +54,6 @@ export class GameConfig {
                 unlockLevel: 1,
                 sound: 'bubble'
             },
-            HAPPY_BALLOON_TIME: {
-                name: 'Happy Balloon Time',
-                mpCost: 4,
-                damageMin: 0,  // No damage - befriends instead
-                damageMax: 0,  // No damage - befriends instead
-                unlockLevel: 7,
-                sound: 'party'
-            },
             GRAVEL_GRENADE: {
                 name: 'Gravel Grenade', 
                 mpCost: 5,
@@ -69,12 +61,20 @@ export class GameConfig {
                 damageMax: 15,
                 unlockLevel: 4,
                 sound: 'gravel'
+            },
+            HAPPY_BALLOON_TIME: {
+                name: 'Happy Balloon Time',
+                mpCost: 7,
+                damageMin: 0,  // No damage - befriend instead
+                damageMax: 0,  // No damage - befriend instead
+                unlockLevel: 7,
+                sound: 'party'
             }
         },
         
         PLAYER_DAMAGE: {
             baseMin: 3,                  // Minimum base damage
-            baseMax: 10,                 // Maximum base damage (3 + random 8)
+            baseMax: 10,                 // Maximum base damage
         },
         
         ENEMY_SCALING: {
@@ -92,8 +92,8 @@ export class GameConfig {
         },
         
         RUN_AWAY: {
-            difficultEnemyLevel: 5,        // Enemies at this level+ are harder to escape from
-            difficultEscapeChance: 0.05    // 5% chance to escape from difficult enemies
+            difficultEnemyLevel: 5,       // Enemies at this level+ are harder to escape from
+            difficultEscapeChance: 0.1    // 10% chance to escape from difficult enemies
         },
         
     };
@@ -185,7 +185,7 @@ export class GameConfig {
     
     // === WORLD GENERATION ===
     static WORLD = {
-        MAP_SIZE: 20,
+        MAP_SIZE: 21,
         VILLAGE_CENTER: { x: 10, y: 10 },
         
         ENCOUNTER_RATES: {
@@ -391,6 +391,7 @@ export class GameStrings {
         COMBAT_BEGINS: "Combat begins! {playerName} vs {enemyName}",
         ENEMY_APPEARS: "A wild {enemyName} (Level {level}) appears!",
         ENEMY_DEFEATED: "Defeated {enemyName}!",
+        ENEMY_BEFRIENDED: "You befriended {enemyName}!",
         VICTORY_REWARDS: "Victory! You gained {exp} EXP and {bettaBites} Betta Bites!",
         LEVEL_UP: "Level up! Now level {newLevel}!",
         HP_MP_INCREASE: "HP increased by {hpIncrease}! MP increased by {mpIncrease}!",
@@ -446,7 +447,9 @@ export class GameStrings {
         ],
         
         ENEMY_ATTACK_DEFLECTED: "{enemyName} {attackDescription} but the ancient armor deflects all damage!",
-        ENEMY_ATTACK_DAMAGE: "{enemyName} {attackDescription} for {damage} damage!"
+        ENEMY_ATTACK_DAMAGE: "{enemyName} {attackDescription} for {damage} damage!",
+        
+        MADE_FRIEND: "You made a friend!"
     };
     
     // === WORLD EXPLORATION ===
@@ -588,7 +591,10 @@ export class GameStrings {
             TITLE: "🎉 CONGRATULATIONS! 🎉",
             EDGE_REACHED: "You've explored to your paddy's edge!",
             MORE_ADVENTURES: "What lies beyond? More adventures await!",
-            IN_DEVELOPMENT: "(In Development)"
+            IN_DEVELOPMENT: "(In Development)",
+            ALL_FRIENDS_TITLE: "🌟 PEACE IN THE PADDIES! 🌟",
+            ALL_FRIENDS_MESSAGE: "You've made the rice paddies safe for you and all your new friends!",
+            ALL_FRIENDS_SUBTITLE: "The waters are now peaceful and full of friendship!"
         },
         
         

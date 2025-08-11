@@ -19,6 +19,7 @@ export class Player {
         this.expToNext = GameConfig.PLAYER.PROGRESSION.EXP_BASE;
         this.bettaBites = startingStats.bettaBites;
         this.hasDunkleosteusSub = false;
+        this.befriendedSpecies = new Set(); // Track which enemy types are friends
     }
     
     // Combat
@@ -270,6 +271,19 @@ export class Player {
     // Interface for UI display management (replacing direct HP manipulation)
     getDisplayHP(overrideHP = null) {
         return overrideHP !== null ? overrideHP : this.hp;
+    }
+    
+    // Befriended species management
+    addBefriendedSpecies(speciesName) {
+        this.befriendedSpecies.add(speciesName);
+    }
+    
+    isFriendsWith(speciesName) {
+        return this.befriendedSpecies.has(speciesName);
+    }
+    
+    getBefriendedSpecies() {
+        return Array.from(this.befriendedSpecies);
     }
     
     // Set player identity

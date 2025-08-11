@@ -1209,6 +1209,23 @@ export class UIManager {
     // Combat UI
     startCombat(enemy) {
         this.showScreen('combat');
+        
+        // Clear any lingering rainbow effects and friendship messages from previous combats
+        const enemyHPBar = document.getElementById('enemy-hp-bar');
+        if (enemyHPBar) {
+            enemyHPBar.classList.remove('rainbow-friendship');
+            enemyHPBar.style.width = ''; // Reset width to default
+        }
+        
+        // Reset the HP container text to proper format
+        const enemyHPContainer = document.querySelector('.enemy-combat > div:last-child');
+        if (enemyHPContainer) {
+            // Restore the HP: prefix if it was replaced with friendship message
+            if (!enemyHPContainer.innerHTML.includes('HP:')) {
+                enemyHPContainer.innerHTML = 'HP: <span id="enemy-hp-text"></span>';
+            }
+        }
+        
         this.updateCombatDisplay();
         this.enableCombatButtons();
         
@@ -1217,15 +1234,35 @@ export class UIManager {
     }
     
     endCombat() {
+        // Store whether we need to show peace message after congratulations
+        const needsPeaceMessage = this.combat.shouldShowPeaceMessage();
+        
         // Check for max level victory congratulations before ending combat
         if (this.combat.shouldShowCongratulations()) {
-            this.showCongratulationsPopup();
+            this.showCongratulationsPopup(() => {
+                // Callback when congratulations is closed
+                if (needsPeaceMessage) {
+                    this.showPeaceMessage();
+                    this.combat.clearPeaceMessageFlag();
+                }
+            });
             this.combat.clearCongratulationsFlag();
+        } else if (needsPeaceMessage) {
+            // Show peace message immediately if no congratulations
+            this.showPeaceMessage();
+            this.combat.clearPeaceMessageFlag();
         }
         
-        
-        // Set flag to skip encounter on next move (prevents immediate re-engagement)
-        this.world.setCombatExitFlag();
+        // Clean up only old balloon effects (older than 3 seconds)
+        // This preserves balloons during the celebration but removes lingering ones
+        const balloonContainers = document.querySelectorAll('.balloon-container');
+        balloonContainers.forEach(container => {
+            const createdAt = parseInt(container.dataset.createdAt || 0);
+            const age = Date.now() - createdAt;
+            if (age > 3000) { // Only remove if older than 3 seconds
+                container.remove();
+            }
+        });
         
         this.hideElement('combatArea');
         this.showElement('movementControls');
@@ -1233,14 +1270,17 @@ export class UIManager {
         
         // Return to appropriate screen after combat
         this.showGameScreen();
+        
+        // Reset party hat flag and update sprites to remove party hat
+        this.combat.playerHasPartyHat = false;
+        
+        // Force update player stats to reset combat sprite
+        this.updatePlayerStats();
     }
     
     updateCombatDisplay() {
         const enemy = this.combat.getCurrentEnemy();
         if (!enemy) return;
-        
-        // Update all displays first
-        this.updateAllDisplays();
         
         // Update player name in combat
         this.setTextContent('player-name-combat', this.player.getName());
@@ -1251,23 +1291,34 @@ export class UIManager {
         
         // Update HP bars
         this.updateHPBar('player-hp-bar', this.player.getHP(), this.player.getMaxHP());
-        this.updateHPBar('enemy-hp-bar', enemy.hp, enemy.maxHp);
         
-        // Update HP text
-        this.setTextContent('player-hp-text', `${this.player.getHP()}/${this.player.getMaxHP()}`);
-        this.setTextContent('enemy-hp-text', `${enemy.hp}/${enemy.maxHp}`);
+        // Special handling for befriended enemies - don't update HP bar (let rainbow effect stay)
+        // Check if we're actively befriending in THIS combat, not just if enemy has befriended flag
+        if (!this.combat.isBefriendingCurrentEnemy()) {
+            this.updateHPBar('enemy-hp-bar', enemy.hp, enemy.maxHp);
+            this.setTextContent('enemy-hp-text', `${enemy.hp}/${enemy.maxHp}`);
+        } else {
+            // For enemies being befriended in this combat, replace entire HP text with friendship message
+            const enemyHPContainer = document.querySelector('.enemy-combat > div:last-child');
+            if (enemyHPContainer && enemyHPContainer.textContent.includes('HP:')) {
+                enemyHPContainer.textContent = GameStrings.COMBAT.MADE_FRIEND;
+            }
+        }
         
-        // Update overall player stats in sidebar during combat
+        // Update player stats (this will handle party hat preservation)
         this.updatePlayerStats();
         
         // Update combat log
         this.updateCombatLog();
         
-        // Update enemy sprite (using correct HTML ID)
-        const enemySprite = document.getElementById('enemy-fish-combat');
-        if (enemySprite) {
-            enemySprite.src = enemy.sprite;
-            enemySprite.style.filter = 'none';
+        // Update enemy sprite only if no party hat (using correct HTML ID)
+        if (!enemy.hasPartyHat) {
+            const enemySprite = document.getElementById('enemy-fish-combat');
+            if (enemySprite) {
+                enemySprite.src = enemy.sprite;
+                // Apply random hue rotation for color variation
+                enemySprite.style.filter = enemy.randomHue ? `hue-rotate(${enemy.randomHue}deg)` : 'none';
+            }
         }
         
         // Update swim away difficulty warning
@@ -1455,6 +1506,22 @@ export class UIManager {
             this.updateCombatDisplay();
             this.updateCombatLog();
             
+            // If enemy was befriended, re-apply party hat visual after updates
+            if (result.enemy && result.enemy.befriended && this.combat.playerHasPartyHat) {
+                const playerFishCombat = document.getElementById('player-fish-combat');
+                const statsSprite = document.getElementById('stats-player-sprite');
+                const currentSprite = this.player.getSprite();
+                const partyHatSprite = this.combat.getPartyHatSprite(currentSprite);
+                
+                if (partyHatSprite) {
+                    if (playerFishCombat) {
+                        playerFishCombat.src = partyHatSprite;
+                    }
+                    if (statsSprite) {
+                        statsSprite.src = partyHatSprite;
+                    }
+                }
+            }
             
             // Wait for spell animations to complete before showing death animation
             setTimeout(() => {
@@ -1507,20 +1574,33 @@ export class UIManager {
                 enemyName: victoryResult.defeatedEnemy.name, 
                 level: victoryResult.defeatedEnemy.level 
             }));
-            this.displayMessage(StringFormatter.format(GameStrings.COMBAT.ENEMY_DEFEATED, { enemyName: victoryResult.defeatedEnemy.name }));
+            
+            // Use befriended message if enemy was befriended, defeated message otherwise
+            const message = victoryResult.defeatedEnemy.befriended 
+                ? GameStrings.COMBAT.ENEMY_BEFRIENDED 
+                : GameStrings.COMBAT.ENEMY_DEFEATED;
+            this.displayMessage(StringFormatter.format(message, { enemyName: victoryResult.defeatedEnemy.name }));
         }
         
-        // Handle victory aftermath - check for congratulations, then end combat
-        if (victoryResult.showCongratulations) {
-            this.showCongratulationsPopup();
-        }
+        // Don't show congratulations here - it will be shown in endCombat() on world map
+        // This prevents showing it twice
+        
+        // Don't show peace message here either - it will be shown in endCombat()
+        // This prevents showing it twice
+        
+        // Check if enemy was befriended via Happy Balloon Time
+        const wasBefriended = victoryResult.defeatedEnemy && victoryResult.defeatedEnemy.befriended;
         
         // If there was a level up, wait for level up sound to complete before ending combat
         if (victoryResult.levelUp) {
             const LEVEL_UP_SEQUENCE_DELAY = 1000; // Wait for level up fanfare and messages
             setTimeout(() => this.endCombat(), LEVEL_UP_SEQUENCE_DELAY);
+        } else if (wasBefriended) {
+            // If enemy was befriended, delay to show party hats
+            const FRIENDSHIP_CELEBRATION_DELAY = 2000; // Show party hats for 2 seconds
+            setTimeout(() => this.endCombat(), FRIENDSHIP_CELEBRATION_DELAY);
         } else {
-            // End combat immediately if no level up
+            // End combat immediately if no level up and not befriended
             this.endCombat();
         }
     }
@@ -1805,10 +1885,12 @@ export class UIManager {
     }
     
     // Congratulations popup system
-    showCongratulationsPopup() {
+    showCongratulationsPopup(onCloseCallback) {
         const popup = document.getElementById('congratulations-popup');
         if (popup) {
             popup.classList.add('show');
+            // Store callback for when popup is closed
+            this.congratsCloseCallback = onCloseCallback;
             // Victory fanfare already played by combat system
         }
     }
@@ -1817,7 +1899,59 @@ export class UIManager {
         const popup = document.getElementById('congratulations-popup');
         if (popup) {
             popup.classList.remove('show');
+            // Execute callback if one was provided
+            if (this.congratsCloseCallback) {
+                const callback = this.congratsCloseCallback;
+                this.congratsCloseCallback = null;
+                setTimeout(() => callback(), 500); // Small delay for transition
+            }
         }
+    }
+    
+    showPeaceMessage() {
+        // Create a special popup for the peace achievement
+        const popup = document.createElement('div');
+        popup.className = 'peace-popup';
+        popup.innerHTML = `
+            <h2 style="margin-bottom: 1.5rem;">${GameStrings.SYSTEM.CONGRATULATIONS.ALL_FRIENDS_TITLE}</h2>
+            <p style="margin-bottom: 1rem;">${GameStrings.SYSTEM.CONGRATULATIONS.ALL_FRIENDS_MESSAGE}</p>
+            <p style="margin-bottom: 2rem;">${GameStrings.SYSTEM.CONGRATULATIONS.ALL_FRIENDS_SUBTITLE}</p>
+            <button id="peace-continue-btn"><u>C</u>ontinue</button>
+        `;
+        popup.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+            z-index: 10000;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            animation: fadeInScale 0.5s ease-out;
+        `;
+        document.body.appendChild(popup);
+        
+        // Set up button click handler
+        const continueBtn = document.getElementById('peace-continue-btn');
+        continueBtn.onclick = () => popup.remove();
+        
+        // Set up keyboard handlers
+        const handleKeyPress = (e) => {
+            if (e.key === 'Enter' || e.key === 'c' || e.key === 'C') {
+                popup.remove();
+                document.removeEventListener('keydown', handleKeyPress);
+            }
+        };
+        document.addEventListener('keydown', handleKeyPress);
+        
+        // Focus the button so Enter works
+        continueBtn.focus();
+        
+        // Play a special sound for achieving peace
+        this.audio.playSound('fanfare');
     }
     
     // Show NPC interaction options when in village
@@ -1853,17 +1987,22 @@ export class UIManager {
         this.setTextContent('player-name-combat', this.player.getName());
         this.setTextContent('player-hp-text', `${this.player.getHP()}/${this.player.getMaxHP()}`);
         
-        // Update player sprite
+        // Update sprites based on party hat state
         const playerSprite = document.getElementById('stats-player-sprite');
         const combatSprite = document.getElementById('player-fish-combat');
-        if (playerSprite) {
-            playerSprite.src = this.player.getSprite();
-            playerSprite.style.filter = this.player.getColorFilter();
+        
+        if (!this.combat.playerHasPartyHat) {
+            // No party hat - update both sprites normally
+            if (playerSprite) {
+                playerSprite.src = this.player.getSprite();
+                playerSprite.style.filter = this.player.getColorFilter();
+            }
+            if (combatSprite) {
+                combatSprite.src = this.player.getSprite();
+                combatSprite.style.filter = this.player.getColorFilter();
+            }
         }
-        if (combatSprite) {
-            combatSprite.src = this.player.getSprite();
-            combatSprite.style.filter = this.player.getColorFilter();
-        }
+        // If party hat is active, preserve it (don't update sprites)
         
         // Update HP bar in combat
         this.updateHPBar('player-hp-bar', this.player.getHP(), this.player.getMaxHP());
@@ -1954,6 +2093,34 @@ export class UIManager {
                 log.scrollTop = 0;
             }
         });
+    }
+    
+    updatePlayerSpritesWithPartyHat() {
+        const currentSprite = this.player.getSprite();
+        const partyHatSprite = this.combat.getPartyHatSprite(currentSprite);
+        if (!partyHatSprite) return;
+        
+        // Update both combat sprite AND stats panel during combat
+        const playerFishCombat = document.getElementById('player-fish-combat');
+        const statsSprite = document.getElementById('stats-player-sprite');
+        
+        if (playerFishCombat) {
+            playerFishCombat.src = partyHatSprite;
+        }
+        
+        if (statsSprite) {
+            statsSprite.src = partyHatSprite;
+        }
+    }
+    
+    applyRainbowHPEffect() {
+        const enemyHPBar = document.getElementById('enemy-hp-bar');
+        if (enemyHPBar) {
+            // Add rainbow animation class
+            enemyHPBar.classList.add('rainbow-friendship');
+            // Keep the bar at full width
+            enemyHPBar.style.width = '100%';
+        }
     }
     
     
@@ -2094,13 +2261,18 @@ export class UIManager {
             worldMapScreen.appendChild(tuft);
         });
         
-        // Add village marker (centered at 50%, 50%)
+        // Add village marker - position it in the center of its tile
         const village = document.createElement('img');
         village.src = 'graphics/map/bettahome.png';
         village.className = 'betta-village';
         village.style.position = 'absolute';
-        village.style.left = '50%';
-        village.style.top = '50%';
+        const tileSize = 64;
+        const villagePixelX = GameConfig.WORLD.VILLAGE_CENTER.x * tileSize + tileSize / 2;
+        const villagePixelY = GameConfig.WORLD.VILLAGE_CENTER.y * tileSize + tileSize / 2;
+        // Convert to percentage of container
+        const containerSize = GameConfig.WORLD.MAP_SIZE * tileSize;
+        village.style.left = `${(villagePixelX / containerSize) * 100}%`;
+        village.style.top = `${(villagePixelY / containerSize) * 100}%`;
         village.style.transform = 'translate(-50%, -50%)';
         village.style.pointerEvents = 'none';
         village.style.zIndex = '2';
@@ -2119,20 +2291,29 @@ export class UIManager {
         player.src = this.player.getSprite();
         player.className = this.player.hasSubmarine() ? 'map-player submarine' : 'map-player';
         player.style.position = 'absolute';
-        player.style.left = `${this.playerMapPosition.x}%`;
-        player.style.top = `${this.playerMapPosition.y}%`;
+        
+        // Position player in center of their tile
+        const location = this.world.getCurrentLocation();
+        const tileSize = 64;
+        const playerPixelX = location.x * tileSize + tileSize / 2;
+        const playerPixelY = location.y * tileSize + tileSize / 2;
+        const containerSize = GameConfig.WORLD.MAP_SIZE * tileSize;
+        
+        player.style.left = `${(playerPixelX / containerSize) * 100}%`;
+        player.style.top = `${(playerPixelY / containerSize) * 100}%`;
+        
         // Apply facing direction transform
         const flipTransform = this.playerFacing === 'left' ? 'scaleX(-1)' : '';
         player.style.transform = `translate(-50%, -50%) ${flipTransform}`;
         player.style.zIndex = '10';
         player.style.imageRendering = 'pixelated';
-        player.style.width = '32px';
-        player.style.height = '32px';
+        player.style.width = '48px';
+        player.style.height = '48px';
         
         if (this.player.hasSubmarine()) {
-            player.style.filter = 'none';
+            player.style.filter = 'drop-shadow(2px 2px 4px rgba(0,0,0,0.5))';
         } else {
-            player.style.filter = this.player.getColorFilter();
+            player.style.filter = this.player.getColorFilter() + ' drop-shadow(2px 2px 4px rgba(0,0,0,0.5))';
         }
         worldMapScreen.appendChild(player);
     }
@@ -2140,7 +2321,7 @@ export class UIManager {
     // Update player position on map based on world coordinates
     updatePlayerMapPosition() {
         const location = this.world.getCurrentLocation();
-        // Convert grid coordinates to percentage (assuming 30x30 grid)
+        // Convert grid coordinates to percentage based on actual map size
         this.playerMapPosition.x = (location.x / GameConfig.WORLD.MAP_SIZE) * 100;
         this.playerMapPosition.y = (location.y / GameConfig.WORLD.MAP_SIZE) * 100;
         

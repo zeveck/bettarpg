@@ -17,7 +17,6 @@ export class WorldManager {
         this.currentY = GameConfig.WORLD.VILLAGE_CENTER.y;
         this.inVillage = true;
         this.worldMap = this.generateWorldMap();
-        this.justExitedCombat = false; // Flag to skip encounter on first move after combat
         
         // World configuration from GameConfig
         this.WORLD_SIZE = GameConfig.WORLD.MAP_SIZE;
@@ -98,7 +97,7 @@ export class WorldManager {
         }
         
         // Clamp movement to world boundaries instead of blocking
-        // Allow movement to the edge zone where Gar spawns (coordinates 1-28 inclusive)
+        // Allow movement to the edge zone where Gar spawns (coordinates 1-19 with 21x21 grid)
         newX = Math.max(1, Math.min(this.WORLD_SIZE - 2, newX));
         newY = Math.max(1, Math.min(this.WORLD_SIZE - 2, newY));
         
@@ -137,11 +136,6 @@ export class WorldManager {
         };
     }
     
-    // Set flag to skip next encounter (called when combat ends)
-    setCombatExitFlag() {
-        this.justExitedCombat = true;
-    }
-    
     // Encounter system
     checkForEncounter() {
         // In extreme zone (dark water): guaranteed combat encounters
@@ -167,6 +161,15 @@ export class WorldManager {
     
     createCombatEncounter() {
         const enemy = this.combat.startRandomEncounter(this.currentX, this.currentY);
+        
+        // If no enemy spawned (all species are friends in this zone), convert to peaceful encounter
+        if (!enemy) {
+            return {
+                type: 'peaceful',
+                message: "Your fish friends swim by peacefully!",
+                effectMessage: null
+            };
+        }
         
         // Add extreme zone warning message if in dark water
         let message = null;
@@ -261,9 +264,9 @@ export class WorldManager {
     leaveVillage() {
         if (this.inVillage) {
             // Position player south of village when exiting
-            // Village is just center tile, so place south of center
+            // Village is just center tile, so place one tile south
             this.currentX = this.VILLAGE_CENTER.x; // Keep X at village center
-            this.currentY = this.VILLAGE_CENTER.y + 2; // Move south of village area
+            this.currentY = this.VILLAGE_CENTER.y + 1; // Move one tile south of village
             this.inVillage = false;
             return {
                 success: true,
@@ -393,7 +396,6 @@ export class WorldManager {
         this.currentX = this.VILLAGE_CENTER.x;
         this.currentY = this.VILLAGE_CENTER.y;
         this.inVillage = true;
-        this.justExitedCombat = false;
         return {
             success: true,
             message: GameStrings.EXPLORATION.VILLAGE_MESSAGES.SAFELY_RETURNED
@@ -405,23 +407,10 @@ export class WorldManager {
         this.currentX = this.VILLAGE_CENTER.x;
         this.currentY = this.VILLAGE_CENTER.y;
         this.inVillage = true;
-        this.justExitedCombat = false;
         this.npcs.reset();
         // Note: worldMap doesn't need reset as it's static
     }
     
     // Getters for UI
-    getCurrentX() { return this.currentX; }
-    getCurrentY() { return this.currentY; }
     isInVillage() { return this.inVillage; }
-    getWorldSize() { return this.WORLD_SIZE; }
-    
-    // NPC access interfaces (delegated to NPCManager)
-    getNPCName(npcId) {
-        return this.npcs.getNPCName(npcId);
-    }
-    
-    getNPCIds() {
-        return this.npcs.getNPCIds();
-    }
 }

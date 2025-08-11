@@ -832,8 +832,8 @@ button:disabled {
 }
 
 .betta-village {
-    width: 56px;
-    height: 56px;
+    width: 100px;
+    height: 100px;
     image-rendering: pixelated;
     image-rendering: -moz-crisp-edges;
     image-rendering: crisp-edges;

@@ -108,12 +108,6 @@ export class NPCManager {
         };
     }
     
-    // Data access methods (proper interfaces - no direct object exposure)
-    getNPCName(npcId) {
-        const npc = this.npcs[npcId];
-        return npc ? npc.name : 'Unknown NPC';
-    }
-    
     // Service type checking
     isShopNPC(npcId) {
         const npc = this.npcs[npcId];

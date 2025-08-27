@@ -1123,11 +1123,6 @@ class Player {
     getName() { return this.name; }
     getColor() { return this.color; }
     
-    // Interface for UI display management (replacing direct HP manipulation)
-    getDisplayHP(overrideHP = null) {
-        return overrideHP !== null ? overrideHP : this.hp;
-    }
-    
     // Befriended species management
     addBefriendedSpecies(speciesName) {
         this.befriendedSpecies.add(speciesName);
@@ -1135,10 +1130,6 @@ class Player {
     
     isFriendsWith(speciesName) {
         return this.befriendedSpecies.has(speciesName);
-    }
-    
-    getBefriendedSpecies() {
-        return Array.from(this.befriendedSpecies);
     }
     
     // Set player identity
@@ -1304,12 +1295,6 @@ class NPCManager {
             isInn: npc.isInn || false,
             hasMoreDialogue: this.currentDialogueIndex < npc.dialogues.length - 1
         };
-    }
-    
-    // Data access methods (proper interfaces - no direct object exposure)
-    getNPCName(npcId) {
-        const npc = this.npcs[npcId];
-        return npc ? npc.name : 'Unknown NPC';
     }
     
     // Service type checking
@@ -2085,7 +2070,7 @@ class CombatManager {
             victory: true,
             showCongratulations: isLevel10Victory,
             showPeaceMessage: this.hasAchievedPeace,
-            didLevelUp: willLevelUp
+            levelUp: willLevelUp
         };
     }
     
@@ -3789,6 +3774,13 @@ class UIManager {
     }
     
     showCombatScreen() {
+        // Clear enemy sprite immediately to prevent flash of previous enemy
+        const enemySprite = document.getElementById('enemy-fish-combat');
+        if (enemySprite) {
+            enemySprite.style.visibility = 'hidden';
+            enemySprite.src = '';
+        }
+        
         // Combat screen setup
         this.showStatsPanel(); // Show stats during combat
         this.updateCombatDisplay();
@@ -4215,9 +4207,13 @@ class UIManager {
         if (!enemy.hasPartyHat) {
             const enemySprite = document.getElementById('enemy-fish-combat');
             if (enemySprite) {
+                // Clear sprite first to prevent flash of previous enemy
+                enemySprite.style.visibility = 'hidden';
                 enemySprite.src = enemy.sprite;
                 // Apply random hue rotation for color variation
                 enemySprite.style.filter = enemy.randomHue ? `hue-rotate(${enemy.randomHue}deg)` : 'none';
+                // Show sprite after setting new image
+                enemySprite.style.visibility = 'visible';
             }
         }
         

@@ -268,11 +268,6 @@ export class Player {
     getName() { return this.name; }
     getColor() { return this.color; }
     
-    // Interface for UI display management (replacing direct HP manipulation)
-    getDisplayHP(overrideHP = null) {
-        return overrideHP !== null ? overrideHP : this.hp;
-    }
-    
     // Befriended species management
     addBefriendedSpecies(speciesName) {
         this.befriendedSpecies.add(speciesName);
@@ -280,10 +275,6 @@ export class Player {
     
     isFriendsWith(speciesName) {
         return this.befriendedSpecies.has(speciesName);
-    }
-    
-    getBefriendedSpecies() {
-        return Array.from(this.befriendedSpecies);
     }
     
     // Set player identity

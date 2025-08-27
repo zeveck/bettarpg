@@ -889,6 +889,13 @@ export class UIManager {
     }
     
     showCombatScreen() {
+        // Clear enemy sprite immediately to prevent flash of previous enemy
+        const enemySprite = document.getElementById('enemy-fish-combat');
+        if (enemySprite) {
+            enemySprite.style.visibility = 'hidden';
+            enemySprite.src = '';
+        }
+        
         // Combat screen setup
         this.showStatsPanel(); // Show stats during combat
         this.updateCombatDisplay();
@@ -1315,9 +1322,13 @@ export class UIManager {
         if (!enemy.hasPartyHat) {
             const enemySprite = document.getElementById('enemy-fish-combat');
             if (enemySprite) {
+                // Clear sprite first to prevent flash of previous enemy
+                enemySprite.style.visibility = 'hidden';
                 enemySprite.src = enemy.sprite;
                 // Apply random hue rotation for color variation
                 enemySprite.style.filter = enemy.randomHue ? `hue-rotate(${enemy.randomHue}deg)` : 'none';
+                // Show sprite after setting new image
+                enemySprite.style.visibility = 'visible';
             }
         }
         

@@ -541,7 +541,7 @@ export class CombatManager {
             victory: true,
             showCongratulations: isLevel10Victory,
             showPeaceMessage: this.hasAchievedPeace,
-            didLevelUp: willLevelUp
+            levelUp: willLevelUp
         };
     }
     

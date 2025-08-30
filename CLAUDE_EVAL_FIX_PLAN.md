@@ -28,16 +28,13 @@ These are actual bugs that break features or cause incorrect behavior.
 **Impact**: Violates HTML standards, may confuse screen readers
 **Effort**: 1 minute
 
-#### FIX-003: Broken getNPCList Method ⚠️ RUNTIME ERROR IF CALLED
+#### FIX-003: Broken getNPCList Method ⚠️ RUNTIME ERROR IF CALLED ✅
+**Status**: COMPLETED (2025-01-27) - v0.4.1
 **Issue**: world.getNPCList() calls non-existent this.npcs.getNPCList()
 **Location**: src/world.js:386-388
-**Fix**: Remove the broken method entirely
-```javascript
-// DELETE these lines from world.js:
-getNPCList() {
-    return this.npcs.getNPCList();
-}
-```
+**Fix Applied**: Removed the broken method entirely (deleted lines 386-388)
+**Build**: Successful ✅
+**Expected Result**: No runtime errors from calling non-existent method
 **Impact**: Would throw error if ever called
 **Effort**: 1 minute
 
@@ -294,8 +291,8 @@ These were reported but are actually not problems.
 
 ### Phase 1: Critical Fixes (25 minutes) - DO THESE
 1. FIX-001: Victory payload mismatch ⚠️ ✅ COMPLETED
-2. FIX-002: Duplicate HTML IDs ⚠️ ✅ COMPLETED
-3. FIX-003: Remove broken getNPCList ⚠️
+2. FIX-002: Duplicate HTML IDs ⚠️ ✅ COMPLETED  
+3. FIX-003: Remove broken getNPCList ⚠️ ✅ COMPLETED (v0.4.1)
 4. FIX-018: Previous enemy sprite flash 👻
 5. FIX-020: Audio context initialization (browser autoplay) ⚠️
 

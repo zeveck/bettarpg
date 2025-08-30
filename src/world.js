@@ -383,10 +383,6 @@ export class WorldManager {
         return this.npcs.endDialogue();
     }
     
-    getNPCList() {
-        return this.npcs.getNPCList();
-    }
-    
     getCurrentDialogueState() {
         return this.npcs.getCurrentDialogueState();
     }

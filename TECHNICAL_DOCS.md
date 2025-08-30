@@ -1,4 +1,4 @@
-# Betta Fish RPG v0.4 - Technical Documentation
+# Betta Fish RPG v0.4.1 - Technical Documentation
 
 ## Architecture Overview
 
@@ -10,7 +10,7 @@
 - **Configuration System**: Centralized GameConfig and GameStrings for constants and localization
 
 ### Design Patterns
-- **Modular Architecture**: 8-module ES6 system with clear boundaries
+- **Modular Architecture**: 9-module ES6 system with clear boundaries
 - **Configuration-Driven**: Central constants and strings management
 - **Dependency Injection**: Clean module initialization and wiring
 - **State Machine**: Screen-based navigation system
@@ -18,14 +18,14 @@
 
 ## File Structure
 
-### index.html (175+ lines)
+### index.html (195 lines)
 - **Screen Organization**: 6 main game screens (title, creation, village, dialogue, world-map, combat)
 - **UI Components**: Stats panel, combat interface with swim-away section, village locations
 - **Event Handlers**: Inline onclick handlers for game interactions
 - **Graphics Integration**: Image elements for sprites and layered backgrounds
 - **Accessibility**: Keyboard shortcut indicators with underlined letters
 
-### style.css (620+ lines)
+### style.css (1193 lines)
 - **Layout Systems**: Flexbox with order-based combat positioning, CSS Grid for responsive design
 - **Screen Management**: Absolute positioning with active state classes
 - **Background Layering**: CSS pseudo-elements for three-tier danger zone visualization
@@ -33,7 +33,7 @@
 - **Shop Interface**: Interactive item styling with hover states and affordability indicators
 - **Responsive Design**: Mobile breakpoints and adaptive layouts
 
-### src/ modules (8 ES6 modules)
+### src/ modules (9 ES6 modules)
 - **config.js**: GameConfig and GameStrings - centralized constants and text
 - **audio.js**: AudioManager - Web Audio API wrapper
 - **player.js**: Player - character state, progression, combat mechanics
@@ -56,7 +56,7 @@
 GameConfig.PLAYER.STARTING_STATS = { hp: 20, mp: 10, level: 1, ... }
 GameConfig.COMBAT.SPELLS.BUBBLE_BLAST = { mpCost: 3, damageMin: 5, ... }
 GameConfig.ENEMIES.FIERCE_CICHLID = { baseHp: 18, baseDamage: 8, ... }
-GameConfig.ECONOMY.SHOP_ITEMS.SUBMARINE = { cost: 100, effect: '...' }
+// Shop items are hardcoded in world.js - see FIX-004 in fix plan
 
 // All game text centralized
 GameStrings.NPCS.ELDER_FINN.DIALOGUES = ['Welcome, young one...', ...]
@@ -111,24 +111,30 @@ getColorFilter() {
 ```javascript
 playSound(type) {
     // Procedural generation using Web Audio API
-    // Sound types: attack, magic, victory, levelup, 
-    //              combatstart, wound, treasure
+    // Sound types: attack, bubble, gravel, party, fanfare,
+    //              levelup, combatstart, wound, roar, found
+    // Plus additional sounds like 'befriend', 'victory', 'defeat'
     // Graceful fallback if audio unavailable
 }
 ```
 
 ### Economy System
 ```javascript
-// Configuration-driven economy
-GameConfig.ECONOMY.SHOP_ITEMS = {
-    SUBMARINE: { cost: 100, effect: 'submarine_transformation' },
-    KELP_SNACK: { cost: 3, effect: 'restore_hp' },
-    BUBBLE_WATER: { cost: 2, effect: 'restore_mp' }
+// Shop items are hardcoded in world.js getShopItems()
+// Costs: Submarine (100), Kelp Snack (3), Bubble Water (2)
+// Note: This is identified as FIX-004 in the fix plan
+
+GameConfig.ECONOMY.SERVICES = {
+    INN_REST: { cost: 5, effect: 'full_restore' }
 };
 
 GameConfig.ECONOMY.INCOME_SOURCES = {
-    COMBAT_BASE: { min: 1, max: 5 },
-    TREASURE_BASE: { min: 1, max: 3 }
+    TREASURE_BASE: { min: 1, max: 3 }  // Used for treasure encounters
+};
+
+GameConfig.COMBAT.ENEMY_SCALING.BETTA_BITES_REWARDS = {
+    baseMin: 1, baseMax: 5,           // Base combat rewards
+    levelBonusMin: 1, levelBonusMax: 2 // Per enemy level
 };
 ```
 
@@ -198,7 +204,7 @@ GameConfig.ENEMIES.FIERCE_CICHLID = {
 };
 
 // CombatManager converts config to runtime format
-creatEnemyFromConfig(enemyConfig) {
+createEnemyFromConfig(enemyConfig) {
     return {
         name: enemyConfig.name,
         hp: enemyConfig.baseHp,
@@ -260,7 +266,7 @@ generateRandomName() {
 ## Development Guidelines
 
 ### Code Organization
-- **Modular Architecture**: 8 ES6 modules with clear separation of concerns
+- **Modular Architecture**: 9 ES6 modules with clear separation of concerns
 - **Configuration-Driven**: All constants and strings centralized in GameConfig/GameStrings
 - **Method Naming**: Clear, descriptive function names
 - **State Management**: Distributed across specialized modules with clean interfaces
@@ -276,6 +282,18 @@ generateRandomName() {
 - **Edge Cases**: Empty inputs, audio unavailable, rapid clicking
 - **Cross-Platform**: Desktop and mobile browser testing
 - **Performance**: No memory leaks or performance degradation
+
+## Version 0.4.1 Updates
+
+### Bug Fixes
+- **Removed broken getNPCList method**: Deleted non-functional method in world.js that would cause runtime error if called
+- **Fixed duplicate HTML IDs**: Removed duplicate version-info element to ensure valid HTML
+
+### Known Issues (To Be Fixed)
+- **Shop prices hardcoded**: Item costs are hardcoded in world.js rather than using configuration (see FIX-004)
+- **World distance thresholds**: Map generation uses hardcoded values instead of config constants (see FIX-005)
+- **Previous enemy sprite flash**: Brief display of previous enemy sprite when entering combat (see FIX-018)
+- **Audio context initialization**: May be blocked by browser autoplay policies (see FIX-020)
 
 ---
 

@@ -2,7 +2,19 @@
 
 ---
 
-## Version 0.4 (Current)
+## Version 0.4.1 (Current)
+
+### 🐛 Bug Fixes
+- **Removed broken getNPCList method**: Deleted non-functional method that would cause runtime error if called (FIX-003)
+- **Fixed duplicate HTML IDs**: Removed duplicate version-info element to ensure valid HTML (FIX-002)
+
+### 📝 Maintenance
+- Updated version number to 0.4.1
+- Organized evaluation documents into EVALS subfolder
+
+---
+
+## Version 0.4
 
 ### 🛒 Shop System Overhaul
 - **Clickable Items**: Shop items become interactive buttons when affordable

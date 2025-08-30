@@ -38,24 +38,24 @@ These are actual bugs that break features or cause incorrect behavior.
 **Impact**: Would throw error if ever called
 **Effort**: 1 minute
 
-#### FIX-018: Previous Enemy Sprite Flash on Combat Start 👻 VISUAL BUG
+#### FIX-018: Previous Enemy Sprite Flash on Combat Start 👻 VISUAL BUG ✅
+**Status**: COMPLETED (2025-08-27) - Fixed in commit 9c1d3bbd
 **Issue**: When entering combat, the previous enemy's sprite appears briefly before being replaced
-**Location**: src/combat.js (startRandomEncounter), src/ui.js (showCombatScreen)
-**Root Cause**: The enemy sprite src is likely not being cleared/updated before the combat screen shows
-**Fix**: Clear enemy sprite before combat screen shows
+**Location**: src/ui.js lines 892-897 (showCombatScreen), lines 1325-1331 (updateCombatDisplay)
+**Root Cause**: The enemy sprite src wasn't being cleared/hidden before the combat screen showed
+**Fix Applied**: Implemented both hiding and clearing in two places:
+1. In showCombatScreen(): Clear and hide sprite immediately (lines 892-897)
+2. In updateCombatDisplay(): Hide sprite, set new src, then show (lines 1325-1331)
 ```javascript
-// Option 1: In UI showCombatScreen, clear sprite first
+// showCombatScreen() - lines 892-897
 const enemySprite = document.getElementById('enemy-fish-combat');
 if (enemySprite) {
-    enemySprite.src = ''; // Clear immediately
-    enemySprite.style.visibility = 'hidden'; // Hide until ready
+    enemySprite.style.visibility = 'hidden';
+    enemySprite.src = '';
 }
-// Then after setting new sprite:
-enemySprite.style.visibility = 'visible';
-
-// Option 2: In combat.js, set sprite URL on currentEnemy BEFORE returning
-// so UI can immediately use it when showing screen
 ```
+**Build**: Successful ✅
+**Expected Result**: No flash of previous enemy sprite when entering combat
 **Impact**: Poor user experience, makes combat feel unpolished
 **Effort**: 5 minutes
 
@@ -293,7 +293,7 @@ These were reported but are actually not problems.
 1. FIX-001: Victory payload mismatch ⚠️ ✅ COMPLETED
 2. FIX-002: Duplicate HTML IDs ⚠️ ✅ COMPLETED  
 3. FIX-003: Remove broken getNPCList ⚠️ ✅ COMPLETED (v0.4.1)
-4. FIX-018: Previous enemy sprite flash 👻
+4. FIX-018: Previous enemy sprite flash 👻 ✅ COMPLETED (already fixed 2025-08-27)
 5. FIX-020: Audio context initialization (browser autoplay) ⚠️
 
 ### Phase 2: High Priority (45 minutes) - STRONGLY RECOMMENDED

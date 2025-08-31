@@ -368,6 +368,37 @@ button:disabled {
     text-decoration: underline;
 }
 
+.audio-toggle {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 16px;
+    cursor: pointer;
+    z-index: 500;
+    padding: 0;
+    margin: 0;
+    font-family: inherit;
+    outline: none;
+    box-shadow: none;
+    transform: none;
+    line-height: 1;
+    vertical-align: baseline;
+}
+
+.audio-toggle:hover {
+    color: rgba(255, 255, 255, 0.9);
+    transform: none;
+    box-shadow: none;
+    outline: none;
+}
+
+.audio-toggle.muted {
+    color: rgba(255, 255, 255, 0.3);
+}
+
 #dialogue-box {
     max-width: 600px;
     margin: 100px auto;

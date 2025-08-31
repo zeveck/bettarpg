@@ -1,5 +1,50 @@
 # Betta Fish RPG - Comprehensive Fix Plan
 
+## Fix Progress Summary
+
+### 🔴 Critical Fixes (Must Fix)
+- ✅ FIX-001: Victory Payload Mismatch (COMPLETED)
+- ✅ FIX-002: Duplicate HTML IDs (COMPLETED)
+- ✅ FIX-003: Broken getNPCList Method (COMPLETED)
+- ✅ FIX-018: Previous Enemy Sprite Flash (COMPLETED)
+- ✅ FIX-020: Audio Context Initialization (COMPLETED)
+
+### 🟠 High Priority (Configuration & Maintenance)
+- ⬜ FIX-004: Hardcoded Prices in Dialogue Strings
+- ⬜ FIX-005: World Distance Thresholds Conflict
+
+### 🟡 Medium Priority (Dead Code Removal)
+- ⬜ FIX-006: Unreachable Code Block
+- ⬜ FIX-007: Dead Function - canMoveTo
+- ⬜ FIX-008: Dead Functions - isShopNPC/isInnNPC
+- ⬜ FIX-009: Dead Event Listeners
+- ⬜ FIX-010: Dead Element References
+- ⬜ FIX-019: Player.getStats Dead Method
+- ⬜ FIX-011: justExitedCombat Flag (NO ACTION NEEDED)
+
+### 🔵 Low Priority (Visual Constants & Timing)
+- ⬜ FIX-012: Consolidate Visual Constants (OPTIONAL)
+- ⬜ FIX-013: Timing Constants (OPTIONAL)
+- ⬜ FIX-014: Cheat Constants (OPTIONAL)
+
+### ⚪ Minor (Code Quality Issues)
+- ⬜ FIX-015: Dialog Container Mismatch
+- ⬜ FIX-016: Duplicate Color Config
+- ⬜ FIX-017: updateMovementButtons References Wrong IDs
+- ⬜ FIX-021: UIManager God Class (MAJOR REFACTOR)
+- ⬜ FIX-022: Global game Object Coupling (MAJOR REFACTOR)
+- ⬜ FIX-023: Circular Dependencies via Setters (MAJOR REFACTOR)
+- ⬜ FIX-024: DialogManager Naming Confusion
+
+### ✅ Verified Non-Issues
+- ✅ NON-ISSUE-001: StringFormatter Not Defined (FALSE POSITIVE)
+- ✅ NON-ISSUE-002: Happy Balloon Time Damage (WORKING AS INTENDED)
+- ✅ NON-ISSUE-003: justExitedCombat Implementation (NOT IMPLEMENTED)
+
+**Progress**: 5/24 fixes completed | Next Priority: FIX-004 (Hardcoded Prices)
+
+**Latest Release**: v0.4.2 - Audio improvements and browser compliance
+
 ## Overview
 This plan addresses all issues found during the comprehensive codebase evaluation. Each fix is labeled with an ID for easy reference and categorized by type and priority.
 
@@ -58,6 +103,24 @@ if (enemySprite) {
 **Expected Result**: No flash of previous enemy sprite when entering combat
 **Impact**: Poor user experience, makes combat feel unpolished
 **Effort**: 5 minutes
+
+#### FIX-020: Audio Context Initialization ⚠️ AUTOPLAY POLICY ✅
+**Status**: COMPLETED (2025-08-31) - v0.4.2
+**Issue**: Audio context initialized on page load, blocked by browser autoplay policies
+**Location**: src/audio.js initialization
+**Fix**: Initialize audio context on first user interaction instead
+```javascript
+// Add user gesture detection in AudioManager
+initializeOnUserGesture() {
+    if (this.context) return;
+    this.context = new (window.AudioContext || window.webkitAudioContext)();
+}
+```
+**Fix Applied**: Modified AudioManager constructor to defer initialization and initialize on first playSound() call
+**Build**: Successful ✅
+**Expected Result**: Audio context respects browser autoplay policies, initializes on first user interaction
+**Impact**: Audio may not work until user interacts with page
+**Effort**: 15 minutes
 
 ### 🟠 HIGH: Configuration & Maintenance Issues
 These make the code hard to maintain and prone to bugs when values change.
@@ -154,20 +217,6 @@ Code that's never used but clutters the codebase.
 **Fix**: This is actually NOT an issue - the flag doesn't exist in the codebase
 **Impact**: None - already not implemented
 **Effort**: 0 minutes (no action needed)
-
-#### FIX-020: Audio Context Initialization ⚠️ AUTOPLAY POLICY
-**Issue**: Audio context initialized on page load, blocked by browser autoplay policies
-**Location**: src/audio.js initialization
-**Fix**: Initialize audio context on first user interaction instead
-```javascript
-// Add user gesture detection in AudioManager
-initializeOnUserGesture() {
-    if (this.context) return;
-    this.context = new (window.AudioContext || window.webkitAudioContext)();
-}
-```
-**Impact**: Audio may not work until user interacts with page
-**Effort**: 15 minutes
 
 ### 🔵 LOW: Visual Constants & Timing
 Hardcoded values that work fine but could be configurable.
@@ -294,7 +343,7 @@ These were reported but are actually not problems.
 2. FIX-002: Duplicate HTML IDs ⚠️ ✅ COMPLETED  
 3. FIX-003: Remove broken getNPCList ⚠️ ✅ COMPLETED (v0.4.1)
 4. FIX-018: Previous enemy sprite flash 👻 ✅ COMPLETED (already fixed 2025-08-27)
-5. FIX-020: Audio context initialization (browser autoplay) ⚠️
+5. FIX-020: Audio context initialization (browser autoplay) ⚠️ ✅ COMPLETED (v0.4.2)
 
 ### Phase 2: High Priority (45 minutes) - STRONGLY RECOMMENDED
 1. FIX-004: Hardcoded prices in dialogues 📝
@@ -349,8 +398,8 @@ After implementing fixes, verify:
 
 ## Notes
 
-1. The most critical issue is FIX-001 (victory payload) which has been COMPLETED ✅
-2. FIX-020 (audio autoplay policy) is now critical for browser compatibility
+1. The most critical issue is FIX-001 (victory payload) which has been COMPLETED ✅  
+2. FIX-020 (audio autoplay policy) has been COMPLETED ✅ in v0.4.2 with audio toggle
 3. FIX-004 (hardcoded prices) is the biggest maintenance risk
 4. Most "dead code" is harmless but clutters the codebase
 5. Gemini incorrectly identified DialogManager as dead code - it's actively used
@@ -363,3 +412,10 @@ After implementing fixes, verify:
 - Added FIX-021, 022, 023: Major architectural issues (UIManager god class, global coupling, circular deps)
 - Added FIX-024: DialogManager renaming for clarity (Gemini's confusion highlights naming issue)
 - Note: Gemini incorrectly identified DialogManager as dead code, but the confusion does suggest renaming would help
+
+## Version 0.4.2 Updates
+- **COMPLETED FIX-020**: Audio context initialization now complies with browser autoplay policies
+- **NEW FEATURE**: Added subtle audio toggle control (speaker icon in bottom-left corner)
+- **ENHANCED UX**: Users can now control audio without cluttering interface
+- **TECHNICAL**: Audio context deferred until first user interaction, preventing browser blocking
+- **DOCUMENTATION**: Updated all docs, changelogs, and version numbers to reflect v0.4.2 improvements

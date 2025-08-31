@@ -2,7 +2,20 @@
 
 ---
 
-## Version 0.4.1 (Current)
+## Version 0.4.2 (Current)
+
+### 🎵 Audio Improvements  
+- **Fixed audio autoplay policy compliance**: Audio context now initializes on first user interaction instead of page load (FIX-020)
+- **Added audio toggle control**: Subtle speaker icon in bottom-left corner allows users to toggle audio on/off
+- **Enhanced user experience**: Audio respects browser policies and provides intuitive user control
+
+### 📝 Maintenance
+- Updated version number to 0.4.2
+- Updated all documentation to reflect audio improvements
+
+---
+
+## Version 0.4.1
 
 ### 🐛 Bug Fixes
 - **Removed broken getNPCList method**: Deleted non-functional method that would cause runtime error if called (FIX-003)

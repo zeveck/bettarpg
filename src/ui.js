@@ -389,6 +389,9 @@ export class UIManager {
         // Start screen
         document.getElementById('startGameBtn')?.addEventListener('click', () => this.startNewGame());
         
+        // Audio toggle
+        document.getElementById('audio-toggle')?.addEventListener('click', () => this.toggleAudio());
+        
         // Keyboard controls
         document.addEventListener('keydown', (e) => this.handleKeyboard(e));
         
@@ -1711,6 +1714,19 @@ export class UIManager {
             this.showShop();
         } else {
             this.hideShop();
+        }
+    }
+    
+    toggleAudio() {
+        if (!this.audio) return;
+        
+        const isEnabled = this.audio.toggleAudio();
+        const toggleButton = document.getElementById('audio-toggle');
+        
+        if (toggleButton) {
+            toggleButton.textContent = isEnabled ? '🔊' : '🔇';
+            toggleButton.classList.toggle('muted', !isEnabled);
+            toggleButton.title = isEnabled ? 'Toggle Audio (On)' : 'Toggle Audio (Off)';
         }
     }
     

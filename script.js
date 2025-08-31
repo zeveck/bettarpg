@@ -226,7 +226,7 @@ class GameConfig {
     
     // === GAME METADATA ===
     static GAME = {
-        VERSION: '0.4.1',
+        VERSION: '0.4.2',
         WEBSITE: 'https://github.com/zeveck/bettarpg'
     };
     
@@ -653,18 +653,43 @@ class StringFormatter {
 class AudioManager {
     constructor() {
         this.audioContext = null;
-        this.initAudio();
+        this.isInitialized = false;
+        this.isEnabled = true; // Audio enabled by default
     }
     
     initAudio() {
+        if (this.isInitialized) return;
+        
         try {
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            this.isInitialized = true;
         } catch (e) {
             // Web Audio API not supported - graceful fallback
         }
     }
     
+    toggleAudio() {
+        this.isEnabled = !this.isEnabled;
+        return this.isEnabled;
+    }
+    
+    setAudioEnabled(enabled) {
+        this.isEnabled = enabled;
+    }
+    
+    isAudioEnabled() {
+        return this.isEnabled;
+    }
+    
     playSound(type) {
+        // Don't play if audio is disabled
+        if (!this.isEnabled) return;
+        
+        // Initialize audio context on first user interaction
+        if (!this.isInitialized) {
+            this.initAudio();
+        }
+        
         if (!this.audioContext) return;
         
         const oscillator = this.audioContext.createOscillator();
@@ -3270,6 +3295,9 @@ class UIManager {
         // Start screen
         document.getElementById('startGameBtn')?.addEventListener('click', () => this.startNewGame());
         
+        // Audio toggle
+        document.getElementById('audio-toggle')?.addEventListener('click', () => this.toggleAudio());
+        
         // Keyboard controls
         document.addEventListener('keydown', (e) => this.handleKeyboard(e));
         
@@ -4592,6 +4620,19 @@ class UIManager {
             this.showShop();
         } else {
             this.hideShop();
+        }
+    }
+    
+    toggleAudio() {
+        if (!this.audio) return;
+        
+        const isEnabled = this.audio.toggleAudio();
+        const toggleButton = document.getElementById('audio-toggle');
+        
+        if (toggleButton) {
+            toggleButton.textContent = isEnabled ? '🔊' : '🔇';
+            toggleButton.classList.toggle('muted', !isEnabled);
+            toggleButton.title = isEnabled ? 'Toggle Audio (On)' : 'Toggle Audio (Off)';
         }
     }
     

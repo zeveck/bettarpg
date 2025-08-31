@@ -1,4 +1,4 @@
-# Betta Fish RPG v0.4.1 - Technical Documentation
+# Betta Fish RPG v0.4.2 - Technical Documentation
 
 ## Architecture Overview
 
@@ -282,6 +282,13 @@ generateRandomName() {
 - **Edge Cases**: Empty inputs, audio unavailable, rapid clicking
 - **Cross-Platform**: Desktop and mobile browser testing
 - **Performance**: No memory leaks or performance degradation
+
+## Version 0.4.2 Updates
+
+### Audio Improvements
+- **FIX-020: Audio Context Initialization**: Fixed browser autoplay policy compliance by deferring audio context creation until first user interaction
+- **Audio Toggle Control**: Added subtle speaker icon in bottom-left corner allowing users to toggle audio on/off
+- **Enhanced User Experience**: Audio respects browser policies and provides user control without cluttering the interface
 
 ## Version 0.4.1 Updates
 

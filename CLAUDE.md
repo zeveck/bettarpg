@@ -2,23 +2,6 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## CURRENT STATE: MODULAR ARCHITECTURE (v0.4)
-
-**IMPORTANT**: This project has completed the refactoring from v0.3 to v0.4, implementing a modular ES6 architecture.
-
-### Refactoring Guidelines
-- **Goal**: Transform monolithic script.js into modern, modular JavaScript architecture
-- **Behavior preservation**: New modular code must match behavior of orig-* reference files exactly
-- **Reference files**: `orig-index.html`, `orig-script.js`, `orig-style.css` are READ-ONLY references
-- **DO NOT modify orig-* files** - they are the authoritative behavior reference
-- **Current focus**: Refactor only, no new features or behavior changes
-
-### Working with Files During Refactor
-- **Avoid reading script.js directly** except to verify build output (use grep/search if needed)
-- **Work in src/ modules** for all code changes
-- **Use orig-* files** as reference for expected behavior
-- **Build frequently** to verify refactored modules produce correct output
-
 ## Build and Development Commands
 
 ### Essential Commands
@@ -28,31 +11,27 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Development Workflow
 - If you make code changes you should always build the script unless there's some reason to think it's worth waiting, in which case, always ask.
+- If you fix a bug or add a feature or otherwise materially change the code you should ensure all docs, particularly CHANGELOG.md and CLAUDE_EVAL_FIX_PLAN.md are up to date and adequately reflect the changes.
+- Always report changes to the user.
 
-### Testing During Refactor
-- **Manual testing**: Open index.html in browser after building
-- **Behavior comparison**: Compare against orig-index.html behavior
-- **Check build output**: Use grep/search on script.js to verify modules combined correctly
+### Testing
 - **No automated tests**: This is a browser-based game requiring manual QA
-- **Note on testing reliability**: Ad hoc testing during refactor has been unreliable - focus on code structure over extensive testing for now
+- **Manual testing focus**: Test actual gameplay after changes rather than relying on code inspection
 
 ## Architecture Overview
 
-### Modular Structure (v0.4+)
-The game uses an **8-module architecture** with a simple build system that concatenates modules into a single script.js file:
+### Modular Structure
+The game uses a modular ES6 architecture with modules in `src/` that are concatenated into `script.js`:
 
-```
-src/
-├── config.js    - GameConfig & GameStrings (centralized constants & text)
-├── audio.js     - AudioManager (Web Audio API, procedural sounds)
-├── player.js    - Player (stats, progression, economy)
-├── npc.js       - NPCManager (village characters, dialogue trees)  
-├── dialog.js    - DialogManager (modal dialogs, user prompts)
-├── combat.js    - CombatManager (battles, enemies, visual effects)
-├── world.js     - WorldManager (exploration, encounters, map generation)
-├── ui.js        - UIManager (DOM manipulation, screen management)
-└── core.js      - BettaRPG (coordination, initialization)
-```
+- **config.js** - GameConfig & GameStrings (centralized constants & text)
+- **audio.js** - AudioManager (Web Audio API, procedural sounds)
+- **player.js** - Player (stats, progression, economy)
+- **npc.js** - NPCManager (village characters, dialogue trees)  
+- **dialog.js** - DialogManager (modal dialogs, user prompts)
+- **combat.js** - CombatManager (battles, enemies, visual effects)
+- **world.js** - WorldManager (exploration, encounters, map generation)
+- **ui.js** - UIManager (DOM manipulation, screen management)
+- **core.js** - BettaRPG (coordination, initialization)
 
 ### Build System
 - **Simple concatenation** approach (not webpack/bundlers)
@@ -60,94 +39,78 @@ src/
 - **Module order matters**: Config → Audio → Player → NPC → Dialog → Combat → World → UI → Core
 - **Export stripping**: ES6 exports removed for browser compatibility
 
-### Module Dependencies
-```
-Core (BettaRPG)
-├── Config (independent - provides constants & strings)
-├── Player (depends on: Config)
-├── Audio (independent)
-├── NPC (depends on: Config)
-├── Dialog (depends on: Audio)
-├── Combat (depends on: Player, Audio, Config)
-├── World (depends on: Player, Audio, Combat, NPC, Config)
-└── UI (depends on: Player, Audio, Combat, World)
-```
-
-### Key Design Patterns
+### Key Design Principles
 - **Player as single source of truth** for all character state
-- **Dependency injection** through Core module
-- **Clear separation of concerns** between data (Player) and presentation (UI)
-- **No circular dependencies** - clean, testable architecture
+- **Separation of concerns** between data (Player) and presentation (UI)
+- **No circular dependencies** - maintain clean architecture
+- **Configuration-driven** - use GameConfig/GameStrings for constants
 
 ## Core Systems
 
 ### Player State Management
-The Player class is the **authoritative source** for all character data:
-- Stats (HP, MP, level, exp, bettaBites)
-- All stat modifications (damage, healing, progression)
-- Armor system and damage calculations
-- Economy transactions
+The Player class is the **authoritative source** for all character data.
 
 **Never modify player state directly** - always use Player class methods like `takeDamage()`, `gainExp()`, `spendBettaBites()`.
 
 ### Combat System
-CombatManager handles:
-- 5 enemy types with level-based scaling
-- Turn-based battle flow
-- Special boss mechanics (Prehistoric Gar)
-- Visual effects (bubble/gravel spells, animations)
-- Distance-based enemy level calculation
+- **Turn-based battle flow** with player and enemy alternating
+- **Distance-based scaling**: Enemy level/difficulty increases with distance from village
+- **Boss mechanics**: Special behaviors for unique enemies (e.g., Prehistoric Gar)
+- **Visual effects**: Spell animations, screen shake, sprite transformations
 
-### Graphics System
-- **CSS filter approach**: Hue rotation for color variations instead of multiple sprites
-- **Sprite progression**: Changes based on level and equipment
-- **Layered backgrounds**: CSS pseudo-elements for depth and danger zones
-- **Procedural audio**: Web Audio API generation, no audio files
+### World System
+- **Procedural map generation** with concentric danger zones
+- **Encounter system**: Different encounter types (combat, treasure, peaceful, mystery)
+- **Distance-based content**: Harder enemies and better rewards farther from village
+- **Village hub**: Safe zone with NPCs, shops, and services
 
-### World Design
-- **30x30 procedural map** with concentric danger zones
-- **Encounter probabilities**: 30% combat, 30% treasure, 30% peaceful, 10% mystery
-- **Distance-based scaling**: Enemy difficulty increases with distance from village center
+### Graphics Approach
+- **CSS filters for variations**: Use hue-rotate() instead of multiple sprite files
+- **Sprite progression**: Player appearance changes with level/equipment
+- **Layered backgrounds**: CSS pseudo-elements for depth effects
+- **Pixel art style**: `image-rendering: pixelated` for crisp retro look
 
-## Development Guidelines
+### Audio System
+- **Procedural generation**: All sounds created at runtime via Web Audio API
+- **No audio files**: Zero external assets, everything generated
+- **Graceful degradation**: Game works without audio support
 
-### When Working with Modules During Refactor
-1. **Always build after changes**: Run `node build.mjs` before testing
-2. **Respect module boundaries**: Don't create circular dependencies
-3. **Use Player methods**: Never directly modify player properties
-4. **Test incrementally**: Build and test after each module change
-5. **Preserve exact behavior**: Compare against orig-* files to ensure no behavior changes
-6. **Focus on modular structure**: Priority is clean, maintainable code that matches original functionality
+## Core Guidelines
+
+### Adding Content
+- **Enemies**: Define in config.js, implement logic in combat.js
+- **NPCs**: Define dialogues in config.js, implement in npc.js
+- **Items/Shops**: Define in config.js, implement in world.js
+- **Graphics**: Add to appropriate graphics/ subdirectory
 
 ### Code Conventions
 - **ES6+ syntax**: Classes, arrow functions, template literals
-- **Clear method names**: `updatePlayerStats()`, `canAfford()`, `createScaledEnemy()`
+- **Descriptive method names**: `updatePlayerStats()`, `canAfford()`, etc.
 - **Graceful fallbacks**: Handle missing DOM elements and unsupported APIs
 - **No external dependencies**: Maintain zero-dependency design
 
-### Graphics and Assets
+### Graphics and Audio
 - **Pixel art style**: Use `image-rendering: pixelated` for crisp sprites
-- **Organized structure**: graphics/main_fish/, graphics/enemies/, graphics/map/
-- **Color system**: CSS hue-rotate() for variations, not multiple files
+- **CSS filters for variations**: Use hue-rotate() instead of multiple sprite files
+- **Procedural audio**: All sounds generated via Web Audio API, no audio files
 
-## Important Files and Context
+## Important Documentation
 
-### Documentation
-- `REFACTOR.md` - Complete architectural migration plan (v0.3 → v0.4)
-- `TECHNICAL_DOCS.md` - Implementation details and system explanations
-- `GAME_DESIGN.md` - Game mechanics and balance decisions
+- **TECHNICAL_DOCS.md** - Current implementation details and system specifications
+- **GAME_DESIGN.md** - Game mechanics and balance decisions
+- **CLAUDE_EVAL_FIX_PLAN.md** - Known issues and fixes to implement
+- **CHANGELOG.md** - User-visible changes by version
+- **REFACTOR.md** - Historical v0.3 → v0.4 migration details
 
-### Key Implementation Details
+For specific counts, dimensions, or implementation details, refer to TECHNICAL_DOCS.md.
+
+## Key Implementation Details
+
 - **Zero-dependency design**: No npm packages, libraries, or frameworks
-- **Browser compatibility**: Modern ES6+ features, no polyfills
+- **Browser compatibility**: Modern ES6+ features, no polyfills required
 - **Mobile responsive**: Touch-friendly interface with keyboard controls
 - **Save/load system**: LocalStorage-based game state persistence
-
-### Audio System
-Uses Web Audio API for procedural sound generation:
-- 17 different sound types (attack, magic, victory, etc.)
-- No audio files - everything generated at runtime
-- Graceful fallback when Web Audio unavailable
+- **Double-click to play**: Players can open index.html directly (built script.js is committed)
 
 ## Common Development Tasks
 
@@ -156,6 +119,7 @@ Uses Web Audio API for procedural sound generation:
 2. Implement in src/ module files using existing patterns
 3. Build with `node build.mjs`
 4. Test thoroughly in browser
+5. Update CHANGELOG.md and relevant docs
 
 ### Modifying Player Progression
 - Edit Player class methods in `src/player.js`
@@ -163,20 +127,35 @@ Uses Web Audio API for procedural sound generation:
 - Rebuild and verify stat displays update correctly
 
 ### Adding New Enemies or NPCs
-- Enemy definitions go in `src/combat.js`
-- NPC dialogues and interactions go in `src/ui.js`
-- Add corresponding graphics to graphics/ subdirectories
+- Define enemy/NPC data in `src/config.js`
+- Implement enemy logic in `src/combat.js`
+- Implement NPC interactions in `src/npc.js`
+- Add graphics to appropriate `graphics/` subdirectory
 
-## Clarifications and Conventions
+### Configuration Note
+When asked if a config is "used", this means the values actively drive game logic, not just being referenced without affecting behavior.
 
-### Configuration Usage
-- When asked if a config is "used", this means the values drive game logic
-- Merely being referenced without affecting game behavior is not considered "used"
-- Configs should actively influence game mechanics, enemy scaling, or player interactions
+## Common Pitfalls
 
-## Server and Development Warnings
+### Configuration vs Hardcoding
+- Check if values are already defined in GameConfig before hardcoding
+- Use StringFormatter for text that includes dynamic values
+
+### Module Dependencies
+- Check module dependencies before importing
+- Avoid creating circular dependencies
+- When in doubt, check the build order in build.mjs
 
 ### Server Management
-- You have a terrible track record of using the server to determine anything. If you think you've fixed it, let me know and I can check. Don't start your own servers unless I say to.
+- Don't start servers without explicit user permission
+- Manual testing via user's browser is preferred over automated testing
 
-The codebase prioritizes **simplicity, maintainability, and zero dependencies** while providing a complete RPG experience that runs in any modern browser.
+## Philosophy
+
+The codebase prioritizes **simplicity, maintainability, and zero dependencies** while providing a complete RPG experience that runs in any modern browser. When making changes:
+
+1. Preserve the zero-dependency nature
+2. Keep the double-click-to-play simplicity
+3. Follow existing patterns and conventions
+4. Update relevant documentation
+5. Report all changes to the user

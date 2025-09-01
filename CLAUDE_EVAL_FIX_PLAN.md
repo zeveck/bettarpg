@@ -12,6 +12,7 @@
 ### 🟠 High Priority (Configuration & Maintenance)
 - ✅ FIX-004: Hardcoded Prices in Dialogue Strings (COMPLETED)
 - ⬜ FIX-005: World Distance Thresholds Conflict
+- ⬜ FIX-025: Map Background Caching
 
 ### 🟡 Medium Priority (Dead Code Removal)
 - ⬜ FIX-006: Unreachable Code Block
@@ -35,13 +36,17 @@
 - ⬜ FIX-022: Global game Object Coupling (MAJOR REFACTOR)
 - ⬜ FIX-023: Circular Dependencies via Setters (MAJOR REFACTOR)
 - ⬜ FIX-024: DialogManager Naming Confusion
+- ⬜ FIX-026: Update Documentation - Remove Double-Click Claim
+
+### 🏗️ Major Architecture (Future Enhancements)
+- ⬜ FIX-027: Migrate to Webpack Build System
 
 ### ✅ Verified Non-Issues
 - ✅ NON-ISSUE-001: StringFormatter Not Defined (FALSE POSITIVE)
 - ✅ NON-ISSUE-002: Happy Balloon Time Damage (WORKING AS INTENDED)
 - ✅ NON-ISSUE-003: justExitedCombat Implementation (NOT IMPLEMENTED)
 
-**Progress**: 6/24 fixes completed | Next Priority: FIX-005 (World Distance Thresholds)
+**Progress**: 6/27 fixes completed | Next Priority: FIX-005 (World Distance Thresholds)
 
 **Latest Release**: v0.4.3 - Configuration improvements and centralized pricing
 
@@ -169,6 +174,82 @@ if (distance <= GameConfig.WORLD.DANGER_ZONES.SAFE_RADIUS) {
 ```
 **Impact**: Visual tiles don't match configured danger zones
 **Effort**: 5 minutes
+
+#### FIX-025: Map Background Caching 🗺️ PERFORMANCE
+**Issue**: generateTiledBackground() regenerates canvas every time world map shows
+**Location**: src/ui.js:2206 (generateTiledBackground method)
+**Fix**: Cache generated data URL and loaded water tile images
+```javascript
+// Add to UIManager constructor
+this.cachedWorldBackground = null;
+this.cachedWaterTiles = null;
+
+// Modify generateTiledBackground()
+async generateTiledBackground() {
+    // Return cached version if available
+    if (this.cachedWorldBackground) {
+        return this.cachedWorldBackground;
+    }
+    
+    // Cache water tiles on first load
+    if (!this.cachedWaterTiles) {
+        this.cachedWaterTiles = await this.loadWaterTileImages();
+    }
+    
+    // ... existing generation code using cached tiles ...
+    
+    // Cache the result
+    this.cachedWorldBackground = canvas.toDataURL('image/png');
+    return this.cachedWorldBackground;
+}
+```
+**Impact**: Significant performance improvement for world map transitions
+**Effort**: 15-20 minutes
+
+#### FIX-026: Update Documentation (Remove Double-Click Claim) 🔧 DOCUMENTATION 
+**Issue**: Documentation claims "double-click-to-play" but canvas CORS errors prevent file:// protocol usage
+**Location**: CLAUDE.md, README.md, GAME_DESIGN.md - multiple references to direct file opening
+**Problem**: Canvas toDataURL() fails with file:// due to browser security restrictions
+**Current behavior**: Game fails silently when opened directly, fallback rendering works but suboptimal
+**Fix**: Update all documentation to reflect server requirement for full functionality
+```markdown
+// Change from:
+"Double-click index.html to play - no server required!"
+
+// To:  
+"Run 'python devServer.py' and open http://localhost:5000 to play"
+"Note: Direct file:// opening has limited functionality due to browser security"
+```
+**Files to update**: CLAUDE.md, README.md, GAME_DESIGN.md, any setup instructions
+**Impact**: Documentation accuracy, proper user expectations, clearer setup flow
+**Effort**: 15 minutes
+
+#### FIX-027: Migrate to Webpack Build System 🚀 MODERNIZATION
+**Issue**: Simple concatenation build system limits development workflow and deployment options  
+**Location**: build.mjs, development workflow, deployment process
+**Current limitations**: No hot reload, no dependency management, manual module ordering, no optimization
+**Benefits**: Professional build pipeline, better development experience, automated optimization
+**Implementation plan**:
+```javascript
+// webpack.config.js setup
+module.exports = {
+  entry: './src/core.js',
+  output: { filename: 'script.js', path: __dirname },
+  mode: 'development', // or 'production'
+  devServer: { contentBase: './', port: 5000 },
+  module: { rules: [/* ES6 support */] }
+};
+```
+**Migration steps**:
+1. Create webpack.config.js for zero-dependency ES6 modules
+2. Update package.json with webpack scripts  
+3. Configure development server with hot module replacement
+4. Test all functionality works identically
+5. Update build documentation and processes
+**Key requirements**: Preserve zero runtime dependencies, maintain ES6+ syntax, ensure browser compatibility
+**Files**: New webpack.config.js, package.json, updated build scripts, documentation updates
+**Impact**: Modern development workflow, better debugging, future-proof architecture, easier deployments
+**Effort**: 2-3 hours
 
 ### 🟡 MEDIUM: Dead Code Removal
 Code that's never used but clutters the codebase.
@@ -349,9 +430,12 @@ These were reported but are actually not problems.
 4. FIX-018: Previous enemy sprite flash 👻 ✅ COMPLETED (already fixed 2025-08-27)
 5. FIX-020: Audio context initialization (browser autoplay) ⚠️ ✅ COMPLETED (v0.4.2)
 
-### Phase 2: High Priority (45 minutes) - STRONGLY RECOMMENDED
-1. FIX-004: Hardcoded prices in dialogues 📝
+### Phase 2: High Priority (4+ hours) - STRONGLY RECOMMENDED
+1. FIX-004: Hardcoded prices in dialogues 📝 ✅ COMPLETED (v0.4.3)
 2. FIX-005: World distance thresholds 🗺️
+3. FIX-025: Map background caching 🗺️ (performance)
+4. FIX-026: Update documentation 🔧 (remove double-click claims)
+5. FIX-027: Migrate to webpack build system 🚀 (modernization)
 
 ### Phase 3: Dead Code Removal (12 minutes) - RECOMMENDED
 1. FIX-006: Unreachable code block
@@ -388,17 +472,17 @@ After implementing fixes, verify:
 
 ## Summary
 
-**Total Issues Found**: 24 potential fixes + 3 non-issues
-**Critical to Fix**: 5 (25 minutes) - includes audio autoplay issue
-**Strongly Recommended**: 2 (45 minutes)
+**Total Issues Found**: 27 potential fixes + 3 non-issues
+**Critical to Fix**: 5 (25 minutes) - includes audio autoplay issue - ALL COMPLETED ✅
+**Strongly Recommended**: 5 (4+ hours) - includes new performance and modernization fixes
 **Nice to Have**: 6 dead code removals (12 minutes)
 **Optional**: 8 improvements (including DialogManager rename)
 **Major Refactoring**: 3 architectural issues (5-9 hours)
 
-**Minimum Time Investment**: 25 minutes for critical fixes
-**Recommended Time**: 1.5 hours for critical + high priority + dead code
-**Full Implementation (without major refactoring)**: 2-3 hours
-**Complete Overhaul (with architecture refactor)**: 7-12 hours
+**Minimum Time Investment**: 25 minutes for critical fixes - COMPLETED ✅
+**Recommended Time**: 4+ hours for high priority fixes (world thresholds, map caching, docs, webpack)
+**Full Implementation (without major refactoring)**: 5-6 hours
+**Complete Overhaul (with architecture refactor)**: 10-15 hours
 
 ## Notes
 

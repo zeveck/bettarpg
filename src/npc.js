@@ -39,6 +39,19 @@ export class NPCManager {
         this.currentDialogueIndex = 0;
     }
     
+    // Helper method to process dialogue with templates
+    processDialogue(dialogue, npc) {
+        if (npc.isShop) {
+            // For shop NPCs, use submarine cost for merchant dialogue templates
+            return StringFormatter.format(dialogue, { cost: GameConfig.SHOP.SUBMARINE.cost });
+        } else if (npc.isInn) {
+            // For inn NPCs, use rest cost for inn dialogue templates
+            return StringFormatter.format(dialogue, { cost: GameConfig.SHOP.INN_REST.cost });
+        }
+        // Return as-is for NPCs that don't use cost templates
+        return dialogue;
+    }
+
     // Core NPC interaction methods
     talkToNPC(npcId) {
         const npc = this.npcs[npcId];
@@ -47,12 +60,13 @@ export class NPCManager {
         this.currentNPC = npcId;
         this.currentDialogueIndex = 0;
         
-        const currentDialogue = npc.dialogues[this.currentDialogueIndex];
+        const rawDialogue = npc.dialogues[this.currentDialogueIndex];
+        const processedDialogue = this.processDialogue(rawDialogue, npc);
         
         return {
             success: true,
             npc: npc,
-            dialogue: currentDialogue,
+            dialogue: processedDialogue,
             isShop: npc.isShop || false,
             isInn: npc.isInn || false,
             hasMoreDialogue: this.currentDialogueIndex < npc.dialogues.length - 1
@@ -75,12 +89,13 @@ export class NPCManager {
             };
         }
         
-        const currentDialogue = npc.dialogues[this.currentDialogueIndex];
+        const rawDialogue = npc.dialogues[this.currentDialogueIndex];
+        const processedDialogue = this.processDialogue(rawDialogue, npc);
         
         return {
             success: true,
             npc: npc,
-            dialogue: currentDialogue,
+            dialogue: processedDialogue,
             isShop: npc.isShop || false,
             isInn: npc.isInn || false,
             hasMoreDialogue: this.currentDialogueIndex < npc.dialogues.length - 1

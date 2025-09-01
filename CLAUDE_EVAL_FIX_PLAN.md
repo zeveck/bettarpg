@@ -10,7 +10,7 @@
 - ✅ FIX-020: Audio Context Initialization (COMPLETED)
 
 ### 🟠 High Priority (Configuration & Maintenance)
-- ⬜ FIX-004: Hardcoded Prices in Dialogue Strings
+- ✅ FIX-004: Hardcoded Prices in Dialogue Strings (COMPLETED)
 - ⬜ FIX-005: World Distance Thresholds Conflict
 
 ### 🟡 Medium Priority (Dead Code Removal)
@@ -41,9 +41,9 @@
 - ✅ NON-ISSUE-002: Happy Balloon Time Damage (WORKING AS INTENDED)
 - ✅ NON-ISSUE-003: justExitedCombat Implementation (NOT IMPLEMENTED)
 
-**Progress**: 5/24 fixes completed | Next Priority: FIX-004 (Hardcoded Prices)
+**Progress**: 6/24 fixes completed | Next Priority: FIX-005 (World Distance Thresholds)
 
-**Latest Release**: v0.4.2 - Audio improvements and browser compliance
+**Latest Release**: v0.4.3 - Configuration improvements and centralized pricing
 
 ## Overview
 This plan addresses all issues found during the comprehensive codebase evaluation. Each fix is labeled with an ID for easy reference and categorized by type and priority.
@@ -125,7 +125,8 @@ initializeOnUserGesture() {
 ### 🟠 HIGH: Configuration & Maintenance Issues
 These make the code hard to maintain and prone to bugs when values change.
 
-#### FIX-004: Hardcoded Prices in Dialogue Strings 📝 MAINTENANCE NIGHTMARE
+#### FIX-004: Hardcoded Prices in Dialogue Strings 📝 MAINTENANCE NIGHTMARE ✅
+**Status**: COMPLETED (2025-08-31) - v0.4.3
 **Issue**: Prices hardcoded in 6+ dialogue strings, shop costs hardcoded separately
 **Locations**: 
 - src/config.js:354 - "100 Betta Bites" in submarine dialogue
@@ -146,6 +147,9 @@ static SHOP = {
 // Step 3: Update world.js getShopItems() to use config
 cost: GameConfig.SHOP.SUBMARINE.cost,  // Instead of hardcoded 100
 ```
+**Fix Applied**: Created GameConfig.SHOP configuration and updated all references to use centralized pricing with StringFormatter templates
+**Build**: Successful ✅ 
+**Expected Result**: Single source of truth for all prices - changing submarine cost from 100 to 150 only requires updating GameConfig.SHOP.SUBMARINE.cost
 **Impact**: Changing prices requires updating multiple files currently
 **Effort**: 30-45 minutes
 
@@ -400,7 +404,7 @@ After implementing fixes, verify:
 
 1. The most critical issue is FIX-001 (victory payload) which has been COMPLETED ✅  
 2. FIX-020 (audio autoplay policy) has been COMPLETED ✅ in v0.4.2 with audio toggle
-3. FIX-004 (hardcoded prices) is the biggest maintenance risk
+3. FIX-004 (hardcoded prices) has been COMPLETED ✅ in v0.4.3 with centralized configuration
 4. Most "dead code" is harmless but clutters the codebase
 5. Gemini incorrectly identified DialogManager as dead code - it's actively used
 6. The UIManager god class issue (FIX-021) is valid but requires major refactoring
@@ -412,6 +416,14 @@ After implementing fixes, verify:
 - Added FIX-021, 022, 023: Major architectural issues (UIManager god class, global coupling, circular deps)
 - Added FIX-024: DialogManager renaming for clarity (Gemini's confusion highlights naming issue)
 - Note: Gemini incorrectly identified DialogManager as dead code, but the confusion does suggest renaming would help
+
+## Version 0.4.3 Updates
+- **COMPLETED FIX-004**: Consolidated hardcoded prices into centralized GameConfig.SHOP configuration
+- **SINGLE SOURCE OF TRUTH**: All shop/inn pricing now managed in one location for easy maintenance
+- **TEMPLATE SYSTEM**: NPC dialogues use {cost} placeholders processed by StringFormatter
+- **MAINTAINABILITY**: Changing prices requires updating only GameConfig.SHOP values, not multiple files
+- **TECHNICAL**: NPCManager.processDialogue() applies appropriate costs for shop/inn NPCs automatically
+- **DOCUMENTATION**: Updated all docs, changelogs, and version numbers to reflect v0.4.3 improvements
 
 ## Version 0.4.2 Updates
 - **COMPLETED FIX-020**: Audio context initialization now complies with browser autoplay policies

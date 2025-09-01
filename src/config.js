@@ -223,8 +223,16 @@ export class GameConfig {
     
     // === GAME METADATA ===
     static GAME = {
-        VERSION: '0.4.2',
+        VERSION: '0.4.3',
         WEBSITE: 'https://github.com/zeveck/bettarpg'
+    };
+    
+    // === SHOP CONFIGURATION ===
+    static SHOP = {
+        SUBMARINE: { cost: 100, id: 'submarine' },
+        KELP_SNACK: { cost: 3, id: 'kelp_snack' },
+        BUBBLE_WATER: { cost: 2, id: 'bubble_water' },
+        INN_REST: { cost: 5, id: 'rest' }
     };
     
     // === UI CONFIGURATION ===
@@ -254,7 +262,7 @@ export class GameStrings {
             MAYBE_LATER: "Maybe later",
             ATTACK: "Attack",
             SWIM_AWAY: "Swim Away",
-            REST: "Rest (5 Betta Bites)",
+            REST: "Rest ({cost} Betta Bites)",
             REST_WITH_COST: "Rest ({cost} Betta Bites)",
             CLOSE: "Close",
             OK: "OK",
@@ -351,7 +359,7 @@ export class GameStrings {
                 "Welcome to my shop! Though I'm afraid business has been slow lately.",
                 "With all these disappearances, fewer fish dare to venture between the rice stalks.",
                 "I've heard whispers of something lurking in the deeper paddies...",
-                "I do have one special item - an ancient Dunkleosteus submarine for 100 Betta Bites! Would you like to see my wares?"
+                "I do have one special item - an ancient Dunkleosteus submarine for {cost} Betta Bites! Would you like to see my wares?"
             ]
         },
         
@@ -380,8 +388,8 @@ export class GameStrings {
             DIALOGUES: [
                 "Welcome to the Swishy Solace Inn! You look tired, young betta.",
                 "A good rest in our soft kelp beds will restore your strength.",
-                "For just 5 Betta Bites, you can sleep safely and wake up refreshed!",
-                "Would you like to rest? (This will fully restore your HP and MP for 5 Betta Bites)"
+                "For just {cost} Betta Bites, you can sleep safely and wake up refreshed!",
+                "Would you like to rest? (This will fully restore your HP and MP for {cost} Betta Bites)"
             ]
         }
     };
@@ -510,19 +518,19 @@ export class GameStrings {
             SUBMARINE: {
                 NAME: "🚀 Dunkleosteus Submarine",
                 DESCRIPTION: "An ancient submarine that protects from Giant Gar attacks",
-                PRICE: "100 Betta Bites"
+                PRICE: "{cost} Betta Bites"
             },
             
             KELP_SNACK: {
                 NAME: "🌿 Kelp Snack", 
                 DESCRIPTION: "A crunchy kelp snack that fully restores HP!",
-                PRICE: "3 Betta Bites"
+                PRICE: "{cost} Betta Bites"
             },
             
             BUBBLE_WATER: {
                 NAME: "💧 Bubble Water",
                 DESCRIPTION: "Fizzy bubble water that fully restores MP", 
-                PRICE: "2 Betta Bites"
+                PRICE: "{cost} Betta Bites"
             }
         },
         

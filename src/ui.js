@@ -596,7 +596,7 @@ export class UIManager {
                     // Check if we're at inn and show message if not enough bites
                     const innDialogueState = this.world.getCurrentDialogueState();
                     if (innDialogueState && innDialogueState.isInn) {
-                        const costMessage = StringFormatter.format(GameStrings.INN.REST_NOT_ENOUGH, { cost: GameConfig.ECONOMY.SERVICES.INN_REST.cost });
+                        const costMessage = StringFormatter.format(GameStrings.INN.REST_NOT_ENOUGH, { cost: GameConfig.SHOP.INN_REST.cost });
                         this.displayMessage(costMessage);
                     }
                 }
@@ -1811,12 +1811,12 @@ export class UIManager {
                 actions.push('game.ui.openShopFromDialogue()');
             }
             if (dialogueData.isInn) {
-                if (this.player.canAfford(GameConfig.ECONOMY.SERVICES.INN_REST.cost)) {
-                    buttonTexts.push(StringFormatter.format(GameStrings.UI.BUTTONS.REST_WITH_COST, { cost: GameConfig.ECONOMY.SERVICES.INN_REST.cost }));
+                if (this.player.canAfford(GameConfig.SHOP.INN_REST.cost)) {
+                    buttonTexts.push(StringFormatter.format(GameStrings.UI.BUTTONS.REST_WITH_COST, { cost: GameConfig.SHOP.INN_REST.cost }));
                     actions.push('game.ui.restAtInnFromDialogue()');
                 } else {
                     // Handle disabled state separately since it doesn't get automatic processing
-                    optionsHTML += `<div class="dialogue-option disabled">${GameStrings.UI.BUTTONS.REST}${GameStrings.UI.DIALOGUE_OPTIONS.REST_SUFFIX}</div>`;
+                    optionsHTML += `<div class="dialogue-option disabled">${StringFormatter.format(GameStrings.UI.BUTTONS.REST, { cost: GameConfig.SHOP.INN_REST.cost })}${GameStrings.UI.DIALOGUE_OPTIONS.REST_SUFFIX}</div>`;
                 }
             }
             buttonTexts.push(GameStrings.UI.BUTTONS.GOODBYE);

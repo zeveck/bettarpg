@@ -285,20 +285,20 @@ export class WorldManager {
             {
                 name: GameStrings.SHOP.ITEMS.SUBMARINE.NAME,
                 description: GameStrings.SHOP.ITEMS.SUBMARINE.DESCRIPTION,
-                cost: 100,
-                id: "submarine"
+                cost: GameConfig.SHOP.SUBMARINE.cost,
+                id: GameConfig.SHOP.SUBMARINE.id
             },
             {
                 name: GameStrings.SHOP.ITEMS.KELP_SNACK.NAME,
                 description: GameStrings.SHOP.ITEMS.KELP_SNACK.DESCRIPTION,
-                cost: 3,
-                id: "kelp_snack"
+                cost: GameConfig.SHOP.KELP_SNACK.cost,
+                id: GameConfig.SHOP.KELP_SNACK.id
             },
             {
                 name: GameStrings.SHOP.ITEMS.BUBBLE_WATER.NAME,
                 description: GameStrings.SHOP.ITEMS.BUBBLE_WATER.DESCRIPTION,
-                cost: 2,
-                id: "bubble_water"
+                cost: GameConfig.SHOP.BUBBLE_WATER.cost,
+                id: GameConfig.SHOP.BUBBLE_WATER.id
             }
         ];
     }
@@ -359,7 +359,7 @@ export class WorldManager {
     }
     
     restAtInn() {
-        const innCost = GameConfig.ECONOMY.SERVICES.INN_REST.cost;
+        const innCost = GameConfig.SHOP.INN_REST.cost;
         
         if (!this.player.canAfford(innCost)) {
             return { 

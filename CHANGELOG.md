@@ -2,7 +2,21 @@
 
 ---
 
-## Version 0.4.2 (Current)
+## Version 0.4.3 (Current)
+
+### ⚙️ Configuration Improvements
+- **Fixed hardcoded prices (FIX-004)**: Created centralized GameConfig.SHOP configuration for all pricing
+- **Single source of truth**: Shop costs, inn costs, and dialogue pricing now managed in one location  
+- **Template-based dialogues**: NPC conversations use {cost} placeholders processed dynamically
+- **Enhanced maintainability**: Changing prices requires updating only GameConfig.SHOP values
+
+### 📝 Maintenance  
+- Updated version number to 0.4.3
+- Updated all documentation to reflect configuration improvements
+
+---
+
+## Version 0.4.2
 
 ### 🎵 Audio Improvements  
 - **Fixed audio autoplay policy compliance**: Audio context now initializes on first user interaction instead of page load (FIX-020)

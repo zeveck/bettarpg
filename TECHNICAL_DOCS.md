@@ -1,4 +1,4 @@
-# Betta Fish RPG v0.4.2 - Technical Documentation
+# Betta Fish RPG v0.4.3 - Technical Documentation
 
 ## Architecture Overview
 
@@ -282,6 +282,14 @@ generateRandomName() {
 - **Edge Cases**: Empty inputs, audio unavailable, rapid clicking
 - **Cross-Platform**: Desktop and mobile browser testing
 - **Performance**: No memory leaks or performance degradation
+
+## Version 0.4.3 Updates
+
+### Configuration Improvements
+- **FIX-004: Consolidated Hardcoded Prices**: Created centralized GameConfig.SHOP configuration for all pricing
+- **Single Source of Truth**: Shop costs, inn costs, and dialogue pricing now use one configuration location
+- **Template-based Dialogues**: NPC conversations use {cost} placeholders processed by StringFormatter
+- **Maintainable Pricing**: Changing prices now requires updating only GameConfig.SHOP values
 
 ## Version 0.4.2 Updates
 

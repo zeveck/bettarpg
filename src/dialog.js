@@ -194,7 +194,7 @@ export class DialogManager {
     
     showRestConfirmation(callback) {
         const [button] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.CLOSE]);
-        this.show(StringFormatter.format(GameStrings.INN.REST_SUCCESS, { cost: GameConfig.ECONOMY.SERVICES.INN_REST.cost }), [
+        this.show(StringFormatter.format(GameStrings.INN.REST_SUCCESS, { cost: GameConfig.SHOP.INN_REST.cost }), [
             {
                 html: button.html,
                 key: button.key,

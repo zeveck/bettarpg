@@ -226,8 +226,16 @@ class GameConfig {
     
     // === GAME METADATA ===
     static GAME = {
-        VERSION: '0.4.2',
+        VERSION: '0.4.3',
         WEBSITE: 'https://github.com/zeveck/bettarpg'
+    };
+    
+    // === SHOP CONFIGURATION ===
+    static SHOP = {
+        SUBMARINE: { cost: 100, id: 'submarine' },
+        KELP_SNACK: { cost: 3, id: 'kelp_snack' },
+        BUBBLE_WATER: { cost: 2, id: 'bubble_water' },
+        INN_REST: { cost: 5, id: 'rest' }
     };
     
     // === UI CONFIGURATION ===
@@ -257,7 +265,7 @@ class GameStrings {
             MAYBE_LATER: "Maybe later",
             ATTACK: "Attack",
             SWIM_AWAY: "Swim Away",
-            REST: "Rest (5 Betta Bites)",
+            REST: "Rest ({cost} Betta Bites)",
             REST_WITH_COST: "Rest ({cost} Betta Bites)",
             CLOSE: "Close",
             OK: "OK",
@@ -354,7 +362,7 @@ class GameStrings {
                 "Welcome to my shop! Though I'm afraid business has been slow lately.",
                 "With all these disappearances, fewer fish dare to venture between the rice stalks.",
                 "I've heard whispers of something lurking in the deeper paddies...",
-                "I do have one special item - an ancient Dunkleosteus submarine for 100 Betta Bites! Would you like to see my wares?"
+                "I do have one special item - an ancient Dunkleosteus submarine for {cost} Betta Bites! Would you like to see my wares?"
             ]
         },
         
@@ -383,8 +391,8 @@ class GameStrings {
             DIALOGUES: [
                 "Welcome to the Swishy Solace Inn! You look tired, young betta.",
                 "A good rest in our soft kelp beds will restore your strength.",
-                "For just 5 Betta Bites, you can sleep safely and wake up refreshed!",
-                "Would you like to rest? (This will fully restore your HP and MP for 5 Betta Bites)"
+                "For just {cost} Betta Bites, you can sleep safely and wake up refreshed!",
+                "Would you like to rest? (This will fully restore your HP and MP for {cost} Betta Bites)"
             ]
         }
     };
@@ -513,19 +521,19 @@ class GameStrings {
             SUBMARINE: {
                 NAME: "🚀 Dunkleosteus Submarine",
                 DESCRIPTION: "An ancient submarine that protects from Giant Gar attacks",
-                PRICE: "100 Betta Bites"
+                PRICE: "{cost} Betta Bites"
             },
             
             KELP_SNACK: {
                 NAME: "🌿 Kelp Snack", 
                 DESCRIPTION: "A crunchy kelp snack that fully restores HP!",
-                PRICE: "3 Betta Bites"
+                PRICE: "{cost} Betta Bites"
             },
             
             BUBBLE_WATER: {
                 NAME: "💧 Bubble Water",
                 DESCRIPTION: "Fizzy bubble water that fully restores MP", 
-                PRICE: "2 Betta Bites"
+                PRICE: "{cost} Betta Bites"
             }
         },
         
@@ -1253,6 +1261,19 @@ class NPCManager {
         this.currentDialogueIndex = 0;
     }
     
+    // Helper method to process dialogue with templates
+    processDialogue(dialogue, npc) {
+        if (npc.isShop) {
+            // For shop NPCs, use submarine cost for merchant dialogue templates
+            return StringFormatter.format(dialogue, { cost: GameConfig.SHOP.SUBMARINE.cost });
+        } else if (npc.isInn) {
+            // For inn NPCs, use rest cost for inn dialogue templates
+            return StringFormatter.format(dialogue, { cost: GameConfig.SHOP.INN_REST.cost });
+        }
+        // Return as-is for NPCs that don't use cost templates
+        return dialogue;
+    }
+
     // Core NPC interaction methods
     talkToNPC(npcId) {
         const npc = this.npcs[npcId];
@@ -1261,12 +1282,13 @@ class NPCManager {
         this.currentNPC = npcId;
         this.currentDialogueIndex = 0;
         
-        const currentDialogue = npc.dialogues[this.currentDialogueIndex];
+        const rawDialogue = npc.dialogues[this.currentDialogueIndex];
+        const processedDialogue = this.processDialogue(rawDialogue, npc);
         
         return {
             success: true,
             npc: npc,
-            dialogue: currentDialogue,
+            dialogue: processedDialogue,
             isShop: npc.isShop || false,
             isInn: npc.isInn || false,
             hasMoreDialogue: this.currentDialogueIndex < npc.dialogues.length - 1
@@ -1289,12 +1311,13 @@ class NPCManager {
             };
         }
         
-        const currentDialogue = npc.dialogues[this.currentDialogueIndex];
+        const rawDialogue = npc.dialogues[this.currentDialogueIndex];
+        const processedDialogue = this.processDialogue(rawDialogue, npc);
         
         return {
             success: true,
             npc: npc,
-            dialogue: currentDialogue,
+            dialogue: processedDialogue,
             isShop: npc.isShop || false,
             isInn: npc.isInn || false,
             hasMoreDialogue: this.currentDialogueIndex < npc.dialogues.length - 1
@@ -1538,7 +1561,7 @@ class DialogManager {
     
     showRestConfirmation(callback) {
         const [button] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.CLOSE]);
-        this.show(StringFormatter.format(GameStrings.INN.REST_SUCCESS, { cost: GameConfig.ECONOMY.SERVICES.INN_REST.cost }), [
+        this.show(StringFormatter.format(GameStrings.INN.REST_SUCCESS, { cost: GameConfig.SHOP.INN_REST.cost }), [
             {
                 html: button.html,
                 key: button.key,
@@ -2777,20 +2800,20 @@ class WorldManager {
             {
                 name: GameStrings.SHOP.ITEMS.SUBMARINE.NAME,
                 description: GameStrings.SHOP.ITEMS.SUBMARINE.DESCRIPTION,
-                cost: 100,
-                id: "submarine"
+                cost: GameConfig.SHOP.SUBMARINE.cost,
+                id: GameConfig.SHOP.SUBMARINE.id
             },
             {
                 name: GameStrings.SHOP.ITEMS.KELP_SNACK.NAME,
                 description: GameStrings.SHOP.ITEMS.KELP_SNACK.DESCRIPTION,
-                cost: 3,
-                id: "kelp_snack"
+                cost: GameConfig.SHOP.KELP_SNACK.cost,
+                id: GameConfig.SHOP.KELP_SNACK.id
             },
             {
                 name: GameStrings.SHOP.ITEMS.BUBBLE_WATER.NAME,
                 description: GameStrings.SHOP.ITEMS.BUBBLE_WATER.DESCRIPTION,
-                cost: 2,
-                id: "bubble_water"
+                cost: GameConfig.SHOP.BUBBLE_WATER.cost,
+                id: GameConfig.SHOP.BUBBLE_WATER.id
             }
         ];
     }
@@ -2851,7 +2874,7 @@ class WorldManager {
     }
     
     restAtInn() {
-        const innCost = GameConfig.ECONOMY.SERVICES.INN_REST.cost;
+        const innCost = GameConfig.SHOP.INN_REST.cost;
         
         if (!this.player.canAfford(innCost)) {
             return { 
@@ -3502,7 +3525,7 @@ class UIManager {
                     // Check if we're at inn and show message if not enough bites
                     const innDialogueState = this.world.getCurrentDialogueState();
                     if (innDialogueState && innDialogueState.isInn) {
-                        const costMessage = StringFormatter.format(GameStrings.INN.REST_NOT_ENOUGH, { cost: GameConfig.ECONOMY.SERVICES.INN_REST.cost });
+                        const costMessage = StringFormatter.format(GameStrings.INN.REST_NOT_ENOUGH, { cost: GameConfig.SHOP.INN_REST.cost });
                         this.displayMessage(costMessage);
                     }
                 }
@@ -4717,12 +4740,12 @@ class UIManager {
                 actions.push('game.ui.openShopFromDialogue()');
             }
             if (dialogueData.isInn) {
-                if (this.player.canAfford(GameConfig.ECONOMY.SERVICES.INN_REST.cost)) {
-                    buttonTexts.push(StringFormatter.format(GameStrings.UI.BUTTONS.REST_WITH_COST, { cost: GameConfig.ECONOMY.SERVICES.INN_REST.cost }));
+                if (this.player.canAfford(GameConfig.SHOP.INN_REST.cost)) {
+                    buttonTexts.push(StringFormatter.format(GameStrings.UI.BUTTONS.REST_WITH_COST, { cost: GameConfig.SHOP.INN_REST.cost }));
                     actions.push('game.ui.restAtInnFromDialogue()');
                 } else {
                     // Handle disabled state separately since it doesn't get automatic processing
-                    optionsHTML += `<div class="dialogue-option disabled">${GameStrings.UI.BUTTONS.REST}${GameStrings.UI.DIALOGUE_OPTIONS.REST_SUFFIX}</div>`;
+                    optionsHTML += `<div class="dialogue-option disabled">${StringFormatter.format(GameStrings.UI.BUTTONS.REST, { cost: GameConfig.SHOP.INN_REST.cost })}${GameStrings.UI.DIALOGUE_OPTIONS.REST_SUFFIX}</div>`;
                 }
             }
             buttonTexts.push(GameStrings.UI.BUTTONS.GOODBYE);

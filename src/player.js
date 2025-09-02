@@ -283,22 +283,6 @@ export class Player {
         this.color = color;
     }
     
-    // Interface for getting comprehensive stats (for UI updates)
-    getStats() {
-        return {
-            name: this.name,
-            level: this.level,
-            hp: this.hp,
-            maxHp: this.maxHp,
-            mp: this.mp,
-            maxMp: this.maxMp,
-            exp: this.exp,
-            expToNext: this.expToNext,
-            bettaBites: this.bettaBites,
-            hpPercentage: this.hpPercentage,
-            mpPercentage: this.mpPercentage
-        };
-    }
     
     get isAlive() {
         return this.hp > 0;

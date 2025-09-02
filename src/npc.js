@@ -123,18 +123,6 @@ export class NPCManager {
         };
     }
     
-    // Service type checking
-    isShopNPC(npcId) {
-        const npc = this.npcs[npcId];
-        return npc ? (npc.isShop || false) : false;
-    }
-    
-    isInnNPC(npcId) {
-        const npc = this.npcs[npcId];
-        return npc ? (npc.isInn || false) : false;
-    }
-    
-    
     // Reset method for game state management
     reset() {
         this.currentNPC = null;

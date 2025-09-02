@@ -15,13 +15,13 @@
 - ✅ FIX-025: Map Background Caching (COMPLETED)
 
 ### 🟡 Medium Priority (Dead Code Removal)
-- ⬜ FIX-006: Unreachable Code Block
-- ⬜ FIX-007: Dead Function - canMoveTo
-- ⬜ FIX-008: Dead Functions - isShopNPC/isInnNPC
-- ⬜ FIX-009: Dead Event Listeners
-- ⬜ FIX-010: Dead Element References
-- ⬜ FIX-019: Player.getStats Dead Method
-- ⬜ FIX-011: justExitedCombat Flag (NO ACTION NEEDED)
+- ✅ FIX-006: Unreachable Code Block (COMPLETED - Fixed with FIX-005)
+- ✅ FIX-007: Dead Function - canMoveTo (COMPLETED)
+- ✅ FIX-008: Dead Functions - isShopNPC/isInnNPC (COMPLETED)
+- ✅ FIX-009: Dead Event Listeners (COMPLETED)
+- ✅ FIX-010: Dead Element References (COMPLETED)
+- ✅ FIX-019: Player.getStats Dead Method (COMPLETED)
+- ✅ FIX-011: justExitedCombat Flag (COMPLETED - See NON-ISSUE-003)
 
 ### 🔵 Low Priority (Visual Constants & Timing)
 - ⬜ FIX-012: Consolidate Visual Constants (OPTIONAL)
@@ -31,12 +31,15 @@
 ### ⚪ Minor (Code Quality Issues)
 - ⬜ FIX-015: Dialog Container Mismatch
 - ⬜ FIX-016: Duplicate Color Config
-- ⬜ FIX-017: updateMovementButtons References Wrong IDs
+- ✅ FIX-017: updateMovementButtons Dead Function (COMPLETED)
 - ⬜ FIX-021: UIManager God Class (MAJOR REFACTOR)
 - ⬜ FIX-022: Global game Object Coupling (MAJOR REFACTOR)
 - ⬜ FIX-023: Circular Dependencies via Setters (MAJOR REFACTOR)
 - ⬜ FIX-024: DialogManager Naming Confusion
 - ⬜ FIX-026: Update Documentation - Remove Double-Click Claim
+
+### 🟠 Medium Priority (Architectural Consistency)
+- ⬜ FIX-028: Replace onClick Attributes with Event Listeners
 
 ### 🏗️ Major Architecture (Future Enhancements)
 - ⬜ FIX-027: Migrate to Webpack Build System
@@ -44,11 +47,11 @@
 ### ✅ Verified Non-Issues
 - ✅ NON-ISSUE-001: StringFormatter Not Defined (FALSE POSITIVE)
 - ✅ NON-ISSUE-002: Happy Balloon Time Damage (WORKING AS INTENDED)
-- ✅ NON-ISSUE-003: justExitedCombat Implementation (NOT IMPLEMENTED)
+- ✅ NON-ISSUE-003: justExitedCombat Implementation (ALREADY REMOVED)
 
-**Progress**: 8/27 fixes completed | Next Priority: FIX-006 (Dead Code Removal)
+**Progress**: 16/28 fixes completed | Next Priority: Low Priority fixes or Documentation updates
 
-**Latest Release**: v0.4.5 - Code cleanup and dead code removal
+**Latest Release**: v0.4.6 - Dead code removal completed
 
 ## Overview
 This plan addresses all issues found during the comprehensive codebase evaluation. Each fix is labeled with an ID for easy reference and categorized by type and priority.
@@ -237,6 +240,28 @@ initializeVillageBackground() {
 **Impact**: Documentation accuracy, proper user expectations, clearer setup flow
 **Effort**: 15 minutes
 
+#### FIX-028: Replace onClick Attributes with Event Listeners 🔄 ARCHITECTURAL CONSISTENCY
+**Issue**: Inconsistent event handling - mix of inline `onclick` attributes in HTML and `addEventListener` calls in JavaScript
+**Location**: index.html (inline onclick handlers throughout), various src/ modules
+**Current inconsistency**: 
+- HTML uses: `onclick="if(game) game.swimDirection('north')"`
+- JavaScript uses: `document.getElementById('button')?.addEventListener('click', ...)`
+**Fix**: Replace all inline onclick handlers with proper addEventListener calls in JavaScript modules
+**Benefits**: 
+- Better separation of concerns (HTML for structure, JS for behavior)
+- Easier testing and debugging
+- Eliminates global `game` object dependency in HTML
+- Consistent event handling patterns
+- Better error handling capabilities
+**Implementation steps**:
+1. Remove all onclick attributes from HTML elements
+2. Add corresponding addEventListener calls in appropriate modules
+3. Update event handler functions to work with event objects
+4. Test all interactive elements still function correctly
+**Files affected**: index.html, src/ui.js, src/core.js
+**Impact**: Cleaner architecture, better maintainability, consistent code patterns
+**Effort**: 30-45 minutes
+
 #### FIX-027: Migrate to Webpack Build System 🚀 MODERNIZATION
 **Issue**: Simple concatenation build system limits development workflow and deployment options  
 **Location**: build.mjs, development workflow, deployment process
@@ -267,54 +292,68 @@ module.exports = {
 ### 🟡 MEDIUM: Dead Code Removal
 Code that's never used but clutters the codebase.
 
-#### FIX-006: Unreachable Code Block 🚫 DUPLICATE CONDITION
+#### FIX-006: Unreachable Code Block 🚫 DUPLICATE CONDITION ✅
+**Status**: COMPLETED (2025-09-02) - Fixed automatically with FIX-005
 **Issue**: Duplicate condition makes else-if unreachable
-**Location**: src/world.js:42-47
-**Fix**: Delete the duplicate else-if block (lines 42-47)
-**Impact**: Confusing dead code
-**Effort**: 1 minute
+**Original Location**: src/world.js:42-47 (in generateWorldMap function)
+**Fix Applied**: Entire generateWorldMap function was removed as dead code (FIX-005)
+**Impact**: Duplicate condition was in unused worldMap generation
+**Root Cause**: The duplicate condition `(x === this.VILLAGE_CENTER.x && y === this.VILLAGE_CENTER.y)` appeared twice in the same if-else chain
+**Effort**: 0 minutes (resolved by FIX-005 dead code removal)
 
-#### FIX-007: Dead Function - canMoveTo 🗑️ NEVER CALLED
+#### FIX-007: Dead Function - canMoveTo 🗑️ NEVER CALLED ✅
+**Status**: COMPLETED (2025-09-02) - v0.4.6
 **Issue**: Function defined but never used
-**Location**: src/world.js:82-84
-**Fix**: Delete the function
-**Impact**: Reduces code clutter
+**Location**: src/world.js:28-30
+**Fix Applied**: Removed the entire canMoveTo function
+**Impact**: Reduced code clutter by 3 lines
 **Effort**: 1 minute
 
-#### FIX-008: Dead Functions - isShopNPC/isInnNPC 🗑️ NEVER CALLED
+#### FIX-008: Dead Functions - isShopNPC/isInnNPC 🗑️ NEVER CALLED ✅
+**Status**: COMPLETED (2025-09-02) - v0.4.6
 **Issue**: Two functions defined but never used
-**Location**: src/npc.js:112-121
-**Fix**: Delete both functions
-**Impact**: Reduces code clutter
+**Location**: src/npc.js:127-135
+**Fix Applied**: Removed both isShopNPC() and isInnNPC() functions
+**Impact**: Reduced code clutter by 9 lines
 **Effort**: 1 minute
 
-#### FIX-009: Dead Event Listeners 🗑️ NON-EXISTENT IDS
+#### FIX-009: Dead Event Listeners 🗑️ NON-EXISTENT IDS ✅
+**Status**: COMPLETED (2025-09-02) - v0.4.6
 **Issue**: Listeners for northBtn/southBtn/etc that don't exist
-**Location**: src/ui.js:371-374
-**Fix**: Remove these addEventListener calls
-**Impact**: Cleans up console errors
+**Location**: src/ui.js:379-382
+**Fix Applied**: Removed dead event listeners for non-existent button IDs
+**Details**: HTML has swim-north-btn, swim-south-btn etc., but code tried to attach to northBtn, southBtn
+**Impact**: Eliminated failed element lookups, cleaned up code
 **Effort**: 2 minutes
 
-#### FIX-010: Dead Element References 🗑️ NON-EXISTENT IDS
+#### FIX-010: Dead Element References 🗑️ NON-EXISTENT IDS ✅
+**Status**: COMPLETED (2025-09-02) - v0.4.6
 **Issue**: References to combatArea and movementControls that don't exist
-**Location**: src/ui.js:1240-1242
-**Fix**: Remove these two lines
-**Impact**: Cleans up code
+**Location**: src/ui.js:1283-1284
+**Fix Applied**: Removed hideElement('combatArea') and showElement('movementControls') calls
+**Impact**: Eliminated failed element operations, cleaned up code
 **Effort**: 1 minute
 
-#### FIX-019: Player.getStats Dead Method 🗑️ NEVER CALLED
+#### FIX-019: Player.getStats Dead Method 🗑️ NEVER CALLED ✅
+**Status**: COMPLETED (2025-09-02) - v0.4.6
 **Issue**: getStats method defined but never used
-**Location**: src/player.js (need to verify line number)
-**Fix**: Delete the getStats method
-**Impact**: Reduces code clutter
+**Location**: src/player.js:287-301
+**Fix Applied**: Removed the entire getStats method and its comment
+**Impact**: Reduced code clutter by 16 lines
 **Effort**: 1 minute
 
-#### FIX-011: justExitedCombat Flag Missing 🚫 SET BUT NEVER USED
-**Issue**: The flag is mentioned in evaluations but doesn't exist in code
-**Location**: N/A - not implemented  
-**Fix**: This is actually NOT an issue - the flag doesn't exist in the codebase
-**Impact**: None - already not implemented
-**Effort**: 0 minutes (no action needed)
+#### FIX-011: justExitedCombat Flag Missing 🚫 SET BUT NEVER USED ✅
+**Status**: COMPLETED (2025-09-02) - Resolved as NON-ISSUE-003
+**Issue**: The flag is mentioned in evaluations but doesn't exist in current code
+**Location**: N/A - was removed in commit b89cf17 (Happy Balloon Time)
+**Resolution**: Confirmed the flag was intentionally removed, not missing
+**History**: 
+- Originally implemented in v0.3 with proper flag and `setCombatExitFlag()` method
+- Intentionally removed in Happy Balloon Time commit along with supporting logic  
+- Evaluations were based on older code that still contained the flag
+**Cross-reference**: See NON-ISSUE-003 for detailed analysis
+**Impact**: None - no action needed, feature was intentionally removed
+**Effort**: 0 minutes (historical verification only)
 
 ### 🔵 LOW: Visual Constants & Timing
 Hardcoded values that work fine but could be configurable.
@@ -393,12 +432,19 @@ Non-breaking issues that could be improved.
 **Impact**: Reduces redundancy
 **Effort**: 2 minutes
 
-#### FIX-017: updateMovementButtons References Wrong IDs 🔄 DEAD CODE
-**Issue**: Updates northBtn/southBtn which don't exist
-**Location**: src/ui.js:2031-2040
-**Fix**: Remove or update to use swim-*-btn
-**Impact**: None - buttons don't exist anyway
-**Effort**: 5 minutes
+#### FIX-017: updateMovementButtons Dead Function 🗑️ UNNECESSARY DEAD CODE ✅
+**Status**: COMPLETED (2025-09-02) - v0.4.6
+**Issue**: Function attempts to disable non-existent movement buttons during combat
+**Location**: src/ui.js:2060-2074 (entire function) and src/ui.js:1996 (function call)
+**Root Cause Analysis**: 
+- Function was designed to disable movement buttons during combat
+- References non-existent button IDs (`northBtn` vs actual `swim-north-btn`)
+- Keyboard shortcuts already properly isolated by screen via `handleKeyboard()` logic
+- Combat and world-map are separate screens, so buttons aren't visible during combat anyway
+- Function serves no purpose in current architecture
+**Fix Applied**: Removed entire `updateMovementButtons()` function and its call from `updateAllDisplays()`
+**Impact**: Eliminated 15 lines of dead code with zero functionality loss - screen isolation already prevents cross-screen input issues
+**Effort**: 2 minutes
 
 #### FIX-024: DialogManager Naming Confusion 📦 CLARITY
 **Issue**: DialogManager name conflicts with dialogue system, causing confusion
@@ -431,8 +477,12 @@ These were reported but are actually not problems.
 
 #### NON-ISSUE-003: justExitedCombat Implementation
 **Claimed by**: GPT-5 evaluation (said flag was set but never used)
-**Status**: NOT IMPLEMENTED - The feature doesn't exist in the codebase at all
-**Action**: Could be added as enhancement if desired
+**Status**: ALREADY REMOVED - The feature was implemented in v0.3 but intentionally removed in commit b89cf17 (Happy Balloon Time)
+**History**: 
+- Originally implemented in v0.3 with `this.justExitedCombat` flag and `setCombatExitFlag()` method
+- Removed in Happy Balloon Time commit along with supporting logic
+- Evaluations were done on older code that still had the flag
+**Action**: None needed - feature was intentionally removed, not missing
 
 ## Implementation Priority
 
@@ -448,7 +498,8 @@ These were reported but are actually not problems.
 2. FIX-005: World distance thresholds 🗺️ ✅ COMPLETED (v0.4.5)
 3. FIX-025: Map background caching 🗺️ (performance) ✅ COMPLETED (v0.4.4)
 4. FIX-026: Update documentation 🔧 (remove double-click claims)
-5. FIX-027: Migrate to webpack build system 🚀 (modernization)
+5. FIX-028: Replace onClick with event listeners 🔄 (architectural consistency)
+6. FIX-027: Migrate to webpack build system 🚀 (modernization)
 
 ### Phase 3: Dead Code Removal (12 minutes) - RECOMMENDED
 1. FIX-006: Unreachable code block
@@ -464,7 +515,7 @@ These were reported but are actually not problems.
 3. FIX-014: Cheat constants (very low priority)
 4. FIX-015: Dialog container fix
 5. FIX-016: Remove duplicate colors
-6. FIX-017: Fix updateMovementButtons
+6. FIX-017: Remove updateMovementButtons ✅ COMPLETED
 7. FIX-024: Rename DialogManager for clarity (10 minutes)
 
 ### Phase 5: Major Architecture Refactoring - FUTURE CONSIDERATION
@@ -485,9 +536,9 @@ After implementing fixes, verify:
 
 ## Summary
 
-**Total Issues Found**: 27 potential fixes + 3 non-issues
+**Total Issues Found**: 28 potential fixes + 3 non-issues
 **Critical to Fix**: 5 (25 minutes) - includes audio autoplay issue - ALL COMPLETED ✅
-**Strongly Recommended**: 5 (4+ hours) - includes new performance and modernization fixes
+**Strongly Recommended**: 6 (4+ hours) - includes new performance and modernization fixes
 **Nice to Have**: 6 dead code removals (12 minutes)
 **Optional**: 8 improvements (including DialogManager rename)
 **Major Refactoring**: 3 architectural issues (5-9 hours)

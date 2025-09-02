@@ -25,11 +25,6 @@ export class WorldManager {
     
     
     // Movement methods
-    canMoveTo(x, y) {
-        return x >= 0 && x < this.WORLD_SIZE && y >= 0 && y < this.WORLD_SIZE;
-    }
-    
-    
     
     movePlayer(direction) {
         let newX = this.currentX;

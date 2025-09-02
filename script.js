@@ -226,7 +226,7 @@ class GameConfig {
     
     // === GAME METADATA ===
     static GAME = {
-        VERSION: '0.4.5',
+        VERSION: '0.4.6',
         WEBSITE: 'https://github.com/zeveck/bettarpg'
     };
     
@@ -1171,22 +1171,6 @@ class Player {
         this.color = color;
     }
     
-    // Interface for getting comprehensive stats (for UI updates)
-    getStats() {
-        return {
-            name: this.name,
-            level: this.level,
-            hp: this.hp,
-            maxHp: this.maxHp,
-            mp: this.mp,
-            maxMp: this.maxMp,
-            exp: this.exp,
-            expToNext: this.expToNext,
-            bettaBites: this.bettaBites,
-            hpPercentage: this.hpPercentage,
-            mpPercentage: this.mpPercentage
-        };
-    }
     
     get isAlive() {
         return this.hp > 0;
@@ -1344,18 +1328,6 @@ class NPCManager {
             hasMoreDialogue: this.currentDialogueIndex < npc.dialogues.length - 1
         };
     }
-    
-    // Service type checking
-    isShopNPC(npcId) {
-        const npc = this.npcs[npcId];
-        return npc ? (npc.isShop || false) : false;
-    }
-    
-    isInnNPC(npcId) {
-        const npc = this.npcs[npcId];
-        return npc ? (npc.isInn || false) : false;
-    }
-    
     
     // Reset method for game state management
     reset() {
@@ -2540,11 +2512,6 @@ class WorldManager {
     
     
     // Movement methods
-    canMoveTo(x, y) {
-        return x >= 0 && x < this.WORLD_SIZE && y >= 0 && y < this.WORLD_SIZE;
-    }
-    
-    
     
     movePlayer(direction) {
         let newX = this.currentX;
@@ -3237,11 +3204,7 @@ class UIManager {
     }
     
     setupEventListeners() {
-        // Movement buttons
-        document.getElementById('northBtn')?.addEventListener('click', () => this.movePlayer('north'));
-        document.getElementById('southBtn')?.addEventListener('click', () => this.movePlayer('south'));
-        document.getElementById('eastBtn')?.addEventListener('click', () => this.movePlayer('east'));
-        document.getElementById('westBtn')?.addEventListener('click', () => this.movePlayer('west'));
+        // Movement buttons (use onclick handlers in HTML)
         
         // Combat buttons
         document.getElementById('attackBtn')?.addEventListener('click', () => this.playerAttack());
@@ -4146,8 +4109,6 @@ class UIManager {
             }
         });
         
-        this.hideElement('combatArea');
-        this.showElement('movementControls');
         this.disableCombatButtons();
         
         // Return to appropriate screen after combat
@@ -4861,7 +4822,6 @@ class UIManager {
     updateAllDisplays() {
         this.updatePlayerStats();
         this.updateVillageButtons();
-        this.updateMovementButtons();
         
         // Update world map player sprite if on world map (for armor changes etc)
         if (this.currentScreen === 'world-map') {
@@ -4925,21 +4885,6 @@ class UIManager {
         }
     }
     
-    updateMovementButtons() {
-        const combatActive = this.combat.isCombatActive();
-        const buttons = ['northBtn', 'southBtn', 'eastBtn', 'westBtn'];
-        
-        buttons.forEach(id => {
-            const btn = document.getElementById(id);
-            if (btn) {
-                if (combatActive) {
-                    btn.setAttribute('disabled', 'true');
-                } else {
-                    btn.removeAttribute('disabled');
-                }
-            }
-        });
-    }
     
     updateHPBar(elementId, current, max) {
         const bar = document.getElementById(elementId);

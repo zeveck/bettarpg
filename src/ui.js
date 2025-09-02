@@ -375,11 +375,7 @@ export class UIManager {
     }
     
     setupEventListeners() {
-        // Movement buttons
-        document.getElementById('northBtn')?.addEventListener('click', () => this.movePlayer('north'));
-        document.getElementById('southBtn')?.addEventListener('click', () => this.movePlayer('south'));
-        document.getElementById('eastBtn')?.addEventListener('click', () => this.movePlayer('east'));
-        document.getElementById('westBtn')?.addEventListener('click', () => this.movePlayer('west'));
+        // Movement buttons (use onclick handlers in HTML)
         
         // Combat buttons
         document.getElementById('attackBtn')?.addEventListener('click', () => this.playerAttack());
@@ -1284,8 +1280,6 @@ export class UIManager {
             }
         });
         
-        this.hideElement('combatArea');
-        this.showElement('movementControls');
         this.disableCombatButtons();
         
         // Return to appropriate screen after combat
@@ -1999,7 +1993,6 @@ export class UIManager {
     updateAllDisplays() {
         this.updatePlayerStats();
         this.updateVillageButtons();
-        this.updateMovementButtons();
         
         // Update world map player sprite if on world map (for armor changes etc)
         if (this.currentScreen === 'world-map') {
@@ -2063,21 +2056,6 @@ export class UIManager {
         }
     }
     
-    updateMovementButtons() {
-        const combatActive = this.combat.isCombatActive();
-        const buttons = ['northBtn', 'southBtn', 'eastBtn', 'westBtn'];
-        
-        buttons.forEach(id => {
-            const btn = document.getElementById(id);
-            if (btn) {
-                if (combatActive) {
-                    btn.setAttribute('disabled', 'true');
-                } else {
-                    btn.removeAttribute('disabled');
-                }
-            }
-        });
-    }
     
     updateHPBar(elementId, current, max) {
         const bar = document.getElementById(elementId);

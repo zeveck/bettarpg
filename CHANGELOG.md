@@ -2,7 +2,30 @@
 
 ---
 
-## Version 0.4.5 (Current)
+## Version 0.4.6 (Current)
+
+### 🧹 Dead Code Removal & Code Cleanup
+- **Completed dead code removal (Phase 3)**: Systematically removed all identified unused functions and references
+- **Removed dead functions**: Eliminated `canMoveTo()`, `isShopNPC()`, `isInnNPC()`, and `getStats()` methods
+- **Cleaned up event listeners**: Removed event listeners for non-existent button elements (northBtn, southBtn, etc.)
+- **Eliminated dead DOM references**: Removed references to non-existent combatArea and movementControls elements
+- **Removed dead function**: Eliminated entire updateMovementButtons() function that operated on non-existent buttons and served no purpose due to screen isolation
+- **Confirmed FIX-006 resolution**: Verified that duplicate condition was already fixed with worldMap removal (FIX-005)
+
+### 📊 Code Quality Improvements
+- **Line reduction**: Removed ~50 lines of dead code across 4 files
+- **Cleaner architecture**: Eliminated confusing unused methods and references
+- **Better maintainability**: Code now contains only actively used functions and elements
+- **Documentation accuracy**: Updated FIX_PLAN with completion status for all dead code fixes
+
+### 📝 Maintenance
+- Updated version number to 0.4.6
+- Updated CLAUDE_EVAL_FIX_PLAN.md with completion status (15/28 fixes now complete)
+- Rebuilt script.js with all dead code removed
+
+---
+
+## Version 0.4.5
 
 ### 🧹 Code Cleanup & Architecture Improvements
 - **Fixed threshold mismatch (FIX-005)**: Removed unused worldMap data structure that was causing confusion

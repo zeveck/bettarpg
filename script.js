@@ -226,7 +226,7 @@ class GameConfig {
     
     // === GAME METADATA ===
     static GAME = {
-        VERSION: '0.4.4',
+        VERSION: '0.4.5',
         WEBSITE: 'https://github.com/zeveck/bettarpg'
     };
     
@@ -2531,7 +2531,6 @@ class WorldManager {
         this.currentX = GameConfig.WORLD.VILLAGE_CENTER.x; // Starting position - village center
         this.currentY = GameConfig.WORLD.VILLAGE_CENTER.y;
         this.inVillage = true;
-        this.worldMap = this.generateWorldMap();
         
         // World configuration from GameConfig
         this.WORLD_SIZE = GameConfig.WORLD.MAP_SIZE;
@@ -2539,59 +2538,6 @@ class WorldManager {
         this.ENCOUNTER_RATES = GameConfig.WORLD.ENCOUNTER_RATES;
     }
     
-    // Generate procedural world map
-    generateWorldMap() {
-        const map = [];
-        
-        for (let y = 0; y < this.WORLD_SIZE; y++) {
-            map[y] = [];
-            for (let x = 0; x < this.WORLD_SIZE; x++) {
-                // Village center
-                if (x === this.VILLAGE_CENTER.x && y === this.VILLAGE_CENTER.y) {
-                    map[y][x] = {
-                        type: 'village',
-                        sprite: 'graphics/map/bettahome.png'
-                    };
-                }
-                // Village area (just center tile)
-                else if (x === this.VILLAGE_CENTER.x && y === this.VILLAGE_CENTER.y) {
-                    map[y][x] = {
-                        type: 'village_area',
-                        sprite: 'graphics/map/water-tile.png'
-                    };
-                }
-                // Water tiles with varying depths
-                else {
-                    const distance = Math.sqrt((x - this.VILLAGE_CENTER.x) * (x - this.VILLAGE_CENTER.x) + (y - this.VILLAGE_CENTER.y) * (y - this.VILLAGE_CENTER.y));
-                    let tileType, sprite;
-                    
-                    if (distance < 5) {
-                        tileType = 'shallow';
-                        sprite = 'graphics/map/water-tile.png';
-                    } else if (distance < 10) {
-                        tileType = 'medium';  
-                        sprite = 'graphics/map/water-tile2.png';
-                    } else {
-                        tileType = 'deep';
-                        sprite = 'graphics/map/water-tile-darkish.png';
-                    }
-                    
-                    map[y][x] = {
-                        type: tileType,
-                        sprite: sprite
-                    };
-                    
-                    // Add rice paddy tufts randomly in shallow areas
-                    if (tileType === 'shallow' && Math.random() < 0.15) {
-                        map[y][x].hasRiceTuft = true;
-                        map[y][x].sprite = 'graphics/map/rice_paddy_tuft.png';
-                    }
-                }
-            }
-        }
-        
-        return map;
-    }
     
     // Movement methods
     canMoveTo(x, y) {
@@ -2741,21 +2687,9 @@ class WorldManager {
     
     // Location information
     getCurrentLocation() {
-        // Safety check for initialization
-        if (!this.worldMap || !this.worldMap[this.currentY] || !this.worldMap[this.currentY][this.currentX]) {
-            return {
-                x: this.currentX,
-                y: this.currentY,
-                tile: { type: 'village' },
-                inVillage: this.inVillage
-            };
-        }
-        
-        const tile = this.worldMap[this.currentY][this.currentX];
         return {
             x: this.currentX,
             y: this.currentY,
-            tile: tile,
             inVillage: this.inVillage
         };
     }
@@ -2919,7 +2853,6 @@ class WorldManager {
         this.currentY = this.VILLAGE_CENTER.y;
         this.inVillage = true;
         this.npcs.reset();
-        // Note: worldMap doesn't need reset as it's static
     }
     
     // Getters for UI

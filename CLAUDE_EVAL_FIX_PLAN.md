@@ -11,7 +11,7 @@
 
 ### 🟠 High Priority (Configuration & Maintenance)
 - ✅ FIX-004: Hardcoded Prices in Dialogue Strings (COMPLETED)
-- ⬜ FIX-005: World Distance Thresholds Conflict
+- ✅ FIX-005: World Distance Thresholds Conflict (COMPLETED)
 - ✅ FIX-025: Map Background Caching (COMPLETED)
 
 ### 🟡 Medium Priority (Dead Code Removal)
@@ -46,9 +46,9 @@
 - ✅ NON-ISSUE-002: Happy Balloon Time Damage (WORKING AS INTENDED)
 - ✅ NON-ISSUE-003: justExitedCombat Implementation (NOT IMPLEMENTED)
 
-**Progress**: 7/27 fixes completed | Next Priority: FIX-005 (World Distance Thresholds)
+**Progress**: 8/27 fixes completed | Next Priority: FIX-006 (Dead Code Removal)
 
-**Latest Release**: v0.4.4 - Rendering performance and UI architecture improvements
+**Latest Release**: v0.4.5 - Code cleanup and dead code removal
 
 ## Overview
 This plan addresses all issues found during the comprehensive codebase evaluation. Each fix is labeled with an ID for easy reference and categorized by type and priority.
@@ -158,22 +158,33 @@ cost: GameConfig.SHOP.SUBMARINE.cost,  // Instead of hardcoded 100
 **Impact**: Changing prices requires updating multiple files currently
 **Effort**: 30-45 minutes
 
-#### FIX-005: World Distance Thresholds Conflict 🗺️ CONFIG MISMATCH
-**Issue**: World generation uses hardcoded < 5 and < 10, but config has SAFE_RADIUS: 4 and DANGEROUS_RADIUS: 7
-**Location**: src/world.js:53-56
-**Fix**: Use config values
+#### FIX-005: World Distance Thresholds Conflict 🗺️ DEAD CODE REMOVAL ✅
+**Status**: COMPLETED (2025-09-02) - v0.4.5
+**Issue**: World generation used hardcoded thresholds but the generated worldMap was never actually used
+**Investigation**: Found that `generateWorldMap()` created a 21x21 array but no code ever accessed the tile data
+**Solution Implemented**: Removed entire worldMap system as dead code
+**Changes Made**:
+1. **Removed `generateWorldMap()` method** - 45 lines of unused code
+2. **Removed `this.worldMap` property** - Eliminated memory usage of 441 objects
+3. **Simplified `getCurrentLocation()`** - Now returns only coordinates and village status
+4. **Removed worldMap reset comment** - Cleaned up documentation
+
 ```javascript
-// Replace hardcoded values with:
-if (distance <= GameConfig.WORLD.DANGER_ZONES.SAFE_RADIUS) {
-    tileType = 'shallow';
-} else if (distance <= GameConfig.WORLD.DANGER_ZONES.DANGEROUS_RADIUS) {
-    tileType = 'medium';
-} else {
-    tileType = 'deep';
+// Before: Complex unused data structure
+this.worldMap = this.generateWorldMap(); // Generated 441 objects with tile data
+
+// After: Simple coordinate tracking  
+getCurrentLocation() {
+    return {
+        x: this.currentX,
+        y: this.currentY, 
+        inVillage: this.inVillage
+    };
 }
 ```
-**Impact**: Visual tiles don't match configured danger zones
-**Effort**: 5 minutes
+**Impact**: Cleaner codebase, reduced memory usage, eliminated confusion about threshold conflicts
+**Root Cause**: UI rendering system correctly calculates tiles from coordinates using config values
+**Effort**: 10 minutes (architectural cleanup vs. threshold fixing)
 
 #### FIX-025: Map Background Caching 🗺️ PERFORMANCE ✅
 **Status**: COMPLETED (2025-09-02) - v0.4.4
@@ -434,7 +445,7 @@ These were reported but are actually not problems.
 
 ### Phase 2: High Priority (4+ hours) - STRONGLY RECOMMENDED
 1. FIX-004: Hardcoded prices in dialogues 📝 ✅ COMPLETED (v0.4.3)
-2. FIX-005: World distance thresholds 🗺️
+2. FIX-005: World distance thresholds 🗺️ ✅ COMPLETED (v0.4.5)
 3. FIX-025: Map background caching 🗺️ (performance) ✅ COMPLETED (v0.4.4)
 4. FIX-026: Update documentation 🔧 (remove double-click claims)
 5. FIX-027: Migrate to webpack build system 🚀 (modernization)
@@ -510,6 +521,14 @@ After implementing fixes, verify:
 - **MAINTAINABILITY**: Changing prices requires updating only GameConfig.SHOP values, not multiple files
 - **TECHNICAL**: NPCManager.processDialogue() applies appropriate costs for shop/inn NPCs automatically
 - **DOCUMENTATION**: Updated all docs, changelogs, and version numbers to reflect v0.4.3 improvements
+
+## Version 0.4.5 Updates
+- **COMPLETED FIX-005**: Removed unused worldMap data structure and dead code cleanup
+- **DEAD CODE ELIMINATION**: Removed 59 lines of unused world generation code and 441 unused objects
+- **ARCHITECTURE CLEANUP**: Simplified WorldManager class with single responsibility for coordinate tracking
+- **MEMORY OPTIMIZATION**: Eliminated unnecessary 21x21 tile array storage
+- **CODE CLARITY**: Removed conflicting threshold systems, UI rendering already used correct config values
+- **TECHNICAL**: Streamlined getCurrentLocation() to return only needed coordinates and village status
 
 ## Version 0.4.4 Updates
 - **COMPLETED FIX-025**: Implemented comprehensive background rendering performance improvements

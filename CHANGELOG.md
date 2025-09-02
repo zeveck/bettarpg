@@ -2,7 +2,28 @@
 
 ---
 
-## Version 0.4.4 (Current)
+## Version 0.4.5 (Current)
+
+### 🧹 Code Cleanup & Architecture Improvements
+- **Fixed threshold mismatch (FIX-005)**: Removed unused worldMap data structure that was causing confusion
+- **Dead code elimination**: Removed 59 lines of unused world generation code and 441 unused objects
+- **Memory optimization**: Eliminated unnecessary 21x21 tile array that was never accessed
+- **Architecture cleanup**: Simplified getCurrentLocation() to return only needed coordinates
+- **Code clarity**: Removed conflicting threshold systems, UI rendering already used correct config values
+
+### 🏗️ Technical Improvements
+- **Simplified WorldManager**: Cleaner class structure with single responsibility
+- **Reduced memory footprint**: Eliminated storage of unused tile objects and sprite paths
+- **Single source of truth**: UI system is now the only tile rendering authority
+- **Better maintainability**: Fewer moving parts, clearer code flow
+
+### 📝 Maintenance
+- Updated version number to 0.4.5
+- Updated all documentation to reflect architectural cleanup
+
+---
+
+## Version 0.4.4
 
 ### 🚀 Performance & Architecture Improvements
 - **Fixed background rendering performance (FIX-025)**: Implemented comprehensive background caching and pre-rendering system

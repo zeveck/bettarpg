@@ -18,6 +18,34 @@ export class BettaRPG {
         this.ui.setCoreManager(this); // Set core reference for version info
         this.combat.setUIManager(this.ui); // Set UI reference for death handling
         
+        // Pre-render world background for smooth user experience
+        this.initializeAssets();
+    }
+    
+    // Initialize heavy assets in background during game startup
+    async initializeAssets() {
+        try {
+            // Pre-load all background images
+            this.preloadBackgroundImages();
+            // Pre-render world background
+            await this.ui.preRenderWorldBackground();
+        } catch (error) {
+            // Silent fallback - assets will load on-demand
+        }
+    }
+    
+    // Pre-load all background images to avoid first-load delays
+    preloadBackgroundImages() {
+        const backgroundImages = [
+            'graphics/map/water-tile-dark.png',      // Village background
+            'graphics/map/water-tile2.png',         // Light water (world/combat)
+            'graphics/map/water-tile-darkish.png'   // Medium water (world/combat)
+        ];
+        
+        backgroundImages.forEach(src => {
+            const img = new Image();
+            img.src = src;
+        });
     }
     
     

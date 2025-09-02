@@ -17,6 +17,11 @@ export class UIManager {
         // UI state
         this.currentScreen = 'start';
         this.shopOpen = false;
+        
+        // Background caching and pre-rendering
+        this.cachedWorldBackground = null;
+        this.cachedWaterTiles = null;
+        this.backgroundPreRenderComplete = false;
         this.dialogueActive = false;
         this.blockVillageExit = false; // Prevent immediate exit after village entry
         this.defeatInProgress = false; // Prevent duplicate defeat handling
@@ -31,6 +36,9 @@ export class UIManager {
         
         // Initialize UI after DOM is ready
         this.initializeUI();
+        
+        // Apply village background immediately after UI is ready
+        setTimeout(() => this.initializeVillageBackground(), 0);
     }
     
     // Set core reference (called after construction to avoid circular dependency)
@@ -823,10 +831,15 @@ export class UIManager {
         this.currentScreen = screenId;
         this.hideAllScreens();
         
+        // Hide all background containers
+        document.querySelectorAll('.background-container').forEach(container => {
+            container.classList.remove('active');
+        });
+        
         const elementId = screenMap[screenId] || 'gameArea';
         this.showElement(elementId);
         
-        // Screen-specific setup
+        // Screen-specific setup and background container activation
         switch(screenId) {
             case 'title-screen':
                 break;
@@ -834,15 +847,20 @@ export class UIManager {
                 // Character creation screen setup (no circular call)
                 break;
             case 'village':
+                document.getElementById('village-container')?.classList.add('active');
                 this.showVillageScreen();
                 break;
             case 'world-map':
+                document.getElementById('world-container')?.classList.add('active');
                 this.showWorldMapScreen();
                 break;
             case 'dialogue':
-                // Dialogue overlay handled separately
+                // Dialogue overlay handled separately - keep current background
+                this.determineDialogueBackground();
                 break;
             case 'combat':
+                // Combat inherits current location's background
+                this.determineCombatBackground();
                 this.showCombatScreen();
                 break;
         }
@@ -865,16 +883,8 @@ export class UIManager {
     }
     
     showVillageScreen() {
-        // Village-specific UI setup - don't show message on every visit
-        // Apply water background consistently (looks better than blue gradient)
-        const gameContainer = document.getElementById('game-container');
-        if (gameContainer) {
-            gameContainer.style.backgroundImage = 'url(graphics/map/water-tile-dark.png)';
-            gameContainer.style.backgroundRepeat = 'repeat';
-            gameContainer.style.backgroundSize = '64px 64px';
-        }
-        
-        // Clean up world map dynamic styles but keep base water background
+        // Village-specific UI setup - background is now handled by CSS
+        // Clean up world map dynamic styles
         const existingStyle = document.getElementById('dynamic-world-style');
         if (existingStyle) {
             existingStyle.remove();
@@ -2176,9 +2186,6 @@ export class UIManager {
     }
     
     createLayeredWorldBackground() {
-        const gameContainer = document.getElementById('game-container');
-        const worldMapScreen = document.getElementById('world-map');
-        
         // Remove existing decorations
         document.querySelectorAll('.rice-paddy-tuft, .betta-village, .map-player, .danger-zone-border, .safe-water-zone').forEach(element => element.remove());
         
@@ -2188,22 +2195,35 @@ export class UIManager {
             existingStyle.remove();
         }
         
-        // Generate tile-based background
-        this.generateTiledBackground().then(backgroundUrl => {
-            gameContainer.style.backgroundImage = `url(${backgroundUrl})`;
-            gameContainer.style.backgroundRepeat = 'no-repeat';
-            gameContainer.style.backgroundSize = '100% 100%';
-        }).catch(error => {
-            console.error('Failed to generate tile background:', error);
-            // Fallback to old system
-            gameContainer.style.backgroundImage = 'url(graphics/map/water-tile-dark.png)';
-            gameContainer.style.backgroundRepeat = 'repeat';
-            gameContainer.style.backgroundSize = '64px 64px';
-        });
+        // If pre-rendering is complete, background is already set
+        if (this.backgroundPreRenderComplete) {
+            return;
+        }
+        
+        // Fallback: generate on-demand (shouldn't happen if pre-rendering worked)
+        const worldContainer = document.getElementById('world-container');
+        if (this.cachedWorldBackground) {
+            worldContainer.style.backgroundImage = `url(${this.cachedWorldBackground})`;
+        } else {
+            this.generateTiledBackground().then(backgroundUrl => {
+                worldContainer.style.backgroundImage = `url(${backgroundUrl})`;
+            }).catch(error => {
+                console.error('Failed to generate tile background:', error);
+                // Fallback to simple water background
+                worldContainer.style.backgroundImage = 'url(graphics/map/water-tile-dark.png)';
+                worldContainer.style.backgroundRepeat = 'repeat';
+                worldContainer.style.backgroundSize = '64px 64px';
+            });
+        }
     }
     
     // Generate a pre-rendered background with tiles based on distance zones
     async generateTiledBackground() {
+        // Return cached version if available
+        if (this.cachedWorldBackground) {
+            return this.cachedWorldBackground;
+        }
+        
         const mapSize = GameConfig.WORLD.MAP_SIZE;
         const tileSize = 64; // Each tile is 64x64 pixels
         const canvasSize = mapSize * tileSize;
@@ -2214,8 +2234,11 @@ export class UIManager {
         canvas.height = canvasSize;
         const ctx = canvas.getContext('2d');
         
-        // Load water tile images
-        const waterTiles = await this.loadWaterTileImages();
+        // Load water tile images (with caching)
+        if (!this.cachedWaterTiles) {
+            this.cachedWaterTiles = await this.loadWaterTileImages();
+        }
+        const waterTiles = this.cachedWaterTiles;
         
         for (let y = 0; y < mapSize; y++) {
             for (let x = 0; x < mapSize; x++) {
@@ -2227,8 +2250,15 @@ export class UIManager {
             }
         }
         
-        // Convert canvas to data URL for use as background image
-        return canvas.toDataURL('image/png');
+        // Convert canvas to data URL and cache it
+        try {
+            this.cachedWorldBackground = canvas.toDataURL('image/png');
+            return this.cachedWorldBackground;
+        } catch (error) {
+            // Handle CORS/taint errors by falling back to uncached generation
+            console.warn('Canvas toDataURL failed (likely CORS), generating without caching:', error);
+            return canvas.toDataURL('image/png');
+        }
     }
     
     // Load all water tile images
@@ -2369,6 +2399,67 @@ export class UIManager {
         const statsPanel = document.getElementById('player-stats');
         if (statsPanel) {
             statsPanel.classList.remove('show');
+        }
+    }
+    
+    // Helper methods for background container management
+    determineDialogueBackground() {
+        // Dialogue keeps the background of the current game state
+        if (this.world.isInVillage()) {
+            document.getElementById('village-container')?.classList.add('active');
+        } else {
+            document.getElementById('world-container')?.classList.add('active');
+        }
+    }
+    
+    determineCombatBackground() {
+        // Combat inherits from current location
+        if (this.world.isInVillage()) {
+            document.getElementById('village-container')?.classList.add('active');
+        } else {
+            document.getElementById('world-container')?.classList.add('active');
+        }
+    }
+    
+    // Pre-render world background during game initialization
+    async preRenderWorldBackground() {
+        if (this.backgroundPreRenderComplete) {
+            return; // Already done
+        }
+        
+        try {
+            const backgroundUrl = await this.generateTiledBackground();
+            const worldContainer = document.getElementById('world-container');
+            if (worldContainer && backgroundUrl) {
+                worldContainer.style.backgroundImage = `url(${backgroundUrl})`;
+                this.backgroundPreRenderComplete = true;
+            }
+        } catch (error) {
+            // Silent fallback - will generate on-demand if needed
+            // Don't set backgroundPreRenderComplete = true so it will try again later
+        }
+    }
+    
+    // Initialize village background and force initial render to prevent first-view flash
+    initializeVillageBackground() {
+        const villageContainer = document.getElementById('village-container');
+        if (villageContainer) {
+            // Set background properties
+            villageContainer.style.backgroundImage = 'url(graphics/map/water-tile-dark.png)';
+            villageContainer.style.backgroundRepeat = 'repeat';
+            villageContainer.style.backgroundSize = '64px 64px';
+            villageContainer.style.backgroundPosition = '0 0';
+            
+            // Force browser to render background by briefly making element visible
+            villageContainer.style.opacity = '0';
+            villageContainer.classList.add('active');
+            
+            // Force a layout/paint cycle
+            villageContainer.offsetHeight; // Triggers layout
+            
+            // Hide it again
+            villageContainer.classList.remove('active');
+            villageContainer.style.opacity = '';
         }
     }
 }

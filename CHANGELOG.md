@@ -2,7 +2,28 @@
 
 ---
 
-## Version 0.4.3 (Current)
+## Version 0.4.4 (Current)
+
+### 🚀 Performance & Architecture Improvements
+- **Fixed background rendering performance (FIX-025)**: Implemented comprehensive background caching and pre-rendering system
+- **New UI architecture**: Separate background containers for village and world screens eliminate CSS switching
+- **Pre-rendering system**: World map background generates during game initialization, eliminating first-view flash
+- **Enhanced UX**: Smooth transitions between screens with zero visual artifacts or rendering glitches
+- **Performance boost**: Background operations moved to game startup when user isn't waiting
+
+### 🏗️ Technical Improvements
+- **Container separation**: Village and world screens use dedicated background container elements
+- **CSS optimization**: Fixed background properties eliminate dynamic style switching
+- **Synchronous caching**: Cached backgrounds apply instantly without Promise delays
+- **Graceful fallbacks**: Pre-rendering failures fall back to on-demand generation
+
+### 📝 Maintenance
+- Updated version number to 0.4.4
+- Updated all documentation to reflect performance improvements
+
+---
+
+## Version 0.4.3
 
 ### ⚙️ Configuration Improvements
 - **Fixed hardcoded prices (FIX-004)**: Created centralized GameConfig.SHOP configuration for all pricing

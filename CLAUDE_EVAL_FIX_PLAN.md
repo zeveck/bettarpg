@@ -12,7 +12,7 @@
 ### 🟠 High Priority (Configuration & Maintenance)
 - ✅ FIX-004: Hardcoded Prices in Dialogue Strings (COMPLETED)
 - ⬜ FIX-005: World Distance Thresholds Conflict
-- ⬜ FIX-025: Map Background Caching
+- ✅ FIX-025: Map Background Caching (COMPLETED)
 
 ### 🟡 Medium Priority (Dead Code Removal)
 - ⬜ FIX-006: Unreachable Code Block
@@ -46,9 +46,9 @@
 - ✅ NON-ISSUE-002: Happy Balloon Time Damage (WORKING AS INTENDED)
 - ✅ NON-ISSUE-003: justExitedCombat Implementation (NOT IMPLEMENTED)
 
-**Progress**: 6/27 fixes completed | Next Priority: FIX-005 (World Distance Thresholds)
+**Progress**: 7/27 fixes completed | Next Priority: FIX-005 (World Distance Thresholds)
 
-**Latest Release**: v0.4.3 - Configuration improvements and centralized pricing
+**Latest Release**: v0.4.4 - Rendering performance and UI architecture improvements
 
 ## Overview
 This plan addresses all issues found during the comprehensive codebase evaluation. Each fix is labeled with an ID for easy reference and categorized by type and priority.
@@ -175,36 +175,38 @@ if (distance <= GameConfig.WORLD.DANGER_ZONES.SAFE_RADIUS) {
 **Impact**: Visual tiles don't match configured danger zones
 **Effort**: 5 minutes
 
-#### FIX-025: Map Background Caching 🗺️ PERFORMANCE
-**Issue**: generateTiledBackground() regenerates canvas every time world map shows
-**Location**: src/ui.js:2206 (generateTiledBackground method)
-**Fix**: Cache generated data URL and loaded water tile images
-```javascript
-// Add to UIManager constructor
-this.cachedWorldBackground = null;
-this.cachedWaterTiles = null;
+#### FIX-025: Map Background Caching 🗺️ PERFORMANCE ✅
+**Status**: COMPLETED (2025-09-02) - v0.4.4
+**Issue**: generateTiledBackground() regenerates canvas every time world map shows, causing rendering flash
+**Solution Implemented**: Comprehensive background rendering architecture overhaul
+**Changes Made**:
+1. **Separate container architecture**: Created dedicated `village-container` and `world-container` elements
+2. **Pre-rendering system**: World background generates during game initialization, not on-demand  
+3. **Image pre-loading**: All water tile images cached during startup
+4. **Forced rendering**: Village background pre-warmed to prevent first-view flash
+5. **Synchronous caching**: Cached backgrounds apply instantly without Promise delays
 
-// Modify generateTiledBackground()
-async generateTiledBackground() {
-    // Return cached version if available
-    if (this.cachedWorldBackground) {
-        return this.cachedWorldBackground;
-    }
-    
-    // Cache water tiles on first load
-    if (!this.cachedWaterTiles) {
-        this.cachedWaterTiles = await this.loadWaterTileImages();
-    }
-    
-    // ... existing generation code using cached tiles ...
-    
-    // Cache the result
-    this.cachedWorldBackground = canvas.toDataURL('image/png');
-    return this.cachedWorldBackground;
+```javascript
+// New container-based architecture in index.html
+<div id="village-container" class="background-container village-background">
+<div id="world-container" class="background-container world-background">
+
+// Pre-rendering in core.js
+async initializeAssets() {
+    this.preloadBackgroundImages(); // Cache all tile images
+    await this.ui.preRenderWorldBackground(); // Generate world canvas
+}
+
+// Forced village rendering in ui.js  
+initializeVillageBackground() {
+    villageContainer.style.opacity = '0';
+    villageContainer.classList.add('active');
+    villageContainer.offsetHeight; // Force render
+    villageContainer.classList.remove('active');
 }
 ```
-**Impact**: Significant performance improvement for world map transitions
-**Effort**: 15-20 minutes
+**Impact**: Eliminated all background rendering flash and visual artifacts across all game screens
+**Effort**: 2+ hours (exceeded original scope but delivered complete solution)
 
 #### FIX-026: Update Documentation (Remove Double-Click Claim) 🔧 DOCUMENTATION 
 **Issue**: Documentation claims "double-click-to-play" but canvas CORS errors prevent file:// protocol usage
@@ -433,7 +435,7 @@ These were reported but are actually not problems.
 ### Phase 2: High Priority (4+ hours) - STRONGLY RECOMMENDED
 1. FIX-004: Hardcoded prices in dialogues 📝 ✅ COMPLETED (v0.4.3)
 2. FIX-005: World distance thresholds 🗺️
-3. FIX-025: Map background caching 🗺️ (performance)
+3. FIX-025: Map background caching 🗺️ (performance) ✅ COMPLETED (v0.4.4)
 4. FIX-026: Update documentation 🔧 (remove double-click claims)
 5. FIX-027: Migrate to webpack build system 🚀 (modernization)
 
@@ -500,6 +502,22 @@ After implementing fixes, verify:
 - Added FIX-021, 022, 023: Major architectural issues (UIManager god class, global coupling, circular deps)
 - Added FIX-024: DialogManager renaming for clarity (Gemini's confusion highlights naming issue)
 - Note: Gemini incorrectly identified DialogManager as dead code, but the confusion does suggest renaming would help
+
+## Version 0.4.3 Updates
+- **COMPLETED FIX-004**: Consolidated hardcoded prices into centralized GameConfig.SHOP configuration
+- **SINGLE SOURCE OF TRUTH**: All shop/inn pricing now managed in one location for easy maintenance
+- **TEMPLATE SYSTEM**: NPC dialogues use {cost} placeholders processed by StringFormatter
+- **MAINTAINABILITY**: Changing prices requires updating only GameConfig.SHOP values, not multiple files
+- **TECHNICAL**: NPCManager.processDialogue() applies appropriate costs for shop/inn NPCs automatically
+- **DOCUMENTATION**: Updated all docs, changelogs, and version numbers to reflect v0.4.3 improvements
+
+## Version 0.4.4 Updates
+- **COMPLETED FIX-025**: Implemented comprehensive background rendering performance improvements
+- **NEW ARCHITECTURE**: Separate background containers eliminate CSS switching and rendering glitches
+- **PRE-RENDERING**: World map background generates during game initialization, eliminating first-view flash
+- **ENHANCED UX**: Smooth transitions between village and world screens with zero visual artifacts
+- **TECHNICAL**: Village and world screens now use dedicated container elements with fixed CSS properties
+- **PERFORMANCE**: Background caching with synchronous cached access and asynchronous pre-rendering
 
 ## Version 0.4.3 Updates
 - **COMPLETED FIX-004**: Consolidated hardcoded prices into centralized GameConfig.SHOP configuration

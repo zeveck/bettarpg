@@ -223,7 +223,7 @@ export class GameConfig {
     
     // === GAME METADATA ===
     static GAME = {
-        VERSION: '0.4.3',
+        VERSION: '0.4.4',
         WEBSITE: 'https://github.com/zeveck/bettarpg'
     };
     

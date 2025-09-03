@@ -1,3 +1,5 @@
+import { GameConfig } from './config.js';
+
 /**
  * Player Character Module
  * 

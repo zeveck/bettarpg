@@ -2,7 +2,38 @@
 
 ---
 
-## Version 0.4.7 (Current)
+## Version 0.4.8 (Current)
+
+### 🏗️ Major Build System Migration - Webpack Implementation
+- **Completed FIX-027**: Migrated from simple concatenation build to modern webpack bundler
+- **ES6 module system**: All source files now use proper `import`/`export` statements for explicit dependencies
+- **Modern tooling**: Industry-standard webpack build pipeline with minification and optimization
+- **Enhanced development workflow**: Added `npm run build` for production builds and `npm run dev` for development with watch mode
+- **Package.json infrastructure**: Established npm project structure with webpack as development dependency
+
+### 🔧 Technical Improvements
+- **Explicit dependencies**: Every module now declares its imports, eliminating global scope dependency issues
+- **Better IDE support**: Autocomplete and navigation work properly with explicit imports
+- **Minified output**: Production builds are optimized to 89.9 KiB (down from previous unminified builds)
+- **Module isolation**: Each class is properly encapsulated within its module
+- **Global game exposure**: Maintains backward compatibility with HTML onclick handlers via `window.game`
+
+### 📊 Build System Comparison
+- **Before**: Simple concatenation via `node build.mjs` (208 lines of build script)
+- **After**: Webpack bundling via `npm run build` (modern configuration-based approach)
+- **Dependencies**: Added webpack and webpack-cli as devDependencies (zero runtime dependencies maintained)
+- **Output quality**: Minified, optimized, and more maintainable codebase
+- **Development experience**: Watch mode, better error reporting, industry-standard tooling
+
+### 🛠️ Developer Experience Enhancements
+- **npm run build**: Production build with minification
+- **npm run dev**: Development build with watch mode for rapid iteration
+- **Proper module resolution**: No more manual dependency ordering
+- **Future-ready**: Easy to add code splitting, tree shaking, and other optimizations
+
+---
+
+## Version 0.4.7
 
 ### 🏗️ Major Architectural Cleanup - DialogManager Removal
 - **Completed FIX-015**: Eliminated DialogManager's broken container reference issue by removing the entire class

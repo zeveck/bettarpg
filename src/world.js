@@ -1,3 +1,5 @@
+import { GameConfig, GameStrings, StringFormatter } from './config.js';
+
 /**
  * World Management Module
  * 

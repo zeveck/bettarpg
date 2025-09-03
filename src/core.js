@@ -1,3 +1,11 @@
+import { GameConfig } from './config.js';
+import { AudioManager } from './audio.js';
+import { Player } from './player.js';
+import { NPCManager } from './npc.js';
+import { CombatManager } from './combat.js';
+import { WorldManager } from './world.js';
+import { UIManager } from './ui.js';
+
 /**
  * Core Game Module
  * 
@@ -104,3 +112,10 @@ export class BettaRPG {
         };
     }
 }
+
+// Initialize and expose game globally for HTML interactions
+let game;
+document.addEventListener("DOMContentLoaded", () => {
+    game = new BettaRPG();
+    window.game = game;  // Expose for onclick handlers
+});

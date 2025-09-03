@@ -233,7 +233,7 @@ initializeVillageBackground() {
 "Double-click index.html to play - no server required!"
 
 // To:  
-"Run 'python devServer.py' and open http://localhost:5555 to play"
+"Run 'npm run serve' and open http://localhost:5555 to play"
 "Note: Direct file:// opening has limited functionality due to browser security"
 ```
 **Files to update**: CLAUDE.md, README.md, GAME_DESIGN.md, any setup instructions

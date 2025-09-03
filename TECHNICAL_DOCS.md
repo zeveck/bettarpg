@@ -1,4 +1,4 @@
-# Betta Fish RPG v0.4.7 - Technical Documentation
+# Betta Fish RPG v0.4.8 - Technical Documentation
 
 ## Architecture Overview
 
@@ -44,8 +44,8 @@
 - **core.js**: BettaRPG - module coordination and public API
 
 ### script.js (generated)
-- **Built File**: Concatenated modules with exports stripped for browser compatibility
-- **Build System**: Simple module concatenation via build.mjs
+- **Built File**: Webpack-bundled ES6 modules for browser compatibility
+- **Build System**: Webpack with ES6 import/export system
 
 ## Core Systems
 
@@ -281,6 +281,24 @@ generateRandomName() {
 - **Edge Cases**: Empty inputs, audio unavailable, rapid clicking
 - **Cross-Platform**: Desktop and mobile browser testing
 - **Performance**: No memory leaks or performance degradation
+
+## Version 0.4.8 Updates
+
+### Build System Modernization - Webpack Migration (FIX-027)
+- **ES6 Module System**: Migrated from concatenation build to proper ES6 imports/exports
+- **Webpack Integration**: Added webpack bundler with development server capabilities
+- **Development Server**: Replaced Python Flask server with webpack-dev-server
+- **Live Reload**: Added automatic browser refresh on file changes
+- **Zero Runtime Dependencies**: Maintained production build compatibility with GitHub Pages
+- **Build Output**: Preserved 89.9 KiB minified production script.js
+
+### Technical Implementation Details
+- **Module Imports**: Added ES6 import statements to all 8 source modules
+- **Webpack Configuration**: Created webpack.config.js with dev server on port 5555
+- **Package Management**: Added package.json with npm scripts for build/dev/serve
+- **Dependency Management**: Added .gitignore for node_modules exclusion
+- **Documentation Updates**: Updated all build instructions from Python to npm commands
+- **File Cleanup**: Removed build.mjs and devServer.py in favor of webpack toolchain
 
 ## Version 0.4.7 Updates
 

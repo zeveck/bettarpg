@@ -8,8 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Install dependencies**: `npm install` - Install webpack and build dependencies
 - **Build game**: `npm run build` - Bundles all src/ modules into script.js using webpack
 - **Development build**: `npm run dev` - Builds with watch mode for development
-- **Run dev server**: `python devServer.py` - Serves game on http://localhost:5555
-- **Install Python deps**: `pip install flask` or `pipenv install`
+- **Run dev server**: `npm run serve` - Serves game on http://localhost:5555 with live reload
 
 ### Development Workflow
 - If you make code changes you should always build the script unless there's some reason to think it's worth waiting, in which case, always ask.
@@ -111,7 +110,7 @@ For specific counts, dimensions, or implementation details, refer to TECHNICAL_D
 - **Browser compatibility**: Modern ES6+ features, no polyfills required
 - **Mobile responsive**: Touch-friendly interface with keyboard controls
 - **Save/load system**: LocalStorage-based game state persistence
-- **Server-based deployment**: Run `python devServer.py` for full functionality (built script.js is committed)
+- **Server-based development**: Run `npm run serve` for development with live reload (production deployment is static files)
 
 ## Common Development Tasks
 
@@ -160,3 +159,4 @@ The codebase prioritizes **simplicity, maintainability, and zero dependencies** 
 3. Follow existing patterns and conventions
 4. Update relevant documentation
 5. Report all changes to the user
+- This app is served as a GitHub Page.

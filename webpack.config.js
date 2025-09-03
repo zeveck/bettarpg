@@ -39,5 +39,21 @@ module.exports = {
   // Optimization settings
   optimization: {
     minimize: true // Minify for smaller output
+  },
+
+  // Development server configuration
+  devServer: {
+    static: {
+      directory: path.resolve(__dirname, '.')
+    },
+    port: 5555,
+    open: false, // Don't auto-open browser in codespace
+    hot: false, // Disable hot reload for this simple setup
+    liveReload: true, // Enable live reload on file changes
+    client: {
+      logging: 'info' // Show more verbose output
+    },
+    compress: true, // Enable gzip compression
+    historyApiFallback: false // We don't need SPA routing
   }
 };

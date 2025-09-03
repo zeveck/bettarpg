@@ -1,4 +1,4 @@
-# Betta Fish RPG v0.4.7
+# Betta Fish RPG v0.4.8
 
 A browser-based RPG where you play as a young betta fish exploring rice paddies and battling increasingly dangerous foes.
 
@@ -42,19 +42,23 @@ Browser-based game with no installation required. Uses vanilla HTML5, CSS3, and 
 
 ### Local Setup
 1. **Download** all game files to your computer
-2. **Run the development server**: `python devServer.py` 
-3. **Open** http://localhost:5555 in your web browser
-4. Click "Start Adventure" → "Begin Adventure"
-5. Talk to villagers, then exit to rice paddies
-6. Use arrow keys to explore, battle enemies for levels and Betta Bites
-7. Explore edge zones for ultimate Level 10 challenges
-8. Defeat... or befriend... the boss
+2. **Install dependencies**: `npm install`
+3. **Run the development server**: `npm run serve`
+4. **Open** http://localhost:5555 in your web browser
+5. Click "Start Adventure" → "Begin Adventure"
+6. Talk to villagers, then exit to rice paddies
+7. Use arrow keys to explore, battle enemies for levels and Betta Bites
+8. Explore edge zones for ultimate Level 10 challenges
+9. Defeat... or befriend... the boss
 
-### Network Setup (Optional)
-If you want to access the game from other devices on your network:
-1. Install Python and Flask: `pip install flask`
-2. Run `python devServer.py` in the game folder  
-3. Access via `http://your-ip:5555` from any device
+### Development Commands
+- **Build for production**: `npm run build` - Creates optimized script.js
+- **Development server**: `npm run serve` - Live reload on file changes
+- **Watch mode**: `npm run dev` - Rebuilds on file changes
+
+### Requirements
+- **Node.js** (for development only)
+- **Production deployment**: No server required - just static files!
 
 ### Controls
 - **Arrow keys**: Navigate the rice paddies

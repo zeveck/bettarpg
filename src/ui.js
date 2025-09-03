@@ -12,7 +12,7 @@ export class UIManager {
         this.combat = combatManager;
         this.world = worldManager;
         this.core = null; // Set later via setCoreManager
-        this.dialog = new DialogManager(audioManager);
+        this.isShowingConfirmation = false;
         
         // UI state
         this.currentScreen = 'start';
@@ -106,16 +106,25 @@ export class UIManager {
     // Method called by inline onclick handlers
     buyItem(itemId) {
         const result = this.world.buyItem(itemId);
+        const dialogueTextElement = document.getElementById('dialogue-text');
+        const dialogueOptionsElement = document.getElementById('dialogue-options');
+        
+        if (!dialogueTextElement || !dialogueOptionsElement) return;
+        
+        this.isShowingConfirmation = true;
+        
         if (itemId === 'submarine') {
-            // Special handling for submarine purchase
-            this.dialog.showSubmarinePurchase(() => {
-                this.endDialogue();
-            });
+            // Submarine purchase confirmation
+            dialogueTextElement.textContent = GameStrings.SHOP.CONFIRMATIONS.SUBMARINE;
+            const [button] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.AMAZING]);
+            dialogueOptionsElement.innerHTML = 
+                `<div class="dialogue-option" onclick="game.ui.endConfirmation()">${button.html}</div>`;
         } else {
             // Regular item purchase confirmation
-            this.dialog.showPurchaseConfirmation(result.message, () => {
-                this.endDialogue();
-            });
+            dialogueTextElement.textContent = result.message;
+            const [button] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.THANKS]);
+            dialogueOptionsElement.innerHTML = 
+                `<div class="dialogue-option" onclick="game.ui.endConfirmation()">${button.html}</div>`;
         }
     }
 
@@ -419,13 +428,14 @@ export class UIManager {
             return; // Prevent further processing when popup is shown
         }
         
-        // Skip if modal dialog is active
-        if (this.dialog.isDialogActive()) {
+        // Handle purchase confirmation keyboard shortcuts (within dialogue screen)
+        if (this.isShowingConfirmation) {
+            this.handleConfirmationKeyboard(event);
             return;
         }
         
         // Handle dialogue keyboard shortcuts
-        if (this.dialogueActive && !this.dialog.isDialogActive()) {
+        if (this.dialogueActive) {
             this.handleDialogueKeyboard(event);
             return;
         }
@@ -644,6 +654,30 @@ export class UIManager {
         }
     }
     
+    handleConfirmationKeyboard(event) {
+        const key = event.key.toLowerCase();
+        const dialogueOptions = document.querySelectorAll('#dialogue-options .dialogue-option');
+        
+        // Handle Enter key - click the confirmation button
+        if (key === 'enter') {
+            event.preventDefault();
+            if (dialogueOptions.length > 0) {
+                dialogueOptions[0].click();
+            }
+            return;
+        }
+        
+        // Handle underlined letter shortcuts
+        for (const option of dialogueOptions) {
+            const underlinedMatch = option.innerHTML.match(/<u>([a-zA-Z])<\/u>/);
+            if (underlinedMatch && underlinedMatch[1].toLowerCase() === key) {
+                event.preventDefault();
+                option.click();
+                return;
+            }
+        }
+    }
+    
     handleShopKeyboard(event) {
         const key = event.key.toLowerCase();
         
@@ -676,7 +710,7 @@ export class UIManager {
     }
     
     handleKeyboard(event) {
-        if (this.dialogueActive || this.currentScreen === 'start' || this.dialog.isDialogActive()) return;
+        if (this.dialogueActive || this.currentScreen === 'start' || this.isShowingConfirmation) return;
         
         const key = event.key.toLowerCase();
         
@@ -1897,13 +1931,28 @@ export class UIManager {
         
         if (result.success) {
             this.updateAllDisplays();
-            this.dialog.showRestConfirmation(() => {
-                this.endDialogue();
-            });
+            const dialogueTextElement = document.getElementById('dialogue-text');
+            const dialogueOptionsElement = document.getElementById('dialogue-options');
+            
+            if (dialogueTextElement && dialogueOptionsElement) {
+                this.isShowingConfirmation = true;
+                dialogueTextElement.textContent = StringFormatter.format(
+                    GameStrings.INN.REST_SUCCESS, 
+                    { cost: GameConfig.SHOP.INN_REST.cost }
+                );
+                const [button] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.CLOSE]);
+                dialogueOptionsElement.innerHTML = 
+                    `<div class="dialogue-option" onclick="game.ui.endConfirmation()">${button.html}</div>`;
+            }
         } else {
             this.displayMessage(result.message);
             this.endDialogue();
         }
+    }
+    
+    endConfirmation() {
+        this.isShowingConfirmation = false;
+        this.endDialogue();
     }
     
     endDialogue() {

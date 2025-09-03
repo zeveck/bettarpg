@@ -24,19 +24,19 @@
 - ✅ FIX-011: justExitedCombat Flag (COMPLETED - See NON-ISSUE-003)
 
 ### 🔵 Low Priority (Visual Constants & Timing)
-- ⬜ FIX-012: Consolidate Visual Constants (OPTIONAL)
-- ⬜ FIX-013: Timing Constants (OPTIONAL)
-- ⬜ FIX-014: Cheat Constants (OPTIONAL)
+- <s>FIX-012: Consolidate Visual Constants (STRUCK - tied to asset dimensions)</s>
+- <s>FIX-013: Timing Constants (STRUCK - tied to gameplay balance)</s>
+- <s>FIX-014: Cheat Constants (STRUCK - rarely changed debug value)</s>
 
 ### ⚪ Minor (Code Quality Issues)
-- ⬜ FIX-015: Dialog Container Mismatch
+- ✅ FIX-015: Dialog Container Mismatch (COMPLETED - DialogManager removed entirely)
 - ⬜ FIX-016: Duplicate Color Config
 - ✅ FIX-017: updateMovementButtons Dead Function (COMPLETED)
 - ⬜ FIX-021: UIManager God Class (MAJOR REFACTOR)
 - ⬜ FIX-022: Global game Object Coupling (MAJOR REFACTOR)
 - ⬜ FIX-023: Circular Dependencies via Setters (MAJOR REFACTOR)
-- ⬜ FIX-024: DialogManager Naming Confusion
-- ⬜ FIX-026: Update Documentation - Remove Double-Click Claim
+- ✅ FIX-024: DialogManager Naming Confusion (COMPLETED - DialogManager removed entirely)
+- ✅ FIX-026: Update Documentation - Remove Double-Click Claim (COMPLETED)
 
 ### 🟠 Medium Priority (Architectural Consistency)
 - ⬜ FIX-028: Replace onClick Attributes with Event Listeners
@@ -49,9 +49,9 @@
 - ✅ NON-ISSUE-002: Happy Balloon Time Damage (WORKING AS INTENDED)
 - ✅ NON-ISSUE-003: justExitedCombat Implementation (ALREADY REMOVED)
 
-**Progress**: 16/28 fixes completed | Next Priority: Low Priority fixes or Documentation updates
+**Progress**: 19/28 fixes completed | Next Priority: Architectural consistency
 
-**Latest Release**: v0.4.6 - Dead code removal completed
+**Latest Release**: v0.4.7 - DialogManager removed, architectural cleanup completed
 
 ## Overview
 This plan addresses all issues found during the comprehensive codebase evaluation. Each fix is labeled with an ID for easy reference and categorized by type and priority.
@@ -233,7 +233,7 @@ initializeVillageBackground() {
 "Double-click index.html to play - no server required!"
 
 // To:  
-"Run 'python devServer.py' and open http://localhost:5000 to play"
+"Run 'python devServer.py' and open http://localhost:5555 to play"
 "Note: Direct file:// opening has limited functionality due to browser security"
 ```
 **Files to update**: CLAUDE.md, README.md, GAME_DESIGN.md, any setup instructions
@@ -596,6 +596,16 @@ After implementing fixes, verify:
 - **MAINTAINABILITY**: Changing prices requires updating only GameConfig.SHOP values, not multiple files
 - **TECHNICAL**: NPCManager.processDialogue() applies appropriate costs for shop/inn NPCs automatically
 - **DOCUMENTATION**: Updated all docs, changelogs, and version numbers to reflect v0.4.3 improvements
+
+## Version 0.4.7 Updates  
+- **COMPLETED FIX-015**: Removed DialogManager entirely, eliminated container reference issue
+- **COMPLETED FIX-024**: Resolved DialogManager naming confusion by removing the entire class
+- **ARCHITECTURAL CLEANUP**: All dialogue confirmations now handled directly in UIManager
+- **CODE REDUCTION**: Removed 208 lines of DialogManager code, added ~25 lines of inline handling
+- **NET IMPROVEMENT**: 183 lines removed with zero functionality loss
+- **UNIFIED ARCHITECTURE**: Single dialogue system eliminates three-way split between NPCManager/UIManager/DialogManager
+- **TECHNICAL**: Purchase confirmations (submarine, items, inn rest) now display directly in dialogue screen
+- **MAINTAINABILITY**: Cleaner codebase with dialogue logic consolidated in UIManager where it belongs
 
 ## Version 0.4.2 Updates
 - **COMPLETED FIX-020**: Audio context initialization now complies with browser autoplay policies

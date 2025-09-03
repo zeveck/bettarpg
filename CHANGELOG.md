@@ -2,7 +2,39 @@
 
 ---
 
-## Version 0.4.6 (Current)
+## Version 0.4.7 (Current)
+
+### 🏗️ Major Architectural Cleanup - DialogManager Removal
+- **Completed FIX-015**: Eliminated DialogManager's broken container reference issue by removing the entire class
+- **Completed FIX-024**: Resolved DialogManager naming confusion - no more conflict between NPC dialogues and modal confirmations
+- **Architectural unification**: All dialogue handling now consolidated in UIManager for cleaner, more maintainable code
+- **Code reduction**: Removed 208 lines of DialogManager code, added ~25 lines of inline confirmation handling
+- **Net improvement**: 183 lines removed with zero functionality loss
+- **Simplified architecture**: Eliminated confusing three-way split between NPCManager (data), UIManager (display), and DialogManager (confirmations)
+
+### 🔧 Technical Improvements
+- **Purchase confirmations**: Submarine, item, and inn rest confirmations now display directly in dialogue screen
+- **Event handling**: Added `endConfirmation()` method and `isShowingConfirmation` flag for consistent state management
+- **Build system**: Updated build.mjs to remove dialog.js from module compilation
+- **Testing maintained**: All confirmation flows continue to work identically for end users
+
+### 📊 Code Quality Impact
+- **Files modified**: 2 (src/ui.js, build.mjs)
+- **Files deleted**: 1 (src/dialog.js)
+- **Build verification**: Successfully rebuilt script.js without DialogManager references
+- **Functionality preserved**: All three confirmation scenarios (submarine purchase, item purchase, inn rest) work as before
+
+---
+
+## Version 0.4.6
+
+### 🧹 Dead Code Removal & Code Cleanup
+- **Completed dead code removal (Phase 3)**: Systematically removed all identified unused functions and references
+- **Removed dead functions**: Eliminated `canMoveTo()`, `isShopNPC()`, `isInnNPC()`, and `getStats()` methods
+- **Cleaned up event listeners**: Removed event listeners for non-existent button elements (northBtn, southBtn, etc.)
+- **Eliminated dead DOM references**: Removed references to non-existent combatArea and movementControls elements
+- **Removed dead function**: Eliminated entire updateMovementButtons() function that operated on non-existent buttons and served no purpose due to screen isolation
+- **Confirmed FIX-006 resolution**: Verified that duplicate condition was already fixed with worldMap removal (FIX-005)
 
 ### 🧹 Dead Code Removal & Code Cleanup
 - **Completed dead code removal (Phase 3)**: Systematically removed all identified unused functions and references

@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Essential Commands
 - **Build game**: `node build.mjs` - Combines all src/ modules into script.js
-- **Run dev server**: `python devServer.py` - Serves game on http://localhost:5000
+- **Run dev server**: `python devServer.py` - Serves game on http://localhost:5555
 - **Install Python deps**: `pip install flask` or `pipenv install`
 
 ### Development Workflow
@@ -27,7 +27,6 @@ The game uses a modular ES6 architecture with modules in `src/` that are concate
 - **audio.js** - AudioManager (Web Audio API, procedural sounds)
 - **player.js** - Player (stats, progression, economy)
 - **npc.js** - NPCManager (village characters, dialogue trees)  
-- **dialog.js** - DialogManager (modal dialogs, user prompts)
 - **combat.js** - CombatManager (battles, enemies, visual effects)
 - **world.js** - WorldManager (exploration, encounters, map generation)
 - **ui.js** - UIManager (DOM manipulation, screen management)
@@ -35,8 +34,8 @@ The game uses a modular ES6 architecture with modules in `src/` that are concate
 
 ### Build System
 - **Simple concatenation** approach (not webpack/bundlers)
-- **Zero runtime dependencies** - maintains double-click-to-play simplicity
-- **Module order matters**: Config → Audio → Player → NPC → Dialog → Combat → World → UI → Core
+- **Zero runtime dependencies** - maintains deployment simplicity
+- **Module order matters**: Config → Audio → Player → NPC → Combat → World → UI → Core
 - **Export stripping**: ES6 exports removed for browser compatibility
 
 ### Key Design Principles
@@ -110,7 +109,7 @@ For specific counts, dimensions, or implementation details, refer to TECHNICAL_D
 - **Browser compatibility**: Modern ES6+ features, no polyfills required
 - **Mobile responsive**: Touch-friendly interface with keyboard controls
 - **Save/load system**: LocalStorage-based game state persistence
-- **Double-click to play**: Players can open index.html directly (built script.js is committed)
+- **Server-based deployment**: Run `python devServer.py` for full functionality (built script.js is committed)
 
 ## Common Development Tasks
 
@@ -155,7 +154,7 @@ When asked if a config is "used", this means the values actively drive game logi
 The codebase prioritizes **simplicity, maintainability, and zero dependencies** while providing a complete RPG experience that runs in any modern browser. When making changes:
 
 1. Preserve the zero-dependency nature
-2. Keep the double-click-to-play simplicity
+2. Keep the simple deployment model
 3. Follow existing patterns and conventions
 4. Update relevant documentation
 5. Report all changes to the user

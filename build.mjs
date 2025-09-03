@@ -6,14 +6,13 @@ const modules = [
     'src/audio.js',
     'src/player.js',
     'src/npc.js', 
-    'src/dialog.js',
     'src/combat.js',
     'src/world.js',
     'src/ui.js',
     'src/core.js'
 ];
 
-let combined = '// Betta Fish RPG v0.4 - Generated from modules\n\n';
+let combined = '// Betta Fish RPG v0.4.7 - Generated from modules\n\n';
 
 modules.forEach(file => {
     const content = fs.readFileSync(file, 'utf8');

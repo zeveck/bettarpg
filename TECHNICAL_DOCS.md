@@ -1,4 +1,4 @@
-# Betta Fish RPG v0.4.6 - Technical Documentation
+# Betta Fish RPG v0.4.7 - Technical Documentation
 
 ## Architecture Overview
 
@@ -33,15 +33,14 @@
 - **Shop Interface**: Interactive item styling with hover states and affordability indicators
 - **Responsive Design**: Mobile breakpoints and adaptive layouts
 
-### src/ modules (9 ES6 modules)
+### src/ modules (8 ES6 modules)
 - **config.js**: GameConfig and GameStrings - centralized constants and text
 - **audio.js**: AudioManager - Web Audio API wrapper
 - **player.js**: Player - character state, progression, combat mechanics
 - **npc.js**: NPCManager - village characters and dialogue trees
-- **dialog.js**: DialogManager - modal dialog system
 - **combat.js**: CombatManager - battle system and enemy management
 - **world.js**: WorldManager - exploration, encounters, map generation
-- **ui.js**: UIManager - DOM manipulation and screen management
+- **ui.js**: UIManager - Screen management, user interactions
 - **core.js**: BettaRPG - module coordination and public API
 
 ### script.js (generated)
@@ -282,6 +281,26 @@ generateRandomName() {
 - **Edge Cases**: Empty inputs, audio unavailable, rapid clicking
 - **Cross-Platform**: Desktop and mobile browser testing
 - **Performance**: No memory leaks or performance degradation
+
+## Version 0.4.7 Updates
+
+### Major Architectural Cleanup - DialogManager Removal
+- **FIX-015: Dialog Container Issue Resolution**: Eliminated DialogManager entirely, resolving broken container reference
+- **FIX-024: Naming Confusion Resolution**: Removed confusing DialogManager class that conflicted with NPC dialogue system
+- **Module Reduction**: Reduced from 9 to 8 ES6 modules by removing src/dialog.js completely
+- **Architecture Unification**: All dialogue handling now consolidated in UIManager for cleaner design
+- **Code Reduction**: Removed 208 lines of DialogManager code while maintaining identical functionality
+- **Purchase Confirmations**: Submarine, shop item, and inn rest confirmations now display directly within dialogue screen
+- **Keyboard Handling**: Added dedicated confirmation keyboard shortcuts (Enter key and underlined letters)
+
+### Technical Implementation Details
+- **UIManager Enhancement**: Added `isShowingConfirmation` flag and `endConfirmation()` method
+- **Event Handling**: Created `handleConfirmationKeyboard()` for consistent keyboard interaction
+- **Build System**: Updated build.mjs module list from 9 to 8 modules
+- **Zero Functionality Loss**: All three confirmation scenarios tested and working identically
+- **Performance**: Net reduction of ~183 lines with improved maintainability
+
+---
 
 ## Version 0.4.3 Updates
 

@@ -1,4 +1,4 @@
-// Betta Fish RPG v0.4 - Generated from modules
+// Betta Fish RPG v0.4.7 - Generated from modules
 
 // === CONFIG MODULE ===
 /**
@@ -226,7 +226,7 @@ class GameConfig {
     
     // === GAME METADATA ===
     static GAME = {
-        VERSION: '0.4.6',
+        VERSION: '0.4.7',
         WEBSITE: 'https://github.com/zeveck/bettarpg'
     };
     
@@ -1333,216 +1333,6 @@ class NPCManager {
     reset() {
         this.currentNPC = null;
         this.currentDialogueIndex = 0;
-    }
-}
-
-// === DIALOG MODULE ===
-/**
- * Dialog System Module
- * 
- * Manages modal dialog boxes and user choice prompts. Provides a
- * fallback system for browsers that don't support modern UI features,
- * handling user input validation and audio feedback.
- */
-class DialogManager {
-    constructor(audioManager) {
-        this.audio = audioManager;
-        this.isActive = false;
-        this.currentOptions = [];
-        this.keyHandlers = new Map();
-        
-        // DOM elements
-        this.dialogueContainer = null;
-        this.dialogueTextElement = null;
-        this.dialogueOptionsElement = null;
-        
-        this.initializeElements();
-        this.setupKeyboardHandling();
-    }
-    
-    initializeElements() {
-        this.dialogueContainer = document.getElementById('dialogue-container');
-        this.dialogueTextElement = document.getElementById('dialogue-text');
-        this.dialogueOptionsElement = document.getElementById('dialogue-options');
-    }
-    
-    setupKeyboardHandling() {
-        document.addEventListener('keydown', (event) => {
-            if (!this.isActive) return;
-            
-            const key = event.key.toLowerCase();
-            
-            // Handle Enter key
-            if (key === 'enter') {
-                event.preventDefault();
-                this.handleEnterKey();
-                return;
-            }
-            
-            // Handle underlined letter shortcuts
-            if (this.keyHandlers.has(key)) {
-                event.preventDefault();
-                const handler = this.keyHandlers.get(key);
-                handler();
-            }
-        });
-    }
-    
-    show(text, options = []) {
-        this.isActive = true;
-        this.currentOptions = options;
-        this.keyHandlers.clear();
-        
-        // Show dialogue container
-        if (this.dialogueContainer) {
-            this.dialogueContainer.style.display = 'flex';
-        }
-        
-        // Set text
-        if (this.dialogueTextElement) {
-            this.dialogueTextElement.textContent = text;
-        }
-        
-        // Create option buttons
-        if (this.dialogueOptionsElement) {
-            this.dialogueOptionsElement.innerHTML = '';
-            
-            options.forEach((option, index) => {
-                const button = document.createElement('div');
-                button.className = 'dialogue-option';
-                if (option.disabled) {
-                    button.classList.add('disabled');
-                }
-                
-                // Set button HTML with underlined shortcut key
-                button.innerHTML = option.html || option.text;
-                
-                // Add click handler
-                button.onclick = () => {
-                    if (!option.disabled && option.action) {
-                        option.action();
-                    }
-                };
-                
-                // Register keyboard shortcut
-                if (option.key && !option.disabled) {
-                    this.keyHandlers.set(option.key.toLowerCase(), () => {
-                        if (option.action) {
-                            option.action();
-                        }
-                    });
-                }
-                
-                // Mark first non-disabled option as default for Enter key
-                if (!this.defaultAction && !option.disabled && option.action) {
-                    this.defaultAction = option.action;
-                }
-                
-                this.dialogueOptionsElement.appendChild(button);
-            });
-        }
-    }
-    
-    handleEnterKey() {
-        // Find the first non-disabled option or use default action
-        const firstAvailableOption = this.currentOptions.find(opt => !opt.disabled && opt.action);
-        if (firstAvailableOption) {
-            firstAvailableOption.action();
-        }
-    }
-    
-    hide() {
-        this.isActive = false;
-        this.currentOptions = [];
-        this.keyHandlers.clear();
-        this.defaultAction = null;
-        
-        if (this.dialogueContainer) {
-            this.dialogueContainer.style.display = 'none';
-        }
-    }
-    
-    isDialogActive() {
-        return this.isActive;
-    }
-    
-    // Utility methods for common dialog types
-    showMessage(text, callback) {
-        const [okButton] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.OK]);
-        this.show(text, [
-            {
-                html: okButton.html,
-                key: okButton.key,
-                action: () => {
-                    this.hide();
-                    if (callback) callback();
-                }
-            }
-        ]);
-    }
-    
-    showConfirmation(text, onConfirm, onCancel) {
-        const [confirmButton, cancelButton] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.YES, GameStrings.UI.BUTTONS.NO]);
-        this.show(text, [
-            {
-                html: confirmButton.html,
-                key: confirmButton.key,
-                action: () => {
-                    this.hide();
-                    if (onConfirm) onConfirm();
-                }
-            },
-            {
-                html: cancelButton.html,
-                key: cancelButton.key,
-                action: () => {
-                    this.hide();
-                    if (onCancel) onCancel();
-                }
-            }
-        ]);
-    }
-    
-    showPurchaseConfirmation(message, callback) {
-        const [button] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.THANKS]);
-        this.show(message, [
-            {
-                html: button.html,
-                key: button.key,
-                action: () => {
-                    this.hide();
-                    if (callback) callback();
-                }
-            }
-        ]);
-    }
-    
-    showSubmarinePurchase(callback) {
-        const [button] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.AMAZING]);
-        this.show(GameStrings.SHOP.CONFIRMATIONS.SUBMARINE, [
-            {
-                html: button.html,
-                key: button.key,
-                action: () => {
-                    this.hide();
-                    if (callback) callback();
-                }
-            }
-        ]);
-    }
-    
-    showRestConfirmation(callback) {
-        const [button] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.CLOSE]);
-        this.show(StringFormatter.format(GameStrings.INN.REST_SUCCESS, { cost: GameConfig.SHOP.INN_REST.cost }), [
-            {
-                html: button.html,
-                key: button.key,
-                action: () => {
-                    this.hide();
-                    if (callback) callback();
-                }
-            }
-        ]);
     }
 }
 
@@ -2841,7 +2631,7 @@ class UIManager {
         this.combat = combatManager;
         this.world = worldManager;
         this.core = null; // Set later via setCoreManager
-        this.dialog = new DialogManager(audioManager);
+        this.isShowingConfirmation = false;
         
         // UI state
         this.currentScreen = 'start';
@@ -2935,16 +2725,25 @@ class UIManager {
     // Method called by inline onclick handlers
     buyItem(itemId) {
         const result = this.world.buyItem(itemId);
+        const dialogueTextElement = document.getElementById('dialogue-text');
+        const dialogueOptionsElement = document.getElementById('dialogue-options');
+        
+        if (!dialogueTextElement || !dialogueOptionsElement) return;
+        
+        this.isShowingConfirmation = true;
+        
         if (itemId === 'submarine') {
-            // Special handling for submarine purchase
-            this.dialog.showSubmarinePurchase(() => {
-                this.endDialogue();
-            });
+            // Submarine purchase confirmation
+            dialogueTextElement.textContent = GameStrings.SHOP.CONFIRMATIONS.SUBMARINE;
+            const [button] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.AMAZING]);
+            dialogueOptionsElement.innerHTML = 
+                `<div class="dialogue-option" onclick="game.ui.endConfirmation()">${button.html}</div>`;
         } else {
             // Regular item purchase confirmation
-            this.dialog.showPurchaseConfirmation(result.message, () => {
-                this.endDialogue();
-            });
+            dialogueTextElement.textContent = result.message;
+            const [button] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.THANKS]);
+            dialogueOptionsElement.innerHTML = 
+                `<div class="dialogue-option" onclick="game.ui.endConfirmation()">${button.html}</div>`;
         }
     }
 
@@ -3248,13 +3047,14 @@ class UIManager {
             return; // Prevent further processing when popup is shown
         }
         
-        // Skip if modal dialog is active
-        if (this.dialog.isDialogActive()) {
+        // Handle purchase confirmation keyboard shortcuts (within dialogue screen)
+        if (this.isShowingConfirmation) {
+            this.handleConfirmationKeyboard(event);
             return;
         }
         
         // Handle dialogue keyboard shortcuts
-        if (this.dialogueActive && !this.dialog.isDialogActive()) {
+        if (this.dialogueActive) {
             this.handleDialogueKeyboard(event);
             return;
         }
@@ -3473,6 +3273,30 @@ class UIManager {
         }
     }
     
+    handleConfirmationKeyboard(event) {
+        const key = event.key.toLowerCase();
+        const dialogueOptions = document.querySelectorAll('#dialogue-options .dialogue-option');
+        
+        // Handle Enter key - click the confirmation button
+        if (key === 'enter') {
+            event.preventDefault();
+            if (dialogueOptions.length > 0) {
+                dialogueOptions[0].click();
+            }
+            return;
+        }
+        
+        // Handle underlined letter shortcuts
+        for (const option of dialogueOptions) {
+            const underlinedMatch = option.innerHTML.match(/<u>([a-zA-Z])<\/u>/);
+            if (underlinedMatch && underlinedMatch[1].toLowerCase() === key) {
+                event.preventDefault();
+                option.click();
+                return;
+            }
+        }
+    }
+    
     handleShopKeyboard(event) {
         const key = event.key.toLowerCase();
         
@@ -3505,7 +3329,7 @@ class UIManager {
     }
     
     handleKeyboard(event) {
-        if (this.dialogueActive || this.currentScreen === 'start' || this.dialog.isDialogActive()) return;
+        if (this.dialogueActive || this.currentScreen === 'start' || this.isShowingConfirmation) return;
         
         const key = event.key.toLowerCase();
         
@@ -4726,13 +4550,28 @@ class UIManager {
         
         if (result.success) {
             this.updateAllDisplays();
-            this.dialog.showRestConfirmation(() => {
-                this.endDialogue();
-            });
+            const dialogueTextElement = document.getElementById('dialogue-text');
+            const dialogueOptionsElement = document.getElementById('dialogue-options');
+            
+            if (dialogueTextElement && dialogueOptionsElement) {
+                this.isShowingConfirmation = true;
+                dialogueTextElement.textContent = StringFormatter.format(
+                    GameStrings.INN.REST_SUCCESS, 
+                    { cost: GameConfig.SHOP.INN_REST.cost }
+                );
+                const [button] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.CLOSE]);
+                dialogueOptionsElement.innerHTML = 
+                    `<div class="dialogue-option" onclick="game.ui.endConfirmation()">${button.html}</div>`;
+            }
         } else {
             this.displayMessage(result.message);
             this.endDialogue();
         }
+    }
+    
+    endConfirmation() {
+        this.isShowingConfirmation = false;
+        this.endDialogue();
     }
     
     endDialogue() {

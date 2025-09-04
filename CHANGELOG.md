@@ -2,7 +2,33 @@
 
 ---
 
-## Version 0.4.8 (Current)
+## Version 0.4.9 (Current)
+
+### ✅ Configuration Cleanup (FIX-016)  
+**Removed Duplicate Color Configuration** - Clean separation of concerns
+
+#### Issue Fixed
+- **Problem**: Color names appeared in both GameConfig.UI.COLORS and GameStrings.UI.COLORS
+- **Before**: GameConfig contained `{ filter: 'hue-rotate(0deg)', name: 'Red' }` mixing technical config with UI text
+- **After**: GameConfig contains only `{ filter: 'hue-rotate(0deg)' }` while GameStrings remains authoritative for display text
+
+#### Changes Made
+- Removed 'name' property from all GameConfig.UI.COLORS entries (RED, BLUE, PURPLE, GREEN, ORANGE)
+- Updated ui.js line 1021 to use GameStrings.UI.COLORS.RED instead of GameConfig.UI.COLORS.RED.name
+- Maintained identical functionality with cleaner architecture
+
+#### Benefits
+- **Proper Separation**: Technical configuration vs. user-facing strings
+- **Single Source of Truth**: GameStrings authoritative for all display text
+- **Better Maintainability**: Clear where to change filters vs. display names
+- **Consistent Architecture**: Aligns with existing patterns in codebase
+
+**Files affected**: src/config.js, src/ui.js  
+**Build output**: Maintained 89.9 KiB minified script.js
+
+---
+
+## Version 0.4.8
 
 ### 🏗️ Major Build System Migration - Webpack Implementation
 - **Completed FIX-027**: Migrated from simple concatenation build to modern webpack bundler

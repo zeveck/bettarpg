@@ -223,7 +223,7 @@ export class GameConfig {
     
     // === GAME METADATA ===
     static GAME = {
-        VERSION: '0.4.8',
+        VERSION: '0.4.9',
         WEBSITE: 'https://github.com/zeveck/bettarpg'
     };
     
@@ -238,11 +238,11 @@ export class GameConfig {
     // === UI CONFIGURATION ===
     static UI = {
         COLORS: {
-            RED: { filter: 'hue-rotate(0deg) saturate(1.2)', name: 'Red' },
-            BLUE: { filter: 'hue-rotate(180deg) saturate(1.3)', name: 'Blue' },
-            PURPLE: { filter: 'hue-rotate(270deg) saturate(1.8)', name: 'Purple' },
-            GREEN: { filter: 'hue-rotate(140deg) saturate(1.2) brightness(0.85)', name: 'Green' },
-            ORANGE: { filter: 'hue-rotate(30deg) saturate(1.8) brightness(1.1)', name: 'Orange' }
+            RED: { filter: 'hue-rotate(0deg) saturate(1.2)' },
+            BLUE: { filter: 'hue-rotate(180deg) saturate(1.3)' },
+            PURPLE: { filter: 'hue-rotate(270deg) saturate(1.8)' },
+            GREEN: { filter: 'hue-rotate(140deg) saturate(1.2) brightness(0.85)' },
+            ORANGE: { filter: 'hue-rotate(30deg) saturate(1.8) brightness(1.1)' }
         }
     };
     

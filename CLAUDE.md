@@ -150,6 +150,13 @@ When asked if a config is "used", this means the values actively drive game logi
 - Don't start servers without explicit user permission
 - Manual testing via user's browser is preferred over automated testing
 
+### Version Management
+- **Single Source of Truth**: GameConfig.GAME.VERSION in src/config.js drives all version displays
+- **Cache Busting**: index.html includes `<script src="script.js?v=X.X.X"></script>` to prevent browser caching issues
+- **Update Checklist**: Use `/checkversion` command to verify all version locations are updated consistently
+- **Key Files**: package.json, src/config.js, README.md, documentation headers, and index.html cache buster
+- **After Version Updates**: Always run `npm run build` and update cache buster parameter in index.html
+
 ## Philosophy
 
 The codebase prioritizes **simplicity, maintainability, and zero dependencies** while providing a complete RPG experience that runs in any modern browser. When making changes:

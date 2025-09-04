@@ -1,4 +1,4 @@
-# Betta Fish RPG v0.4.8 - Technical Documentation
+# Betta Fish RPG v0.4.9 - Technical Documentation
 
 ## Architecture Overview
 
@@ -281,6 +281,20 @@ generateRandomName() {
 - **Edge Cases**: Empty inputs, audio unavailable, rapid clicking
 - **Cross-Platform**: Desktop and mobile browser testing
 - **Performance**: No memory leaks or performance degradation
+
+## Version 0.4.9 Updates
+
+### Configuration Cleanup - Duplicate Color Config Fix (FIX-016)
+- **Separation of Concerns**: Removed duplicate color names from GameConfig.UI.COLORS
+- **GameConfig Simplification**: Color objects now only contain filter values, not display names
+- **GameStrings Authority**: GameStrings.UI.COLORS remains the single source of truth for color display names
+- **Code Clarity**: Clear distinction between technical config (filters) and UI text (names)
+
+### Technical Implementation Details
+- **GameConfig.UI.COLORS**: Removed 'name' property from all color entries (RED, BLUE, PURPLE, GREEN, ORANGE)
+- **UI Reference Update**: Changed ui.js:1021 to use GameStrings.UI.COLORS.RED instead of GameConfig.UI.COLORS.RED.name
+- **Architecture Alignment**: Proper separation between configuration values and user-facing strings
+- **Build Output**: Maintained 89.9 KiB minified production script.js with cleaner architecture
 
 ## Version 0.4.8 Updates
 

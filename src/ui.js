@@ -1018,7 +1018,7 @@ export class UIManager {
         // Set default values AFTER cloning
         if (nameInputNew) nameInputNew.value = defaultName;
         if (previewName) previewName.textContent = defaultName;
-        if (previewColor) previewColor.textContent = GameConfig.UI.COLORS.RED.name;
+        if (previewColor) previewColor.textContent = GameStrings.UI.COLORS.RED;
         
         // Set default color selection (red)
         colorOptions.forEach(option => {

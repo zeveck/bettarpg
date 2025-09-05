@@ -33,13 +33,13 @@
 - ✅ FIX-016: Duplicate Color Config (COMPLETED - v0.4.9)
 - ✅ FIX-017: updateMovementButtons Dead Function (COMPLETED)
 - ⬜ FIX-021: UIManager God Class (MAJOR REFACTOR)
-- ⬜ FIX-022: Global game Object Coupling (MAJOR REFACTOR)
+- ✅ FIX-022: Global game Object Coupling **[COMPLETED]**
 - ⬜ FIX-023: Circular Dependencies via Setters (MAJOR REFACTOR)
 - ✅ FIX-024: DialogManager Naming Confusion (COMPLETED - DialogManager removed entirely)
 - ✅ FIX-026: Update Documentation - Remove Double-Click Claim (COMPLETED)
 
 ### 🟠 Medium Priority (Architectural Consistency)
-- ⬜ FIX-028: Replace onClick Attributes with Event Listeners
+- ✅ FIX-028: Replace onClick Attributes with Event Listeners **[COMPLETED]**
 
 ### 🏗️ Major Architecture (Future Enhancements)
 - ✅ FIX-027: Migrate to Webpack Build System (COMPLETED)
@@ -49,9 +49,9 @@
 - ✅ NON-ISSUE-002: Happy Balloon Time Damage (WORKING AS INTENDED)
 - ✅ NON-ISSUE-003: justExitedCombat Implementation (ALREADY REMOVED)
 
-**Progress**: 20/28 fixes completed | Next Priority: Architectural consistency
+**Progress**: 23/28 fixes completed | Latest: Global object decoupling and event modernization (FIX-022, FIX-028)
 
-**Latest Release**: v0.4.9 - Configuration cleanup (FIX-016) completed
+**Latest Release**: v0.4.10 - Event handler modernization (FIX-028) completed
 
 ## Overview
 This plan addresses all issues found during the comprehensive codebase evaluation. Each fix is labeled with an ID for easy reference and categorized by type and priority.
@@ -401,15 +401,29 @@ Non-breaking issues that could be improved.
 **Impact**: Major refactoring, better separation of concerns
 **Effort**: 2-4 hours (major refactor)
 
-#### FIX-022: Global game Object Coupling 🌐 ARCHITECTURE
+#### FIX-022: Global game Object Coupling 🌐 ARCHITECTURE ✅
+**Status**: COMPLETED (2025-09-05) - v0.4.10
 **Issue**: Heavy reliance on global `game` object and onclick attributes creates tight coupling
 **Location**: index.html (onclick attributes), src/core.js (window.game)
-**Fix**: 
-- Replace onclick attributes with addEventListener in code
-- Consider dependency injection pattern instead of global
-- Or implement event bus for decoupling
-**Impact**: Better testability and maintainability
-**Effort**: 1-2 hours
+**Fix Applied**: 
+- **Eliminated window.game**: Removed `window.game = game` global exposure from core.js
+- **Event delegation**: Replaced all onclick attributes with modern event handling
+- **Clean encapsulation**: Game instance properly scoped within module
+**Technical Details**:
+```javascript
+// Before (tight coupling):
+window.game = game;  // Global exposure
+onclick="game.swimDirection('north')"
+
+// After (clean architecture):
+let game;  // Module-scoped
+document.addEventListener('click', (e) => {
+  // Event delegation routing
+});
+```
+**Impact**: Complete decoupling achieved - HTML purely structural, JS purely behavioral
+**Build**: Successful ✅
+**Effort**: Completed as part of FIX-028 implementation
 
 #### FIX-023: Circular Dependencies via Setters 🔄 ARCHITECTURE
 **Issue**: Managers use setter methods to resolve circular dependencies
@@ -417,6 +431,19 @@ Non-breaking issues that could be improved.
 **Fix**: Consider event-driven architecture or mediator pattern
 **Impact**: Cleaner dependency graph
 **Effort**: 2-3 hours (requires significant refactoring)
+
+#### FIX-030: Standardize DOM Manipulation Pattern 🏗️ FUTURE ARCHITECTURE
+**Issue**: Potential inconsistency between innerHTML and createElement patterns
+**Location**: Throughout ui.js (300+ innerHTML uses)
+**Current state**: Consistent use of innerHTML with string templates
+**Consideration**: Modern best practice would be createElement/appendChild for better performance and XSS safety
+**Recommendation**: Keep innerHTML for now (consistency > theoretical best practice)
+**Future options**:
+1. Migrate to createElement for better performance and safety
+2. Adopt a lightweight template system  
+3. Keep innerHTML but add XSS protection layer
+**Impact**: Would require rewriting most UI update methods
+**Effort**: 3-4 hours for full migration
 
 #### FIX-015: Dialog Container Mismatch 📦 MISLEADING
 **Issue**: DialogManager looks for 'dialogue-container' which doesn't exist
@@ -522,6 +549,7 @@ These were reported but are actually not problems.
 1. FIX-021: Refactor UIManager god class (2-4 hours)
 2. FIX-022: Remove global game object coupling (1-2 hours)
 3. FIX-023: Resolve circular dependencies (2-3 hours)
+4. FIX-030: Standardize DOM manipulation pattern (3-4 hours)
 
 ## Testing Checklist
 

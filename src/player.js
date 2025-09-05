@@ -1,4 +1,4 @@
-import { GameConfig } from './config.js';
+import { GameConfig, GameStrings } from './config.js';
 
 /**
  * Player Character Module

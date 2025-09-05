@@ -1,4 +1,4 @@
-# Betta Fish RPG v0.4.9
+# Betta Fish RPG v0.4.10
 
 A browser-based RPG where you play as a young betta fish exploring rice paddies and battling increasingly dangerous foes.
 

@@ -1,4 +1,4 @@
-# Betta Fish RPG v0.4.9 - Technical Documentation
+# Betta Fish RPG v0.4.10 - Technical Documentation
 
 ## Architecture Overview
 
@@ -282,6 +282,28 @@ generateRandomName() {
 - **Cross-Platform**: Desktop and mobile browser testing
 - **Performance**: No memory leaks or performance degradation
 
+## Version 0.4.10 Updates
+
+### Event Handler Modernization (FIX-028)
+- **Complete Migration**: Replaced all inline onclick attributes with modern event delegation pattern
+- **Event Delegation System**: Single document-level click listener using data-action attributes
+- **Global Decoupling**: Eliminated window.game global object dependency from HTML
+- **Architectural Consistency**: Unified event handling approach across all interactive elements
+- **Security Enhancement**: Removed all onclick injection vectors for better security
+
+### Development Workflow Optimization (FIX-022)
+- **Webpack Dev Server**: Enhanced for Docker/devcontainer environments with file watching
+- **Polling Configuration**: Added watchOptions with 3-second polling for container compatibility
+- **Performance Fixes**: Disabled HMR to resolve graphics loading delays and performance issues
+- **Live Reload**: Maintained automatic build and browser refresh capabilities
+- **Optimized Development**: Faster builds with disabled compression during development
+
+### Technical Implementation Details
+- **Event System**: `data-action="continue-dialogue"` replaces `onclick="game.ui.continueDialogue()"`
+- **Event Routing**: Single delegated listener handles all UI interactions via data attributes
+- **Module Decoupling**: HTML no longer depends on JavaScript global objects
+- **Webpack Optimization**: Custom watchOptions for containerized development environments
+
 ## Version 0.4.9 Updates
 
 ### Configuration Cleanup - Duplicate Color Config Fix (FIX-016)
@@ -328,7 +350,7 @@ generateRandomName() {
 ### Technical Implementation Details
 - **UIManager Enhancement**: Added `isShowingConfirmation` flag and `endConfirmation()` method
 - **Event Handling**: Created `handleConfirmationKeyboard()` for consistent keyboard interaction
-- **Build System**: Updated build.mjs module list from 9 to 8 modules
+- **Build System**: Updated webpack configuration from 9 to 8 modules
 - **Zero Functionality Loss**: All three confirmation scenarios tested and working identically
 - **Performance**: Net reduction of ~183 lines with improved maintainability
 

@@ -26,6 +26,9 @@ export class BettaRPG {
         this.ui.setCoreManager(this); // Set core reference for version info
         this.combat.setUIManager(this.ui); // Set UI reference for death handling
         
+        // Attach event listeners for all interactive elements
+        this.attachEventListeners();
+        
         // Pre-render world background for smooth user experience
         this.initializeAssets();
     }
@@ -56,7 +59,50 @@ export class BettaRPG {
         });
     }
     
-    
+    // Attach event listeners for all interactive elements
+    attachEventListeners() {
+        // Start screen
+        document.getElementById('start-game-btn').addEventListener('click', 
+            () => this.startCharacterCreation());
+        
+        // Village locations
+        document.getElementById('elder-dwelling').addEventListener('click', 
+            () => this.talkToNPC('elder'));
+        document.getElementById('fish-mart').addEventListener('click', 
+            () => this.talkToNPC('merchant'));
+        document.getElementById('village-guard').addEventListener('click', 
+            () => this.talkToNPC('guard'));
+        document.getElementById('bubbles-home').addEventListener('click', 
+            () => this.talkToNPC('bubble'));
+        document.getElementById('swishy-solace-inn').addEventListener('click', 
+            () => this.talkToNPC('innkeeper'));
+        document.getElementById('exit-to-paddies').addEventListener('click', 
+            () => this.exitVillage());
+        
+        // Movement buttons
+        document.getElementById('swim-north-btn').addEventListener('click', 
+            () => this.swimDirection('north'));
+        document.getElementById('swim-west-btn').addEventListener('click', 
+            () => this.swimDirection('west'));
+        document.getElementById('swim-east-btn').addEventListener('click', 
+            () => this.swimDirection('east'));
+        document.getElementById('swim-south-btn').addEventListener('click', 
+            () => this.swimDirection('south'));
+        document.getElementById('return-village-btn').addEventListener('click', 
+            () => this.returnToVillage());
+        
+        // Combat buttons
+        document.getElementById('attack-btn').addEventListener('click', 
+            () => this.attack());
+        document.getElementById('bubble-blast-btn').addEventListener('click', 
+            () => this.useSkill('bubble'));
+        document.getElementById('gravel-grenade-btn').addEventListener('click', 
+            () => this.useSkill('gravel'));
+        document.getElementById('happy-balloon-btn').addEventListener('click', 
+            () => this.useSkill('party'));
+        document.getElementById('swim-away-btn').addEventListener('click', 
+            () => this.runAway());
+    }
     
     // Start character creation (called from HTML)
     startCharacterCreation() {
@@ -113,9 +159,8 @@ export class BettaRPG {
     }
 }
 
-// Initialize and expose game globally for HTML interactions
+// Initialize game after DOM is ready
 let game;
 document.addEventListener("DOMContentLoaded", () => {
     game = new BettaRPG();
-    window.game = game;  // Expose for onclick handlers
 });

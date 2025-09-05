@@ -41,19 +41,28 @@ module.exports = {
     minimize: true // Minify for smaller output
   },
 
+  // Docker/devcontainer file watching fix - use longer polling for better performance
+  watchOptions: {
+    poll: 3000, // Poll every 3 seconds (less aggressive)
+    aggregateTimeout: 600,
+    ignored: /node_modules/
+  },
+
   // Development server configuration
   devServer: {
     static: {
-      directory: path.resolve(__dirname, '.')
+      directory: path.resolve(__dirname, '.'),
+      watch: false // Disable static file watching to improve performance
     },
     port: 5555,
     open: false, // Don't auto-open browser in codespace
-    hot: false, // Disable hot reload for this simple setup
-    liveReload: true, // Enable live reload on file changes
+    hot: false, // Disable HMR - it's interfering with static assets
+    liveReload: true, // Keep live reload but disable HMR
+    watchFiles: ['src/**/*.js'], // Only watch JS files, not HTML/assets
     client: {
-      logging: 'info' // Show more verbose output
+      logging: 'warn' // Reduce logging noise
     },
-    compress: true, // Enable gzip compression
+    compress: false, // Disable compression for faster dev builds
     historyApiFallback: false // We don't need SPA routing
   }
 };

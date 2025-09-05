@@ -39,6 +39,9 @@ export class UIManager {
         // Initialize UI after DOM is ready
         this.initializeUI();
         
+        // Setup event delegation for dynamic content
+        this.setupEventDelegation();
+        
         // Apply village background immediately after UI is ready
         setTimeout(() => this.initializeVillageBackground(), 0);
     }
@@ -105,7 +108,7 @@ export class UIManager {
         }
     }
     
-    // Method called by inline onclick handlers
+    // Method called by event delegation
     buyItem(itemId) {
         const result = this.world.buyItem(itemId);
         const dialogueTextElement = document.getElementById('dialogue-text');
@@ -120,13 +123,13 @@ export class UIManager {
             dialogueTextElement.textContent = GameStrings.SHOP.CONFIRMATIONS.SUBMARINE;
             const [button] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.AMAZING]);
             dialogueOptionsElement.innerHTML = 
-                `<div class="dialogue-option" onclick="game.ui.endConfirmation()">${button.html}</div>`;
+                `<div class="dialogue-option" data-action="end-confirmation">${button.html}</div>`;
         } else {
             // Regular item purchase confirmation
             dialogueTextElement.textContent = result.message;
             const [button] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.THANKS]);
             dialogueOptionsElement.innerHTML = 
-                `<div class="dialogue-option" onclick="game.ui.endConfirmation()">${button.html}</div>`;
+                `<div class="dialogue-option" data-action="end-confirmation">${button.html}</div>`;
         }
     }
 
@@ -347,7 +350,7 @@ export class UIManager {
         const titleSubtitle = document.querySelector('#title-screen p');
         if (titleSubtitle) titleSubtitle.textContent = GameStrings.UI.SCREENS.SUBTITLE;
         
-        const startBtn = document.querySelector('button[onclick*="startCharacterCreation"]');
+        const startBtn = document.getElementById('start-game-btn');
         if (startBtn) {
             const [startButton] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.START_ADVENTURE]);
             startBtn.innerHTML = startButton.html;
@@ -386,23 +389,9 @@ export class UIManager {
     }
     
     setupEventListeners() {
-        // Movement buttons (use onclick handlers in HTML)
-        
-        // Combat buttons
-        document.getElementById('attackBtn')?.addEventListener('click', () => this.playerAttack());
-        document.getElementById('bubbleBtn')?.addEventListener('click', () => this.playerCastSpell('bubble'));
-        document.getElementById('gravelBtn')?.addEventListener('click', () => this.playerCastSpell('gravel'));
-        document.getElementById('runBtn')?.addEventListener('click', () => this.playerRunAway());
-        
-        // Village buttons
-        document.getElementById('enterVillageBtn')?.addEventListener('click', () => this.enterVillage());
-        document.getElementById('leaveVillageBtn')?.addEventListener('click', () => this.leaveVillage());
-        document.getElementById('shopBtn')?.addEventListener('click', () => this.toggleShop());
+        // Movement buttons (handled by event listeners in core.js)
         
         // NPC interaction buttons (will be added dynamically)
-        
-        // Start screen
-        document.getElementById('startGameBtn')?.addEventListener('click', () => this.startNewGame());
         
         // Audio toggle
         document.getElementById('audio-toggle')?.addEventListener('click', () => this.toggleAudio());
@@ -414,6 +403,39 @@ export class UIManager {
         document.addEventListener('keydown', (e) => this.handleGlobalKeyboard(e));
     }
     
+    // Setup event delegation for dynamic content
+    setupEventDelegation() {
+        // Single delegated listener for all dynamic dialogue and shop interactions
+        document.addEventListener('click', (e) => {
+            const target = e.target.closest('[data-action]');
+            if (!target) return;
+            
+            const action = target.dataset.action;
+            const params = target.dataset;
+            
+            // Route to appropriate handler
+            switch(action) {
+                case 'continue-dialogue':
+                    this.continueDialogue();
+                    break;
+                case 'end-dialogue':
+                    this.endDialogue();
+                    break;
+                case 'end-confirmation':
+                    this.endConfirmation();
+                    break;
+                case 'buy-item':
+                    this.buyItem(params.itemId);
+                    break;
+                case 'open-shop':
+                    this.openShopFromDialogue();
+                    break;
+                case 'rest-at-inn':
+                    this.restAtInnFromDialogue();
+                    break;
+            }
+        });
+    }
     
     handleGlobalKeyboard(event) {
         const key = event.key.toLowerCase();
@@ -505,7 +527,7 @@ export class UIManager {
         // Handle title screen shortcuts
         if (this.currentScreen === 'title-screen' && key === 's') {
             event.preventDefault();
-            const startButton = document.querySelector('button[onclick*="startCharacterCreation"]');
+            const startButton = document.getElementById('start-game-btn');
             if (startButton) startButton.click();
             return;
         }
@@ -515,7 +537,7 @@ export class UIManager {
             switch(this.currentScreen) {
                 case 'title-screen':
                     // Trigger Start Adventure button
-                    const startButton = document.querySelector('button[onclick*="startCharacterCreation"]');
+                    const startButton = document.getElementById('start-game-btn');
                     if (startButton) startButton.click();
                     break;
                     
@@ -552,7 +574,7 @@ export class UIManager {
             for (const item of shopItems) {
                 if (item.dataset.key === key && item.classList.contains('shop-item-buyable')) {
                     event.preventDefault();
-                    item.click(); // Trigger the onclick handler
+                    item.click(); // Trigger the event listener
                     return;
                 }
             }
@@ -1432,7 +1454,7 @@ export class UIManager {
     }
     
     enableCombatButtons() {
-        // Attack button is always enabled (no ID needed, works via onclick)
+        // Attack button is always enabled (handled by event listener in core.js)
         
         // Always enable spell buttons - let click handlers show MP messages
         const bubbleBtn = document.getElementById('bubble-blast-btn');
@@ -1784,7 +1806,7 @@ export class UIManager {
                     <h4 class="item-name">${item.name}</h4>
                     <p>${item.description}</p>
                     <p>Cost: ${item.cost} Betta Bites</p>
-                    ${canAfford ? `<button onclick="game.ui.buyItem('${item.id}')">Buy</button>` : ''}
+                    ${canAfford ? `<button data-action="buy-item" data-item-id="${item.id}">Buy</button>` : ''}
                 </div>
             `;
         }).join('');
@@ -1840,7 +1862,7 @@ export class UIManager {
         
         if (dialogueData.hasMoreDialogue) {
             const buttons = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.CONTINUE]);
-            optionsHTML += `<div class="dialogue-option" onclick="game.ui.continueDialogue()">${buttons[0].html}</div>`;
+            optionsHTML += `<div class="dialogue-option" data-action="continue-dialogue">${buttons[0].html}</div>`;
         } else {
             // Collect button texts
             const buttonTexts = [];
@@ -1848,24 +1870,24 @@ export class UIManager {
             
             if (dialogueData.isShop) {
                 buttonTexts.push(GameStrings.UI.BUTTONS.BROWSE_ITEMS);
-                actions.push('game.ui.openShopFromDialogue()');
+                actions.push('open-shop');
             }
             if (dialogueData.isInn) {
                 if (this.player.canAfford(GameConfig.SHOP.INN_REST.cost)) {
                     buttonTexts.push(StringFormatter.format(GameStrings.UI.BUTTONS.REST_WITH_COST, { cost: GameConfig.SHOP.INN_REST.cost }));
-                    actions.push('game.ui.restAtInnFromDialogue()');
+                    actions.push('rest-at-inn');
                 } else {
                     // Handle disabled state separately since it doesn't get automatic processing
                     optionsHTML += `<div class="dialogue-option disabled">${StringFormatter.format(GameStrings.UI.BUTTONS.REST, { cost: GameConfig.SHOP.INN_REST.cost })}${GameStrings.UI.DIALOGUE_OPTIONS.REST_SUFFIX}</div>`;
                 }
             }
             buttonTexts.push(GameStrings.UI.BUTTONS.GOODBYE);
-            actions.push('game.ui.endDialogue()');
+            actions.push('end-dialogue');
             
             // Process buttons and generate HTML
             const buttons = StringFormatter.processButtonTexts(buttonTexts);
             buttons.forEach((button, index) => {
-                optionsHTML += `<div class="dialogue-option" onclick="${actions[index]}">${button.html}</div>`;
+                optionsHTML += `<div class="dialogue-option" data-action="${actions[index]}">${button.html}</div>`;
             });
         }
         
@@ -1900,7 +1922,7 @@ export class UIManager {
             let shopItemsHTML = '';
             shopItems.forEach((item, index) => {
                 const canAfford = this.player.canAfford(item.cost);
-                const clickHandler = canAfford ? `onclick="game.ui.buyItem('${item.id}')"` : '';
+                const clickHandler = canAfford ? `data-action="buy-item" data-item-id="${item.id}"` : '';
                 const itemClass = canAfford ? 'shop-item-buyable' : 'shop-item-unavailable';
                 const processedItem = processedItems[index];
                 
@@ -1924,7 +1946,7 @@ export class UIManager {
         
         if (dialogueOptionsElement) {
             const [maybeLaterButton] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.MAYBE_LATER]);
-            dialogueOptionsElement.innerHTML = `<div class="dialogue-option" onclick="game.ui.endDialogue()">${maybeLaterButton.html}</div>`;
+            dialogueOptionsElement.innerHTML = `<div class="dialogue-option" data-action="end-dialogue">${maybeLaterButton.html}</div>`;
         }
     }
     
@@ -1944,7 +1966,7 @@ export class UIManager {
                 );
                 const [button] = StringFormatter.processButtonTexts([GameStrings.UI.BUTTONS.CLOSE]);
                 dialogueOptionsElement.innerHTML = 
-                    `<div class="dialogue-option" onclick="game.ui.endConfirmation()">${button.html}</div>`;
+                    `<div class="dialogue-option" data-action="end-confirmation">${button.html}</div>`;
             }
         } else {
             this.displayMessage(result.message);
@@ -2018,7 +2040,7 @@ export class UIManager {
         
         // Set up button click handler
         const continueBtn = document.getElementById('peace-continue-btn');
-        continueBtn.onclick = () => popup.remove();
+        continueBtn.addEventListener('click', () => popup.remove());
         
         // Set up keyboard handlers
         const handleKeyPress = (e) => {

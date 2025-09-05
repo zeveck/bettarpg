@@ -2,7 +2,75 @@
 
 ---
 
-## Version 0.4.9 (Current)
+## Version 0.4.10 (Current)
+
+### ✅ Event Handler Modernization (FIX-028)
+**Complete Migration from onclick to Event Listeners** - Architectural consistency achieved
+
+#### Issue Fixed
+- **Problem**: Inconsistent event handling - mix of inline `onclick` attributes in HTML and `addEventListener` calls in JavaScript
+- **Before**: HTML used `onclick="if(game) game.swimDirection('north')"` with global game object dependency
+- **After**: Clean event delegation pattern with data attributes and single delegated listener
+
+#### Changes Made
+- **Removed all onclick attributes** from HTML elements (17 total)
+- **Implemented event delegation system** using data-action attributes
+- **Fixed querySelector references** that looked for onclick attributes (3 locations)
+- **Updated dialogue generation** to use data attributes instead of onclick strings
+- **Replaced direct onclick assignment** with addEventListener for popup
+- **Updated stale comments** to reflect new event handling patterns
+
+#### Technical Details
+- **Event Delegation**: Single document-level click listener routes to appropriate handlers
+- **Data Attributes**: `data-action="continue-dialogue"` replaces `onclick="game.ui.continueDialogue()"`
+- **Decoupled Architecture**: Eliminated window.game global dependency from HTML
+- **Consistent Patterns**: All interactive elements now use the same event handling approach
+
+#### Benefits
+- **Better Separation of Concerns**: HTML for structure, JS for behavior
+- **Improved Maintainability**: Consistent event handling patterns throughout
+- **Enhanced Security**: No onclick injection vectors remain
+- **Cleaner Architecture**: Eliminated global object coupling between HTML and JS
+- **Future-Proof**: Modern event handling practices for better extensibility
+
+### ✅ Development Workflow Optimization (FIX-022)
+**Webpack Dev Server Optimization** - Enhanced development experience for containerized environments
+
+#### Issue Fixed
+- **Problem**: Webpack dev server wasn't detecting file changes in Docker/devcontainer environments
+- **Before**: Manual server restarts required after every code change, breaking development flow
+- **After**: Automatic file watching with optimized polling for container compatibility
+
+#### Changes Made
+- **Added Polling Configuration**: `watchOptions` with 3-second polling for Docker/devcontainer compatibility
+- **Disabled HMR**: Removed Hot Module Replacement to fix performance issues and graphics loading delays
+- **Optimized Build Performance**: Disabled compression for faster development builds
+- **Maintained Live Reload**: Files automatically rebuild and browser refreshes on changes
+
+#### Technical Details
+```javascript
+// webpack.config.js additions
+watchOptions: {
+  poll: 3000,           // Poll every 3 seconds
+  aggregateTimeout: 600, // Batch changes
+  ignored: /node_modules/
+},
+devServer: {
+  hot: false,           // Disable HMR for performance
+  compress: false       // Faster development builds
+}
+```
+
+#### Benefits
+- **Seamless Development**: No manual restarts needed after code changes
+- **Container Optimized**: Proper file watching in Docker/devcontainer environments  
+- **Performance Improved**: Graphics load normally without HMR interference
+- **Faster Builds**: Optimized configuration for development workflow
+- **Professional Tooling**: Industry-standard webpack development experience
+
+---
+
+## Version 0.4.9
 
 ### ✅ Configuration Cleanup (FIX-016)  
 **Removed Duplicate Color Configuration** - Clean separation of concerns

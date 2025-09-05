@@ -15,7 +15,7 @@
                 <div class="title-content">
                     <h1></h1>
                     <p></p>
-                    <button onclick="if(game) game.startCharacterCreation()"></button>
+                    <button id="start-game-btn"></button>
                 </div>
                 <img id="title-fish-right" src="graphics/main_fish/player_betta.png" alt="Blue Betta">
             </div>
@@ -56,20 +56,20 @@
                     </div>
                 
                 <div class="village-locations">
-                    <div class="location" onclick="if(game) game.talkToNPC('elder')" id="elder-dwelling">
+                    <div class="location" id="elder-dwelling">
                     </div>
-                    <div class="location" onclick="if(game) game.talkToNPC('merchant')" id="fish-mart">
+                    <div class="location" id="fish-mart">
                     </div>
-                    <div class="location" onclick="if(game) game.talkToNPC('guard')" id="village-guard">
+                    <div class="location" id="village-guard">
                     </div>
-                    <div class="location" onclick="if(game) game.talkToNPC('bubble')" id="bubbles-home">
+                    <div class="location" id="bubbles-home">
                     </div>
-                    <div class="location village-center" onclick="if(game) game.talkToNPC('innkeeper')" id="swishy-solace-inn">
+                    <div class="location village-center" id="swishy-solace-inn">
                     </div>
                 </div>
                 
                 <div class="village-exit">
-                    <div class="location" onclick="if(game) game.exitVillage()" id="exit-to-paddies">
+                    <div class="location" id="exit-to-paddies">
                     </div>
                 </div>
                 
@@ -99,15 +99,15 @@
                 
                 <div class="map-navigation">
                     <div class="nav-row">
-                        <button id="swim-north-btn" onclick="if(game) game.swimDirection('north')"></button>
+                        <button id="swim-north-btn"></button>
                     </div>
                     <div class="nav-row">
-                        <button id="swim-west-btn" onclick="if(game) game.swimDirection('west')"></button>
-                        <button id="return-village-btn" onclick="if(game) game.returnToVillage()"></button>
-                        <button id="swim-east-btn" onclick="if(game) game.swimDirection('east')"></button>
+                        <button id="swim-west-btn"></button>
+                        <button id="return-village-btn"></button>
+                        <button id="swim-east-btn"></button>
                     </div>
                     <div class="nav-row">
-                        <button id="swim-south-btn" onclick="if(game) game.swimDirection('south')"></button>
+                        <button id="swim-south-btn"></button>
                     </div>
                 </div>
                 
@@ -143,14 +143,14 @@
                 <div id="combat-log"></div>
                 
                 <div class="combat-actions">
-                    <button id="attack-btn" onclick="if(game) game.attack()"></button>
+                    <button id="attack-btn"></button>
                     <div class="spell-buttons">
-                        <button id="bubble-blast-btn" onclick="if(game) game.useSkill('bubble')"></button>
-                        <button id="gravel-grenade-btn" onclick="if(game) game.useSkill('gravel')" style="display: none;"></button>
-                        <button id="happy-balloon-btn" onclick="if(game) game.useSkill('party')" style="display: none;"></button>
+                        <button id="bubble-blast-btn"></button>
+                        <button id="gravel-grenade-btn" style="display: none;"></button>
+                        <button id="happy-balloon-btn" style="display: none;"></button>
                     </div>
                     <div class="swim-away-section">
-                        <button id="swim-away-btn" onclick="if(game) game.runAway()"></button>
+                        <button id="swim-away-btn"></button>
                         <div id="swim-away-message" class="swim-away-message"></div>
                     </div>
                 </div>
@@ -198,6 +198,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=0.4.9"></script>
+    <script src="script.js?v=0.4.10"></script>
 </body>
 </html>

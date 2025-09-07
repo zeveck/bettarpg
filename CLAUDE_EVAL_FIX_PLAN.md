@@ -32,11 +32,12 @@
 - ✅ FIX-015: Dialog Container Mismatch (COMPLETED - DialogManager removed entirely)
 - ✅ FIX-016: Duplicate Color Config (COMPLETED - v0.4.9)
 - ✅ FIX-017: updateMovementButtons Dead Function (COMPLETED)
-- ⬜ FIX-021: UIManager God Class (MAJOR REFACTOR)
+- <s>FIX-021: UIManager God Class (STRUCK - cohesive UI controller with 91 methods all UI-related, not problematic god class)</s>
 - ✅ FIX-022: Global game Object Coupling **[COMPLETED]**
-- ⬜ FIX-023: Circular Dependencies via Setters (MAJOR REFACTOR)
+- <s>FIX-023: Circular Dependencies via Setters (STRUCK - only 3 controlled setter methods, not chaotic coupling)</s>
 - ✅ FIX-024: DialogManager Naming Confusion (COMPLETED - DialogManager removed entirely)
 - ✅ FIX-026: Update Documentation - Remove Double-Click Claim (COMPLETED)
+- <s>FIX-030: Standardize DOM Manipulation Pattern (STRUCK - mixed innerHTML/createElement approach appropriate for game scope)</s>
 
 ### 🟠 Medium Priority (Architectural Consistency)
 - ✅ FIX-028: Replace onClick Attributes with Event Listeners **[COMPLETED]**
@@ -44,12 +45,17 @@
 ### 🏗️ Major Architecture (Future Enhancements)
 - ✅ FIX-027: Migrate to Webpack Build System (COMPLETED)
 
+### 🛠️ Development Tooling (Practical Improvements)
+- ⬜ FIX-031: Add ESLint Configuration (15 minutes)
+- ⬜ FIX-032: Add JSDoc Comments for Complex Functions (30 minutes)
+- ⬜ FIX-033: Add Build Verification Script (20 minutes)
+
 ### ✅ Verified Non-Issues
 - ✅ NON-ISSUE-001: StringFormatter Not Defined (FALSE POSITIVE)
 - ✅ NON-ISSUE-002: Happy Balloon Time Damage (WORKING AS INTENDED)
 - ✅ NON-ISSUE-003: justExitedCombat Implementation (ALREADY REMOVED)
 
-**Progress**: 23/28 fixes completed | Latest: Global object decoupling and event modernization (FIX-022, FIX-028)
+**Progress**: 24/31 fixes completed | Latest: Global object decoupling and event modernization (FIX-022, FIX-028)
 
 **Latest Release**: v0.4.10 - Event handler modernization (FIX-028) completed
 
@@ -486,6 +492,76 @@ export class ModalManager {  // or ConfirmationManager
 ```
 **Impact**: Prevents confusion between NPC dialogues and modal confirmations
 **Effort**: 10 minutes (rename class and update references)
+
+### 🛠️ NEW: Development Tooling Improvements
+**These are practical maintainability improvements with low risk and high value.**
+
+#### FIX-031: Add ESLint Configuration 🔧 DEVELOPMENT TOOLING
+**Issue**: No linting setup for code consistency and error detection
+**Benefits**: Catch errors early, maintain consistent code style, improve developer experience
+**Implementation**:
+```javascript
+// .eslintrc.js
+module.exports = {
+    env: { browser: true, es6: true },
+    extends: ['eslint:recommended'],
+    parserOptions: { ecmaVersion: 2020, sourceType: 'module' },
+    rules: {
+        'no-unused-vars': 'warn',
+        'no-console': 'warn',
+        'semi': ['error', 'always']
+    }
+};
+```
+**Files**: New .eslintrc.js, package.json update (`"lint": "eslint src/"`)
+**Effort**: 15 minutes
+**Impact**: Consistent code style, fewer bugs, better developer experience
+
+#### FIX-032: Add JSDoc Comments for Complex Functions 📚 DOCUMENTATION  
+**Issue**: Some complex methods lack proper documentation
+**Target functions**:
+- `generateTiledBackground()` in ui.js (world map rendering logic)
+- `processDialogue()` in npc.js (NPC dialogue system with cost substitution)
+- `calculateCombatReward()` in combat.js (reward calculation logic)
+- `preRenderWorldBackground()` in ui.js (background caching system)
+**Implementation**: Add JSDoc comments explaining parameters, return values, side effects
+```javascript
+/**
+ * Generates a tiled background for the world map using cached water tiles
+ * @param {number} width - Canvas width in pixels
+ * @param {number} height - Canvas height in pixels
+ * @returns {HTMLCanvasElement} Rendered background canvas
+ */
+```
+**Effort**: 30 minutes
+**Impact**: Better code understanding, easier maintenance for complex systems
+
+#### FIX-033: Add Build Verification Script 🧪 BUILD QUALITY
+**Issue**: No automated verification that webpack builds produce working code
+**Implementation**:
+```javascript
+// verify-build.js - Simple smoke test
+const fs = require('fs');
+const path = require('path');
+
+// Check that script.js exists and is non-empty
+const scriptPath = path.join(__dirname, 'script.js');
+if (!fs.existsSync(scriptPath)) {
+    console.error('Build verification failed: script.js not found');
+    process.exit(1);
+}
+
+const stats = fs.statSync(scriptPath);
+if (stats.size < 1000) {
+    console.error('Build verification failed: script.js too small');
+    process.exit(1);
+}
+
+console.log('✅ Build verification passed');
+```
+**Files**: New verify-build.js, package.json update (`"verify": "node verify-build.js"`)
+**Effort**: 20 minutes  
+**Impact**: Catch build-breaking changes early, ensure deployments work
 
 ### ✅ NON-ISSUES: False Positives
 These were reported but are actually not problems.

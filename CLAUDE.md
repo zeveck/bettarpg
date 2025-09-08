@@ -85,6 +85,8 @@ The Player class is the **authoritative source** for all character data.
 
 ### Code Conventions
 - **ES6+ syntax**: Classes, arrow functions, template literals
+- **JavaScript Standard Style**: 2-space indentation, no semicolons, space before function parentheses
+- **Linting**: Run `npm run lint` to check code style, `npm run lint:fix` to auto-fix issues
 - **Descriptive method names**: `updatePlayerStats()`, `canAfford()`, etc.
 - **Graceful fallbacks**: Handle missing DOM elements and unsupported APIs
 - **No external dependencies**: Maintain zero-dependency design

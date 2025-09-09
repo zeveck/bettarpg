@@ -34,7 +34,7 @@ export class UIManager {
     this.playerFacing = 'right' // Track which direction player is facing
 
     // Betta names for character creation - use configuration
-    this.betteNames = GameStrings.CHARACTER_CREATION.RANDOM_NAMES
+    this.bettaNames = GameStrings.CHARACTER_CREATION.RANDOM_NAMES
 
     // Initialize UI after DOM is ready
     this.initializeUI()
@@ -67,8 +67,8 @@ export class UIManager {
   }
 
   generateRandomName () {
-    const randomIndex = Math.floor(Math.random() * this.betteNames.length)
-    return this.betteNames[randomIndex]
+    const randomIndex = Math.floor(Math.random() * this.bettaNames.length)
+    return this.bettaNames[randomIndex]
   }
 
   // Helper method to check if a button is visible
@@ -437,6 +437,11 @@ export class UIManager {
     })
   }
 
+  /**
+   * Handles global keyboard input for all game screens and contexts
+   * Routes key presses to appropriate handlers based on current game state
+   * @param {KeyboardEvent} event - Browser keyboard event object
+   */
   handleGlobalKeyboard (event) {
     const key = event.key.toLowerCase()
 
@@ -940,6 +945,10 @@ export class UIManager {
     }
   }
 
+  /**
+   * Displays village interface with NPC interactions and safe zone features
+   * Shows village background and enables access to shops, inn, and dialogue
+   */
   showVillageScreen () {
     // Village-specific UI setup - background is now handled by CSS
     // Clean up world map dynamic styles
@@ -951,6 +960,10 @@ export class UIManager {
     this.showStatsPanel()
   }
 
+  /**
+   * Displays world map exploration interface with movement controls
+   * Shows current location and enables directional movement for exploration
+   */
   showWorldMapScreen () {
     // World map specific UI setup (don't auto-display message - only show when actually leaving village)
     this.createLayeredWorldBackground()
@@ -959,6 +972,10 @@ export class UIManager {
     this.showStatsPanel()
   }
 
+  /**
+   * Displays combat screen interface and initializes combat UI elements
+   * Sets up combat background, enables combat controls, and shows stats panel
+   */
   showCombatScreen () {
     // Clear enemy sprite immediately to prevent flash of previous enemy
     const enemySprite = document.getElementById('enemy-fish-combat')
@@ -995,6 +1012,10 @@ export class UIManager {
   }
 
   // Game initialization
+  /**
+   * Initializes new game by displaying character creation screen
+   * Resets all game managers and begins fresh game session
+   */
   startNewGame () {
     this.showCharacterCreation()
   }
@@ -1190,6 +1211,11 @@ export class UIManager {
   }
 
   // Movement handling
+  /**
+   * Handles player movement input and coordinates with world manager
+   * Prevents movement during combat or dialogue and manages screen transitions
+   * @param {string} direction - Direction to move ('north', 'south', 'east', 'west')
+   */
   movePlayer (direction) {
     if (this.combat.isCombatActive() || this.dialogueActive) return
 
@@ -1255,6 +1281,11 @@ export class UIManager {
   }
 
   // Encounter handling
+  /**
+   * Processes encounter results from world exploration and displays appropriate UI
+   * Handles different encounter types (combat, treasure, peaceful, mystery)
+   * @param {Object} encounter - Encounter object with type and relevant data
+   */
   handleEncounter (encounter) {
     switch (encounter.type) {
       case 'combat':
@@ -1353,6 +1384,10 @@ export class UIManager {
     this.updatePlayerStats()
   }
 
+  /**
+   * Updates all combat UI elements including HP bars, stats, and enemy display
+   * Refreshes player and enemy health, MP, and combat status indicators
+   */
   updateCombatDisplay () {
     const enemy = this.combat.getCurrentEnemy()
     if (!enemy) return
@@ -1641,6 +1676,11 @@ export class UIManager {
     }
   }
 
+  /**
+   * Handles combat victory processing and displays victory screen with rewards
+   * Shows EXP/currency gains, level up notifications, and special achievements
+   * @param {Object} victoryResult - Victory data including rewards and bonuses
+   */
   handleVictory (victoryResult) {
     // Add combat-over class to show waiting cursor
     document.getElementById('combat')?.classList.add('combat-over')
@@ -1683,6 +1723,10 @@ export class UIManager {
     }
   }
 
+  /**
+   * Handles player defeat in combat and displays death screen with penalties
+   * Shows Betta Bites lost and manages transition back to village safely
+   */
   handlePlayerDefeat () {
     // Add combat-over class to show waiting cursor
     document.getElementById('combat')?.classList.add('combat-over')
@@ -2262,7 +2306,14 @@ export class UIManager {
     }
   }
 
-  // Generate a pre-rendered background with tiles based on distance zones
+  /**
+   * Generates a tiled background for the world map using cached water tiles
+   * Creates a canvas with tiles colored based on danger zones (safe, dangerous, extreme)
+   * Uses GameConfig.WORLD.DANGER_ZONES to determine tile colors by distance from village
+   * @async
+   * @returns {Promise<string>} Data URL of the generated background canvas image
+   * @throws {Error} If image loading fails or canvas creation fails
+   */
   async generateTiledBackground () {
     // Return cached version if available
     if (this.cachedWorldBackground) {
@@ -2466,7 +2517,13 @@ export class UIManager {
     }
   }
 
-  // Pre-render world background during game initialization
+  /**
+   * Pre-renders world background during game initialization for smooth user experience
+   * Generates the background canvas and applies it to the world container DOM element
+   * Sets backgroundPreRenderComplete flag to prevent duplicate rendering
+   * @async
+   * @returns {Promise<void>} Resolves when background is pre-rendered and applied
+   */
   async preRenderWorldBackground () {
     if (this.backgroundPreRenderComplete) {
       return // Already done

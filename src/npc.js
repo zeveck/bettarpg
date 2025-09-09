@@ -41,20 +41,14 @@ export class NPCManager {
     this.currentDialogueIndex = 0
   }
 
-  // Helper method to process dialogue with templates
-  processDialogue (dialogue, npc) {
-    if (npc.isShop) {
-      // For shop NPCs, use submarine cost for merchant dialogue templates
-      return StringFormatter.format(dialogue, { cost: GameConfig.SHOP.SUBMARINE.cost })
-    } else if (npc.isInn) {
-      // For inn NPCs, use rest cost for inn dialogue templates
-      return StringFormatter.format(dialogue, { cost: GameConfig.SHOP.INN_REST.cost })
-    }
-    // Return as-is for NPCs that don't use cost templates
-    return dialogue
-  }
 
   // Core NPC interaction methods
+  /**
+   * Initiates dialogue with specified NPC and returns initial conversation state
+   * Sets up dialogue tracking and processes first dialogue with template substitution
+   * @param {string} npcId - Unique identifier for NPC (elder, merchant, guard, etc.)
+   * @returns {Object} Dialogue initiation result with NPC data and conversation state
+   */
   talkToNPC (npcId) {
     const npc = this.npcs[npcId]
     if (!npc) return { success: false, message: 'NPC not found!' }
@@ -63,7 +57,15 @@ export class NPCManager {
     this.currentDialogueIndex = 0
 
     const rawDialogue = npc.dialogues[this.currentDialogueIndex]
-    const processedDialogue = this.processDialogue(rawDialogue, npc)
+    // Process dialogue with cost substitution if needed
+    let processedDialogue = rawDialogue
+    if (npc.isShop) {
+      // Shop NPC (Shopkeeper Coral) mentions submarine cost in dialogue
+      processedDialogue = StringFormatter.format(rawDialogue, { cost: GameConfig.SHOP.SUBMARINE.cost })
+    } else if (npc.isInn) {
+      // Inn NPC mentions rest cost in dialogue
+      processedDialogue = StringFormatter.format(rawDialogue, { cost: GameConfig.SHOP.INN_REST.cost })
+    }
 
     return {
       success: true,
@@ -75,6 +77,11 @@ export class NPCManager {
     }
   }
 
+  /**
+   * Advances to next dialogue line for current NPC conversation
+   * Handles dialogue progression, template processing, and conversation completion
+   * @returns {Object} Dialogue progression result with next dialogue or completion state
+   */
   nextDialogue () {
     if (!this.currentNPC) return { success: false }
 
@@ -92,7 +99,15 @@ export class NPCManager {
     }
 
     const rawDialogue = npc.dialogues[this.currentDialogueIndex]
-    const processedDialogue = this.processDialogue(rawDialogue, npc)
+    // Process dialogue with cost substitution if needed
+    let processedDialogue = rawDialogue
+    if (npc.isShop) {
+      // Shop NPC (Shopkeeper Coral) mentions submarine cost in dialogue
+      processedDialogue = StringFormatter.format(rawDialogue, { cost: GameConfig.SHOP.SUBMARINE.cost })
+    } else if (npc.isInn) {
+      // Inn NPC mentions rest cost in dialogue
+      processedDialogue = StringFormatter.format(rawDialogue, { cost: GameConfig.SHOP.INN_REST.cost })
+    }
 
     return {
       success: true,
@@ -104,6 +119,11 @@ export class NPCManager {
     }
   }
 
+  /**
+   * Terminates current dialogue conversation and resets NPC manager state
+   * Clears dialogue tracking and returns NPC manager to idle state
+   * @returns {Object} Success confirmation for dialogue termination
+   */
   endDialogue () {
     this.currentNPC = null
     this.currentDialogueIndex = 0
@@ -111,6 +131,11 @@ export class NPCManager {
   }
 
   // State query methods
+  /**
+   * Retrieves current dialogue state for UI display and conversation management
+   * Provides comprehensive conversation state including progress and NPC type flags
+   * @returns {Object|null} Current dialogue state or null if no active conversation
+   */
   getCurrentDialogueState () {
     if (!this.currentNPC) return null
 

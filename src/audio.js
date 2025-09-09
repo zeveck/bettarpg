@@ -12,6 +12,10 @@ export class AudioManager {
     this.isEnabled = true // Audio enabled by default
   }
 
+  /**
+   * Initializes Web Audio API context for procedural sound generation
+   * Creates audio context and handles browser autoplay policy restrictions
+   */
   initAudio () {
     if (this.isInitialized) return
 
@@ -36,6 +40,11 @@ export class AudioManager {
     return this.isEnabled
   }
 
+  /**
+   * Generates and plays procedural sound effects based on game events
+   * Creates different sound types (combat, magic, victory, discovery) using Web Audio API
+   * @param {string} type - Sound type ('attack', 'magic', 'victory', 'found', etc.)
+   */
   playSound (type) {
     // Don't play if audio is disabled
     if (!this.isEnabled) return

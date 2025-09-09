@@ -27,6 +27,12 @@ export class WorldManager {
 
   // Movement methods
 
+  /**
+   * Moves player in specified direction and handles encounters
+   * Clamps movement to world boundaries and manages village entry/exit
+   * @param {string} direction - Direction to move ('north', 'south', 'east', 'west')
+   * @returns {Object} Movement result with success flag, encounters, and location data
+   */
   movePlayer (direction) {
     let newX = this.currentX
     let newY = this.currentY
@@ -79,6 +85,11 @@ export class WorldManager {
   }
 
   // Encounter system
+  /**
+   * Determines what type of encounter occurs when player moves to a location
+   * Uses distance-based logic and probability tables for encounter generation
+   * @returns {Object} Encounter object with type and relevant data
+   */
   checkForEncounter () {
     // In extreme zone (dark water): guaranteed combat encounters
     const distance = this.getDistanceFromVillage()
@@ -101,6 +112,11 @@ export class WorldManager {
     }
   }
 
+  /**
+   * Creates a combat encounter with appropriate enemy for current location
+   * Handles distance-based enemy scaling and danger zone warnings
+   * @returns {Object} Combat encounter with enemy data and optional warning message
+   */
   createCombatEncounter () {
     const enemy = this.combat.startRandomEncounter(this.currentX, this.currentY)
 
@@ -127,6 +143,11 @@ export class WorldManager {
     }
   }
 
+  /**
+   * Creates a treasure discovery encounter with randomized Betta Bites reward
+   * Awards currency to player and plays discovery sound effect
+   * @returns {Object} Treasure encounter with amount found and discovery message
+   */
   createTreasureEncounter () {
     const treasureConfig = GameConfig.ECONOMY.INCOME_SOURCES.TREASURE_BASE
     const bettaBitesFound = Math.floor(Math.random() * (treasureConfig.max - treasureConfig.min + 1)) + treasureConfig.min
@@ -175,6 +196,11 @@ export class WorldManager {
   }
 
   // Village interactions
+  /**
+   * Attempts to enter the village if player is at the center coordinates
+   * Provides safety and access to NPCs, shops, and services
+   * @returns {Object} Entry result with success flag and appropriate message
+   */
   enterVillage () {
     if (this.currentX === this.VILLAGE_CENTER.x && this.currentY === this.VILLAGE_CENTER.y) {
       this.inVillage = true
@@ -189,6 +215,11 @@ export class WorldManager {
     }
   }
 
+  /**
+   * Exits the village and places player one tile south for exploration
+   * Transitions from safe village environment to dangerous wilderness
+   * @returns {Object} Exit result with success flag and movement message
+   */
   leaveVillage () {
     if (this.inVillage) {
       // Position player south of village when exiting
@@ -231,6 +262,14 @@ export class WorldManager {
     ]
   }
 
+  /**
+   * Processes shop item purchase including affordability check and item effects
+   * Different items have different effects (submarine acquisition, HP/MP restoration)
+   * @param {string} itemId - Item identifier (e.g., 'submarine', 'kelp_snack', 'bubble_water')
+   * @returns {Object} Purchase result with success flag and confirmation message
+   * @returns {boolean} returns.success - Whether purchase was successful
+   * @returns {string} returns.message - Confirmation or error message
+   */
   buyItem (itemId) {
     const items = this.getShopItems()
     const item = items.find(i => i.id === itemId)
@@ -273,6 +312,13 @@ export class WorldManager {
   }
 
   // Utility methods
+  /**
+   * Calculates Euclidean distance from given coordinates to village center
+   * Used for determining danger zones and enemy scaling factors
+   * @param {number} x - X coordinate (defaults to current player X)
+   * @param {number} y - Y coordinate (defaults to current player Y)
+   * @returns {number} Distance from village center as floating point value
+   */
   getDistanceFromVillage (x = this.currentX, y = this.currentY) {
     return Math.sqrt((x - this.VILLAGE_CENTER.x) * (x - this.VILLAGE_CENTER.x) + (y - this.VILLAGE_CENTER.y) * (y - this.VILLAGE_CENTER.y))
   }
@@ -286,6 +332,13 @@ export class WorldManager {
     return this.npcs.nextDialogue()
   }
 
+  /**
+   * Processes inn rest service including cost deduction and full healing
+   * Fully restores player HP and MP for the configured inn cost
+   * @returns {Object} Rest result with success flag and confirmation message
+   * @returns {boolean} returns.success - Whether rest was successful (always true if affordable)
+   * @returns {string} returns.message - Confirmation message
+   */
   restAtInn () {
     const innCost = GameConfig.SHOP.INN_REST.cost
 
@@ -316,6 +369,11 @@ export class WorldManager {
   }
 
   // Teleport player to village
+  /**
+   * Instantly transports player to village center (used after death/defeat)
+   * Ensures player safety by placing them directly in the safe zone
+   * @returns {Object} Teleport result with success confirmation message
+   */
   teleportToVillage () {
     this.currentX = this.VILLAGE_CENTER.x
     this.currentY = this.VILLAGE_CENTER.y

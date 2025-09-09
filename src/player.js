@@ -25,6 +25,12 @@ export class Player {
   }
 
   // Combat
+  /**
+   * Applies damage to the player with armor reduction and submarine protection
+   * Calculates final damage based on level-based armor system and equipment
+   * @param {number} amount - Raw damage amount before reductions
+   * @returns {number} Actual damage taken after all reductions (minimum 1, 0 if submarine)
+   */
   takeDamage (amount) {
     // Submarine provides complete damage protection
     if (this.hasDunkleosteusSub) {
@@ -50,13 +56,22 @@ export class Player {
     return finalDamage // Return actual damage taken for logging
   }
 
-  // Healing
+  /**
+   * Heals player HP with overflow protection
+   * @param {number} amount - Amount of HP to restore
+   * @returns {number} Actual HP healed (capped at max HP)
+   */
   healHP (amount) {
     const actualHeal = Math.min(amount, this.maxHp - this.hp)
     this.hp = Math.min(this.maxHp, this.hp + amount)
     return actualHeal
   }
 
+  /**
+   * Heals player MP with overflow protection
+   * @param {number} amount - Amount of MP to restore
+   * @returns {number} Actual MP healed (capped at max MP)
+   */
   healMP (amount) {
     const actualHeal = Math.min(amount, this.maxMp - this.mp)
     this.mp = Math.min(this.maxMp, this.mp + amount)
@@ -71,7 +86,13 @@ export class Player {
     return { hpHealed, mpHealed }
   }
 
-  // Progression
+  /**
+   * Advances player to next level, increasing stats and resetting HP/MP to full
+   * Uses GameConfig.PLAYER.PROGRESSION for HP/MP gain and EXP scaling
+   * @returns {Object} Stat gains from leveling up
+   * @returns {number} returns.hpIncrease - HP gained this level
+   * @returns {number} returns.mpIncrease - MP gained this level
+   */
   levelUp () {
     this.level++
     this.exp -= this.expToNext
@@ -88,16 +109,31 @@ export class Player {
     return { hpIncrease, mpIncrease }
   }
 
+  /**
+   * Adds experience points and checks if player can level up
+   * @param {number} amount - Experience points to add
+   * @returns {boolean} True if player has enough EXP to level up, false otherwise
+   */
   gainExp (amount) {
     this.exp += amount
     return this.exp >= this.expToNext // Return true if level up is available
   }
 
   // Economy
+  /**
+   * Checks if player has enough Betta Bites to afford a purchase
+   * @param {number} cost - Cost in Betta Bites
+   * @returns {boolean} True if player can afford the cost, false otherwise
+   */
   canAfford (cost) {
     return this.bettaBites >= cost
   }
 
+  /**
+   * Attempts to spend Betta Bites if player can afford it
+   * @param {number} amount - Amount of Betta Bites to spend
+   * @returns {boolean} True if purchase was successful, false if insufficient funds
+   */
   spendBettaBites (amount) {
     if (this.canAfford(amount)) {
       this.bettaBites -= amount
@@ -106,11 +142,20 @@ export class Player {
     return false
   }
 
+  /**
+   * Adds Betta Bites to player's currency
+   * @param {number} amount - Amount of Betta Bites to add
+   */
   gainBettaBites (amount) {
     this.bettaBites += amount
   }
 
   // Combat utilities
+  /**
+   * Checks if player has unlocked a specific spell based on level requirements
+   * @param {string} spellType - Type of spell ('bubble', 'party', 'gravel')
+   * @returns {boolean} True if spell is unlocked, false otherwise
+   */
   hasSpell (spellType) {
     if (spellType === 'bubble') {
       const spell = GameConfig.COMBAT.SPELLS.BUBBLE_BLAST
@@ -127,6 +172,11 @@ export class Player {
     return false
   }
 
+  /**
+   * Checks if player can currently cast a spell (has it unlocked and enough MP)
+   * @param {string} spellType - Type of spell ('bubble', 'party', 'gravel')
+   * @returns {boolean} True if spell can be cast, false otherwise
+   */
   canCastSpell (spellType) {
     if (!this.hasSpell(spellType)) return false
 
@@ -145,6 +195,11 @@ export class Player {
     return false
   }
 
+  /**
+   * Casts a spell, consuming the required MP
+   * @param {string} spellType - Type of spell ('bubble', 'party', 'gravel')
+   * @returns {boolean} True if spell was successfully cast, false if cannot cast
+   */
   castSpell (spellType) {
     if (!this.canCastSpell(spellType)) return false
 
@@ -164,6 +219,11 @@ export class Player {
   }
 
   // Damage calculations
+  /**
+   * Calculates physical attack damage with level scaling and equipment bonuses
+   * Base damage is random, with +1 damage every 2 levels, doubled if player has submarine
+   * @returns {number} Final attack damage value
+   */
   calculateAttackDamage () {
     // Base damage scales with level: +1 on even levels (2, 4, 6, 8, 10)
     const damageConfig = GameConfig.COMBAT.PLAYER_DAMAGE
@@ -179,6 +239,12 @@ export class Player {
     return playerDamage
   }
 
+  /**
+   * Calculates spell damage with level-based magic bonus
+   * Magic bonus increases on odd levels (1, 3, 5, etc.)
+   * @param {string} spellType - Type of spell ('bubble', 'party', 'gravel')
+   * @returns {number} Final spell damage value, 0 if invalid spell type
+   */
   calculateMagicDamage (spellType) {
     const magicBonus = Math.floor((this.level + 1) / 2) // +1 on odd levels
 
@@ -207,6 +273,11 @@ export class Player {
   }
 
   // Death handling
+  /**
+   * Handles player death, applying Betta Bites penalty and restoring HP/MP to full
+   * Player loses half their Betta Bites (rounded down) but keeps all other progress
+   * @returns {number} Amount of Betta Bites lost due to death
+   */
   die () {
     // Calculate Betta Bites loss (half, rounded down)
     const bettaBitesLost = Math.floor(this.bettaBites / 2)
@@ -220,6 +291,10 @@ export class Player {
   }
 
   // Reset to initial state
+  /**
+   * Resets player to starting state for new game
+   * Clears all progress including level, stats, currency, and special items
+   */
   reset () {
     const startingStats = GameConfig.PLAYER.STARTING_STATS
     this.name = ''
@@ -236,6 +311,13 @@ export class Player {
   }
 
   // Acquire special items
+  /**
+   * Grants player the Dunkleosteus Submarine, providing damage immunity and attack bonus
+   * This is a major gameplay upgrade affecting both defense and offense
+   * @returns {Object} Success confirmation with message
+   * @returns {boolean} returns.success - Always true for successful acquisition
+   * @returns {string} returns.message - Confirmation message for UI display
+   */
   acquireSubmarine () {
     this.hasDunkleosteusSub = true
     return {
@@ -245,6 +327,10 @@ export class Player {
   }
 
   // Check if player has submarine
+  /**
+   * Checks if player owns the Dunkleosteus Submarine
+   * @returns {boolean} True if player has submarine, false otherwise
+   */
   hasSubmarine () {
     return this.hasDunkleosteusSub
   }
@@ -280,6 +366,11 @@ export class Player {
   }
 
   // Set player identity
+  /**
+   * Sets player's name and color for character customization
+   * @param {string} name - Player's chosen name
+   * @param {string} color - Player's chosen color (affects sprite rendering)
+   */
   setPlayerIdentity (name, color) {
     this.name = name
     this.color = color

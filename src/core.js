@@ -14,6 +14,10 @@ import { UIManager } from './ui.js'
  * communication and provides the public API for HTML interactions.
  */
 export class BettaRPG {
+  /**
+   * Initializes the complete game system by creating and wiring all modules
+   * Sets up dependency relationships and prepares game for user interaction
+   */
   constructor () {
     // Initialize modules in correct dependency order
     this.player = new Player()
@@ -34,6 +38,11 @@ export class BettaRPG {
   }
 
   // Initialize heavy assets in background during game startup
+  /**
+   * Preloads game assets and generates backgrounds for optimal performance
+   * Handles asynchronous asset loading and provides graceful error handling
+   * @async
+   */
   async initializeAssets () {
     try {
       // Pre-load all background images
@@ -60,6 +69,10 @@ export class BettaRPG {
   }
 
   // Attach event listeners for all interactive elements
+  /**
+   * Sets up all DOM event listeners for buttons and interactive elements
+   * Creates connections between HTML interface and game logic methods
+   */
   attachEventListeners () {
     // Start screen
     document.getElementById('start-game-btn').addEventListener('click',
@@ -142,6 +155,10 @@ export class BettaRPG {
   }
 
   // Reset game to initial state
+  /**
+   * Resets all game modules to initial state and starts fresh game session
+   * Clears all player progress, world state, and combat data for new playthrough
+   */
   newGame () {
     // Reset all modules
     this.player.reset()

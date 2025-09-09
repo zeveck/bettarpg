@@ -61,7 +61,13 @@ export class CombatManager {
     this.ui = uiManager
   }
 
-  // Calculate enemy level based on distance from village center using config
+  /**
+   * Calculates enemy level based on distance from village center using danger zones
+   * Uses GameConfig.WORLD.DANGER_ZONES to determine appropriate level ranges
+   * @param {number} x - World X coordinate of encounter
+   * @param {number} y - World Y coordinate of encounter
+   * @returns {number} Enemy level (1-10) based on distance from village
+   */
   calculateEnemyLevel (x, y) {
     // Calculate actual distance from village center
     const distance = this.world.getDistanceFromVillage(x, y)
@@ -84,7 +90,13 @@ export class CombatManager {
     return randomLevel
   }
 
-  // Scale enemy stats based on level
+  /**
+   * Scales enemy stats (HP, attack, EXP) based on level using config multipliers
+   * Creates a clean copy to avoid contaminating the base enemy template
+   * @param {Object} enemy - Base enemy template from GameConfig.ENEMIES
+   * @param {number} level - Enemy level (typically 1-10)
+   * @returns {Object} Scaled enemy with level-appropriate stats
+   */
   scaleEnemyWithLevel (enemy, level) {
     // Create a clean copy without any combat-specific flags
     // This prevents contamination of the base enemy template
@@ -117,6 +129,13 @@ export class CombatManager {
   }
 
   // Start a random encounter
+  /**
+   * Initiates a random combat encounter at the given world coordinates
+   * Generates appropriate enemy based on distance from village and manages spawn rates
+   * @param {number} playerX - World X coordinate
+   * @param {number} playerY - World Y coordinate
+   * @returns {Object|null} Generated enemy object or null if all species are befriended
+   */
   startRandomEncounter (playerX, playerY) {
     let enemyIndex
 
@@ -189,6 +208,11 @@ export class CombatManager {
   }
 
   // Player attacks
+  /**
+   * Executes player's physical attack against current enemy
+   * Calculates damage, applies it to enemy, and triggers combat progression
+   * @returns {boolean} True if attack was executed, false if not in combat or no enemy
+   */
   attack () {
     if (!this.combatActive || !this.currentEnemy) return
 
@@ -209,6 +233,12 @@ export class CombatManager {
   }
 
   // Player uses magic skill
+  /**
+   * Executes player's spell/skill attack against current enemy
+   * Handles MP consumption, damage calculation, and visual effects
+   * @param {string} spellType - Type of spell to use ('bubble', 'party', 'gravel')
+   * @returns {boolean} True if skill was used, false if cannot use or not in combat
+   */
   useSkill (spellType) {
     if (!this.combatActive || !this.currentEnemy) return
     if (!this.player.canCastSpell(spellType)) return
@@ -259,7 +289,15 @@ export class CombatManager {
     return this.checkForVictory()
   }
 
-  // Helper method to check for enemy defeat and handle victory logic
+  /**
+   * Checks for enemy defeat and handles victory logic including rewards and level up
+   * Processes befriending, EXP gain, loot, edge exploration achievement
+   * @returns {Object|null} Victory result object with rewards and flags, or null if combat continues
+   * @returns {number} returns.exp - Experience points gained
+   * @returns {number} returns.bettaBites - Currency gained
+   * @returns {boolean} returns.levelUp - Whether player leveled up
+   * @returns {boolean} returns.showPeaceMessage - Whether to show peace achievement message
+   */
   checkForVictory () {
     if (this.currentEnemy.hp <= 0 || this.currentEnemy.befriended) {
       // Enemy defeated - immediately stop combat to prevent duplicate processing
@@ -339,6 +377,11 @@ export class CombatManager {
   }
 
   // Execute Gargantuan Gar attack using configuration
+  /**
+   * Executes the Gar's special "Gargantuan Bite" multi-hit attack
+   * Performs 3 separate attacks with visual effects and screen shake
+   * @param {Object} attackConfig - Configuration object with attack parameters
+   */
   executeGargantuanAttack (attackConfig) {
     this.addToCombatLog(attackConfig.channelMessage)
     this.addToCombatLog(attackConfig.attackMessage)
@@ -386,6 +429,11 @@ export class CombatManager {
   }
 
   // Try to run away from combat
+  /**
+   * Attempts to escape from combat with success chance based on enemy type
+   * Gar encounters have 0% escape chance, others have 75% success rate
+   * @returns {Object} Escape result with escaped boolean and optional message
+   */
   runAway () {
     if (!this.combatActive) return { escaped: false }
 
@@ -410,6 +458,11 @@ export class CombatManager {
   }
 
   // UI calls this to show enemy death animation and complete victory
+  /**
+   * Completes enemy defeat processing including rewards and special conditions
+   * Handles EXP distribution, Betta Bites rewards, and edge exploration achievements
+   * @param {Function} victoryCallback - Callback function to execute after victory processing
+   */
   completeEnemyDefeat (victoryCallback) {
     // Use stored defeated enemy to avoid null reference issues
     const defeatedEnemy = this.defeatedEnemy
@@ -435,6 +488,12 @@ export class CombatManager {
   }
 
   // Process victory immediately when enemy dies (plays sounds, updates stats)
+  /**
+   * Processes immediate victory effects including EXP gain and loot calculation
+   * Handles befriending mechanics and determines if player levels up
+   * @param {Object} enemy - The defeated enemy object
+   * @returns {Object} Victory result object with rewards and status flags
+   */
   processVictoryImmediate (enemy) {
     const exp = enemy.exp
 
@@ -546,6 +605,12 @@ export class CombatManager {
   }
 
   // Win combat with specific enemy data (called after animation delay)
+  /**
+   * Handles complete victory sequence including cleanup and UI updates
+   * Processes defeat, manages combat state, and triggers UI victory display
+   * @param {Object} enemy - The defeated enemy object
+   * @returns {Object} Victory result with success flag and enemy information
+   */
   winCombatWithEnemy (enemy) {
     if (!enemy) {
       console.error('winCombatWithEnemy called with null enemy')
@@ -565,6 +630,10 @@ export class CombatManager {
   }
 
   // Lose combat
+  /**
+   * Handles player defeat in combat including death penalties and recovery
+   * Triggers player death mechanics and returns to village safely
+   */
   loseCombat () {
     // Store enemy info before clearing it (for UI logging)
     const defeatedByEnemy = this.currentEnemy ? { ...this.currentEnemy } : null
@@ -603,6 +672,10 @@ export class CombatManager {
   }
 
   // Visual Effects
+  /**
+   * Creates visual bubble effect for Bubble Blast spell
+   * Spawns animated bubbles with physics and lifecycle management
+   */
   createBubbleEffect () {
     const bubbleCounts = [4, 5, 6, 7, 8] // Random 4-8 bubbles
     const bubbleCount = bubbleCounts[Math.floor(Math.random() * bubbleCounts.length)]
@@ -635,6 +708,10 @@ export class CombatManager {
     }
   }
 
+  /**
+   * Creates visual gravel effect for Gravel Grenade spell
+   * Spawns animated gravel particles with impact effects
+   */
   createGravelEffect () {
     const container = document.createElement('div')
     container.className = 'gravel-container'
@@ -680,6 +757,10 @@ export class CombatManager {
     }, 2000)
   }
 
+  /**
+   * Creates visual balloon effect for Happy Balloon Time spell
+   * Spawns colorful balloon particles with floating animation
+   */
   createBalloonEffect () {
     const container = document.createElement('div')
     container.className = 'balloon-container'
@@ -846,6 +927,10 @@ export class CombatManager {
     this.shakeSprite('enemy-fish-combat')
   }
 
+  /**
+   * Resets combat manager to initial state for new game
+   * Clears all combat state, effects, and enemy data
+   */
   reset () {
     this.currentEnemy = null
     this.defeatedEnemy = null
@@ -900,6 +985,11 @@ export class CombatManager {
   }
 
   // Check if all enemies are peaceful (all regular enemies befriended and Gar defeated)
+  /**
+   * Checks if all possible enemies are befriended or defeated (complete world peace)
+   * Used to determine if player has achieved the peace condition victory
+   * @returns {boolean} True if all enemies are peaceful, false if any can still be fought
+   */
   areAllEnemiesPeaceful () {
     // Check if Gar is defeated
     if (!this.hasDefeatedGar) {

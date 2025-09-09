@@ -159,6 +159,24 @@ When asked if a config is "used", this means the values actively drive game logi
 - **Key Files**: package.json, src/config.js, README.md, documentation headers, and index.html cache buster
 - **After Version Updates**: Always run `npm run build` and update cache buster parameter in index.html
 
+## Naming Conventions
+
+### Betta Fish Terminology
+- **"Betta" (correct)**: Refers to the fish species Betta splendens (Siamese fighting fish)
+- **NOT "better" or "bette"**: Common misspelling that should be avoided
+- **Game elements using "betta"**:
+  - Game title: "Betta Fish RPG" 
+  - Currency: "Betta Bites"
+  - Character names: `bettaNames` (not `betteNames`)
+  - Player references: "young betta", "little betta"
+- **When "better" is appropriate**: Only in normal English usage (e.g., "better than anyone")
+
+### Variable Naming
+- Use descriptive names that clearly indicate purpose
+- Fish-related variables should use "betta" spelling consistently
+- Avoid abbreviations that could cause confusion
+- Follow existing camelCase conventions
+
 ## Philosophy
 
 The codebase prioritizes **simplicity, maintainability, and zero dependencies** while providing a complete RPG experience that runs in any modern browser. When making changes:

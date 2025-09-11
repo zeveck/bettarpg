@@ -211,7 +211,7 @@ export class CombatManager {
   /**
    * Executes player's physical attack against current enemy
    * Calculates damage, applies it to enemy, and triggers combat progression
-   * @returns {boolean} True if attack was executed, false if not in combat or no enemy
+   * @returns {Object|null} Victory result if enemy defeated, defeat result if player died, or null if combat continues
    */
   attack () {
     if (!this.combatActive || !this.currentEnemy) return
@@ -237,7 +237,7 @@ export class CombatManager {
    * Executes player's spell/skill attack against current enemy
    * Handles MP consumption, damage calculation, and visual effects
    * @param {string} spellType - Type of spell to use ('bubble', 'party', 'gravel')
-   * @returns {boolean} True if skill was used, false if cannot use or not in combat
+   * @returns {Object|null} Victory result if enemy defeated, defeat result if player died, or null if combat continues
    */
   useSkill (spellType) {
     if (!this.combatActive || !this.currentEnemy) return
@@ -633,6 +633,10 @@ export class CombatManager {
   /**
    * Handles player defeat in combat including death penalties and recovery
    * Triggers player death mechanics and returns to village safely
+   * @returns {Object} Defeat result with loss information
+   * @returns {boolean} returns.defeated - Always true
+   * @returns {number} returns.bettaBitesLost - Amount of currency lost
+   * @returns {Object|null} returns.defeatedByEnemy - Enemy that defeated player
    */
   loseCombat () {
     // Store enemy info before clearing it (for UI logging)

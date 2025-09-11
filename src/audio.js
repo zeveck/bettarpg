@@ -43,7 +43,7 @@ export class AudioManager {
   /**
    * Generates and plays procedural sound effects based on game events
    * Creates different sound types (combat, magic, victory, discovery) using Web Audio API
-   * @param {string} type - Sound type ('attack', 'magic', 'victory', 'found', etc.)
+   * @param {string} type - Sound type ('attack', 'bubble', 'gravel', 'party', 'fanfare', 'levelup', 'combatstart', 'wound', 'roar', 'found', etc.)
    */
   playSound (type) {
     // Don't play if audio is disabled

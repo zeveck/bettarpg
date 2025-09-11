@@ -57,7 +57,7 @@ export class Player {
   }
 
   /**
-   * Heals player HP with overflow protection
+   * Heals player HP
    * @param {number} amount - Amount of HP to restore
    * @returns {number} Actual HP healed (capped at max HP)
    */
@@ -68,7 +68,7 @@ export class Player {
   }
 
   /**
-   * Heals player MP with overflow protection
+   * Heals player MP
    * @param {number} amount - Amount of MP to restore
    * @returns {number} Actual MP healed (capped at max MP)
    */
@@ -78,6 +78,12 @@ export class Player {
     return actualHeal
   }
 
+  /**
+   * Restores player HP and MP to full and returns amount healed
+   * @returns {Object} Healing amounts
+   * @returns {number} returns.hpHealed - HP restored
+   * @returns {number} returns.mpHealed - MP restored
+   */
   fullHeal () {
     const hpHealed = this.maxHp - this.hp
     const mpHealed = this.maxMp - this.mp
@@ -381,6 +387,11 @@ export class Player {
   }
 
   // Sprite selection
+  /**
+   * Determines the appropriate sprite path based on player level and equipment
+   * Returns submarine sprite if owned, otherwise returns armor sprite based on level
+   * @returns {string} File path to the player's current sprite image
+   */
   getSprite () {
     if (this.hasDunkleosteusSub) {
       return `graphics/artifacts/${GameConfig.PLAYER.ARMOR_SYSTEM.SUBMARINE.sprite}`
@@ -401,6 +412,11 @@ export class Player {
   }
 
   // Color filter
+  /**
+   * Gets the CSS filter string for player's chosen color customization
+   * Converts color name to hue-rotate filter for sprite recoloring
+   * @returns {string} CSS filter string or 'none' if no color selected
+   */
   getColorFilter () {
     const colorConfig = GameConfig.UI.COLORS[this.color?.toUpperCase()]
     return colorConfig ? colorConfig.filter : 'none'

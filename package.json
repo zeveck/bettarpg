@@ -8,7 +8,9 @@
     "dev": "webpack --mode=development --watch",
     "serve": "webpack serve --mode=development",
     "lint": "standard \"src/**/*.js\"",
-    "lint:fix": "standard --fix \"src/**/*.js\""
+    "lint:fix": "standard --fix \"src/**/*.js\"",
+    "verify": "node verify-build.js",
+    "build:verified": "npm run build && npm run verify"
   },
   "standard": {
     "env": ["browser"]

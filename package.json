@@ -3,14 +3,20 @@
   "version": "0.4.10",
   "description": "A browser-based RPG game featuring a brave betta fish adventurer",
   "private": true,
+  "type": "module",
   "scripts": {
-    "build": "webpack --mode=production",
-    "dev": "webpack --mode=development --watch",
+    "build": "webpack --config webpack.config.cjs --mode=production",
+    "dev": "webpack --config webpack.config.cjs --mode=development --watch",
     "serve": "webpack serve --mode=development",
     "lint": "standard \"src/**/*.js\"",
     "lint:fix": "standard --fix \"src/**/*.js\"",
-    "verify": "node verify-build.js",
-    "build:verified": "npm run build && npm run verify"
+    "verify": "node verify-build.cjs",
+    "build:verified": "npm run build && npm run verify",
+    "test": "node --test test/**/*.test.js",
+    "test:unit": "node --test test/unit/**/*.test.js",
+    "test:integration": "node --test test/integration/**/*.test.js",
+    "test:coverage": "node --test --test-coverage",
+    "test:watch": "node --test --watch"
   },
   "standard": {
     "env": ["browser"]

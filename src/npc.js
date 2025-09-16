@@ -41,7 +41,6 @@ export class NPCManager {
     this.currentDialogueIndex = 0
   }
 
-
   // Core NPC interaction methods
   /**
    * Initiates dialogue with specified NPC and returns initial conversation state

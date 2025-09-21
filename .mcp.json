@@ -2,17 +2,14 @@
   "mcpServers": {
     "playwright": {
       "type": "stdio",
-      "command": "npx",
+      "command": "env",
       "args": [
-        "@playwright/mcp@latest"
-      ],
-      "env": {}
-    },
-    "context7": {
-      "type": "stdio",
-      "command": "npx",
-      "args": [
-        "@upstash/context7-mcp@latest"
+        "HOME=/home/vscode",
+        "PLAYWRIGHT_BROWSERS_PATH=/home/vscode/.cache/ms-playwright",
+        "npx",
+        "@playwright/mcp@latest",
+        "--config",
+        "/workspaces/bettarpg/.playwright-mcp.json"
       ],
       "env": {}
     }

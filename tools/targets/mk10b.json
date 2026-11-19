@@ -1,0 +1,58 @@
+[
+ {
+  "name": "betta_bite",
+  "target": 10,
+  "dim": "max",
+  "out": "game/assets/native/icons/betta_bite.png",
+  "cell": 20
+ },
+ {
+  "name": "strange_scale",
+  "target": 12,
+  "dim": "max",
+  "out": "game/assets/native/icons/strange_scale.png",
+  "cell": 20
+ },
+ {
+  "name": "brass_cog",
+  "target": 12,
+  "dim": "max",
+  "out": "game/assets/native/icons/brass_cog.png",
+  "cell": 20
+ },
+ {
+  "name": "moss_lantern",
+  "target": 14,
+  "dim": "max",
+  "out": "game/assets/native/icons/moss_lantern.png",
+  "cell": 20
+ },
+ {
+  "name": "kelp_snack",
+  "target": 14,
+  "dim": "max",
+  "out": "game/assets/native/icons/kelp_snack.png",
+  "cell": 24
+ },
+ {
+  "name": "bubble_water",
+  "target": 14,
+  "dim": "max",
+  "out": "game/assets/native/icons/bubble_water.png",
+  "cell": 20
+ },
+ {
+  "name": "seed_cake",
+  "target": 14,
+  "dim": "max",
+  "out": "game/assets/native/icons/seed_cake.png",
+  "cell": 20
+ },
+ {
+  "name": "fizzy_water",
+  "target": 14,
+  "dim": "max",
+  "out": "game/assets/native/icons/fizzy_water.png",
+  "cell": 20
+ }
+]

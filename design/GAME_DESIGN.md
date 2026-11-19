@@ -803,6 +803,30 @@ gives sizes relative to the reference betta and as a grid.
 Each sheet goes through the target-driven extraction and is checked on a contact sheet beside
 the betta before the mock screens are made.
 
+### What the mockups taught (2026-11-19; apply in the build)
+
+Mockups cost about $7.70 of the $10 (estimated; MK6's token usage is logged in ASSETS.md for
+re-pricing). Kept: villagers, all six village buildings, Highwater sheet, props, icons, the
+Shallows/title/Gar's-pool backdrops, the Crayfish. To fix in the build (from the build budget):
+
+1. **The Gargantuan Gar isn't gargantuan:** it came out 92×31, barely longer than the ×2 betta
+   on screen. Regenerate at **120×48** (single subject, prompt "more than twice as long and
+   twice as tall as the reference betta"), or draw the boss at ×3 in its battle.
+2. **The Murk backdrop (MK3) is too bright:** its middle band reads as open sky with clouds.
+   Retake with "no surface, no sky, no clouds; a dim teal glow, darker than the Shallows".
+3. **The Dragonfly Nymph is small and muddy:** retake single-subject at 40 art px, more
+   contrast between body and gill plates.
+4. **Snap palette:** reserve 6 of the 48 slots for salmon, olive, lilac, neutral near-black,
+   mint and a light grey, so Coral, Reef, the Nymph and Highwater's awning keep their colors
+   (Coral must stay clear of the player's orange).
+5. **Icons:** the model draws ~8 px icons; accept 8–10 art px icons (drawn ×2 in menus) rather
+   than upsampling to 10–14.
+6. **MK4 has a waterline across the middle:** fighters stand below it (y ≥ 175 logical).
+7. **Battle backdrops on phones:** the menu and log cover the bottom ~80 logical px; keep
+   backdrop detail in the top two-thirds and anchor backdrops a little higher on short screens.
+8. **Buildings at 110–140 art px** read well but fill much of a phone screen; lay out the
+   village with ~3 buildings per screen width.
+
 ## Tech plan
 
 - `game/index.html`, `game/src/*.js` ES modules: `main.js` (loop, scene stack), `input.js`

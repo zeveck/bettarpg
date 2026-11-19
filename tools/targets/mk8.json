@@ -1,0 +1,8 @@
+[
+ {
+  "name": "gargantuan_gar",
+  "target": 100,
+  "dim": "w",
+  "out": "game/assets/native/boss/gargantuan_gar.png"
+ }
+]

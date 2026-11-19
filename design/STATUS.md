@@ -30,8 +30,11 @@ Original untouched; this is a new folder and repo with fresh history.
 - [x] Brief: design/BRIEF.md
 - [x] Design: first draft written; 6 areas, ~40 new images, 8 songs, 23 sounds
 - [x] Design review: 2 rounds, 64 findings, all fixed; battle sim 23/23 (tools/sim_design.py)
-- [ ] Mock pictures + shared design page: making mockups (cap $10)
-- — stops here (--plan-only) —
+- [x] Mock pictures (25 takes, ~$7.70 of $10, est.) + shared design page
+  - Design shared: https://claude.ai/artifact/FK33n9bRLkDpRC1eo5WA5s, as a page (slug 73e49756-9d01-4561-b4e1-7e5340ad9326; source design/share/index.html). Private to the person until they share it.
+  - At the next --continue: read its comments first; keep the same page up to date.
+  - Fix in the build: bigger Gar, darker Murk backdrop, Nymph retake (design: "What the mockups taught").
+- — stopped here (--plan-only), 2026-11-19 —
 - [ ] Art, animation and audio
 - [ ] Build
 - [ ] Play-test

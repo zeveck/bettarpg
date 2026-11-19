@@ -1,0 +1,14 @@
+[
+ {
+  "name": "dragonfly_nymph",
+  "target": 36,
+  "dim": "w",
+  "out": "game/assets/native/enemies/dragonfly_nymph.png"
+ },
+ {
+  "name": "snapping_crayfish",
+  "target": 38,
+  "dim": "w",
+  "out": "game/assets/native/enemies/snapping_crayfish.png"
+ }
+]

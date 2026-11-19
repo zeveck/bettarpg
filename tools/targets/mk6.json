@@ -1,0 +1,32 @@
+[
+ {
+  "name": "elder_finn",
+  "target": 46,
+  "dim": "w",
+  "out": "game/assets/native/villagers/elder_finn.png"
+ },
+ {
+  "name": "coral",
+  "target": 44,
+  "dim": "w",
+  "out": "game/assets/native/villagers/coral.png"
+ },
+ {
+  "name": "reef",
+  "target": 46,
+  "dim": "w",
+  "out": "game/assets/native/villagers/reef.png"
+ },
+ {
+  "name": "bubble",
+  "target": 34,
+  "dim": "w",
+  "out": "game/assets/native/villagers/bubble.png"
+ },
+ {
+  "name": "seaweed",
+  "target": 44,
+  "dim": "w",
+  "out": "game/assets/native/villagers/seaweed.png"
+ }
+]

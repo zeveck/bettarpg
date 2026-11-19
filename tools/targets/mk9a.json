@@ -1,0 +1,20 @@
+[
+ {
+  "name": "highwater_inn",
+  "target": 140,
+  "dim": "w",
+  "out": "game/assets/native/buildings/highwater_inn.png"
+ },
+ {
+  "name": "pip_stall",
+  "target": 110,
+  "dim": "w",
+  "out": "game/assets/native/buildings/pip_stall.png"
+ },
+ {
+  "name": "lock_house",
+  "target": 130,
+  "dim": "w",
+  "out": "game/assets/native/buildings/lock_house.png"
+ }
+]

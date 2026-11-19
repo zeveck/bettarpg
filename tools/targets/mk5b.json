@@ -1,0 +1,20 @@
+[
+ {
+  "name": "guard_post",
+  "target": 120,
+  "dim": "w",
+  "out": "game/assets/native/buildings/guard_post.png"
+ },
+ {
+  "name": "bubble_home",
+  "target": 110,
+  "dim": "w",
+  "out": "game/assets/native/buildings/bubble_home.png"
+ },
+ {
+  "name": "south_gate",
+  "target": 110,
+  "dim": "w",
+  "out": "game/assets/native/buildings/south_gate.png"
+ }
+]

@@ -1,0 +1,20 @@
+[
+ {
+  "name": "elder_dwelling",
+  "target": 130,
+  "dim": "w",
+  "out": "game/assets/native/buildings/elder_dwelling.png"
+ },
+ {
+  "name": "fish_mart",
+  "target": 130,
+  "dim": "w",
+  "out": "game/assets/native/buildings/fish_mart.png"
+ },
+ {
+  "name": "swishy_solace_inn",
+  "target": 140,
+  "dim": "w",
+  "out": "game/assets/native/buildings/swishy_solace_inn.png"
+ }
+]

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Betta Fish RPG Remake Design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Nunito+Sans:ital,opsz,wght@0,6..12,400;0,6..12,700;1,6..12,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Layout idea: one long underwater scroll; each section is a "depth" that darkens as the story goes deeper, mock pictures sit beside the words they show. */
+  --surface: #0f3a5c;      /* paddy water */
+  --deep: #0a2740;         /* murk */
+  --panel: #134a72;        /* lighter water panel */
+  --ink: #eef6fb;          /* text */
+  --muted: #a9c7da;        /* secondary text */
+  --gold: #f7c948;         /* sun gold accent */
+  --red: #ff6a45;          /* betta red */
+  --pink: #ff4fa3;         /* party pink */
+  --line: #2a5f86;
+  --display: "Pixelify Sans", "Courier New", monospace;
+  --body: "Nunito Sans", "Segoe UI", system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: linear-gradient(180deg, #1a5a8a 0, var(--surface) 900px, var(--deep) 100%);
+  background-color: var(--deep);
+  color: var(--ink);
+  font: 17px/1.6 var(--body);
+}
+a { color: var(--gold); }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px 80px; display: grid; gap: 56px; }
+header { padding: 56px 0 8px; display: grid; gap: 20px; }
+.eyebrow { font: 600 14px/1 var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 700 clamp(40px, 7vw, 72px)/1 var(--display); margin: 0; color: var(--ink); text-shadow: 0 4px 0 #082035; }
+h2 { font: 700 30px/1.15 var(--display); margin: 0 0 14px; color: var(--gold); text-wrap: balance; }
+h3 { font: 700 20px/1.3 var(--display); margin: 0 0 6px; color: var(--ink); }
+p { margin: 0 0 12px; max-width: 68ch; }
+.tagline { font-size: 21px; color: var(--muted); max-width: 60ch; }
+section { display: grid; gap: 18px; }
+figure { margin: 0; display: grid; gap: 8px; }
+figure img { width: 100%; height: auto; display: block; border-radius: 6px; border: 2px solid var(--line); background: #0b2234; image-rendering: pixelated; }
+figcaption { font-size: 14px; color: var(--muted); }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; align-items: start; }
+.three { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+.card { background: color-mix(in srgb, var(--panel) 70%, transparent); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; }
+.card p:last-child { margin-bottom: 0; }
+ul { margin: 0; padding-left: 1.2em; max-width: 68ch; }
+li { margin: 4px 0; }
+.asked li::marker { content: "✓  "; color: var(--gold); }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+.tablebox { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 700 14px var(--display); color: var(--gold); background: #0d3150; letter-spacing: .03em; }
+tr:last-child td { border-bottom: 0; }
+td.n { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--gold); font-family: var(--display); }
+.chip { display: inline-block; font: 600 13px var(--display); padding: 2px 8px; border-radius: 99px; border: 1px solid currentColor; }
+.chip.keep { color: #7fe0a8; } .chip.new { color: var(--pink); } .chip.code { color: var(--muted); }
+blockquote { margin: 0; padding: 10px 16px; border-left: 4px solid var(--pink); background: #0d3150; border-radius: 0 8px 8px 0; font-style: italic; max-width: 68ch; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.stat { background: #0d3150; border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+.stat b { display: block; font: 700 28px/1 var(--display); color: var(--gold); }
+.stat span { font-size: 14px; color: var(--muted); }
+.note { font-size: 15px; color: var(--muted); }
+footer { color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); padding-top: 18px; }
+@media (prefers-reduced-motion: no-preference) { figure img { transition: transform .2s; } figure img:hover { transform: scale(1.01); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Game design · for comments · a remake of the original Betta Fish RPG</div>
+  <h1>Betta Fish RPG</h1>
+  <p class="tagline">Small fish, big paddies. Find the missing fish, with your fins or your friendship.</p>
+  <figure>
+    <img src="mockups/screen-title.png" alt="Mock title screen: an underwater rice paddy at morning, the village domes in an oval, the red betta swimming in front.">
+    <figcaption>Mock title screen, put together from the first pictures made for the game (the title lettering is a stand-in for the game's pixel font).</figcaption>
+  </figure>
+</header>
+
+<section>
+  <h2>The game in one breath</h2>
+  <p>You're a young betta from Paddy Village, and fish keep vanishing from the outer paddies. Swim freely across a sunlit, terraced rice-paddy world, battle or befriend the fish that get in your way, and gear up from helmet to full metal. Follow a trail of strange scales up to the city on the next terrace, then down into the Sunken Ditch, where something very old and very lonely is waiting. Every fight can become a friendship, and the village remembers what you did.</p>
+  <p><strong>The feeling:</strong> cozy and a bit brave. A bright paddy you want to explore, a shiver of mystery in the darker water, and a warm, silly heart: party hats and Happy Balloon Time.</p>
+  <div class="stats">
+    <div class="stat"><b>30–45</b><span>minutes on the main path, plus 10–20 for extras</span></div>
+    <div class="stat"><b>6</b><span>areas, from the village down to the Sunken Ditch</span></div>
+    <div class="stat"><b>2</b><span>endings: fins or friendship</span></div>
+    <div class="stat"><b>Desktop + phone</b><span>keyboard, mouse and touch; landscape</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>What the original was reaching for</h2>
+  <p>The original game (built in 2025) has a lovely cast of pixel-art fish and a mystery that's set up but never solved: Elder Finn says fish are disappearing, Bubble keeps asking to come along, and there's talk of "the big city on the next terrace." This remake takes it as a sketch and builds what it was reaching for, keeping every piece of its art and its names.</p>
+  <div class="two">
+    <div class="card">
+      <h3>Kept exactly</h3>
+      <ul>
+        <li>All the original art: the betta in all four armor stages, the Guppy, Angelfish, Catfish, Cichlid and Prehistoric Gar, the party-hat versions, the Dunkleosteus submarine, Paddy Village and the rice tuft</li>
+        <li>The villagers and their names: Elder Finn, Shopkeeper Coral, Guard Captain Reef, Bubble the Brave, Innkeeper Seaweed</li>
+        <li>Betta Bites, the Fish Mart, the Swishy Solace Inn, the spells (Bubble Blast, Gravel Grenade, Happy Balloon Time)</li>
+        <li>Picking your betta's color, which stays through every armor stage</li>
+        <li>Quirks: the Gar roars on turns 1, 4 and 7; Level-10 fish in the edge zones; fleeing from Level 5+ fish is very hard; Home takes you back to the village</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>New</h3>
+      <ul>
+        <li>Free swimming on a real map, with fish you can see (and avoid) instead of random fights</li>
+        <li>Bubble joins you and fights beside you</li>
+        <li>The mystery gets an answer, and two endings</li>
+        <li>Highwater, the city on the next terrace</li>
+        <li>Villagers who remember what you've done</li>
+        <li>Real music and sound effects</li>
+        <li>Phone play, a smoother early game, and the cheat keys moved to a debug mode</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>How it plays</h2>
+  <div class="three">
+    <div class="card"><h3>Every few seconds</h3><p>Swim through the reeds and spot a fish, its level showing over it. Dodge it, fight it, or try to make friends. Grab a glinting Betta Bite on the way.</p></div>
+    <div class="card"><h3>Every minute</h3><p>A turn-based battle: Attack, a spell, <strong>Party!</strong>, an item, or Swim Away. Bubble acts after you. Win EXP and Betta Bites, or a new friend in a party hat.</p></div>
+    <div class="card"><h3>Every session</h3><p>Finish an area's errand, open the next terrace, level into new armor and spells, come home to villagers who talk about what you did, buy the submarine, face the Gar.</p></div>
+  </div>
+  <p><strong>The choice the game lives or dies by:</strong> fight or befriend. Both have to feel good. A new friend gives the same EXP and Betta Bites as a win, and the party cheers you up: your magic comes back and you heal a little. A battle simulator checks that befriending is never the worse choice.</p>
+  <figure>
+    <img src="mockups/screen-battle.png" alt="Mock battle at phone size: the betta and Bubble on the left, an enemy on the right, over a shallow-water backdrop, with five big buttons along the bottom.">
+    <figcaption>Mock battle at phone size: you and Bubble against a Guppy, one row of big buttons (Attack · Spells · Party! · Items · Swim Away). Party! waits, dimmed, until Bubble teaches it.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2>The world</h2>
+  <p>The further from the village, the darker the water and the tougher the fish (the original's rule), with fixed levels per area so there are no surprise spikes near home.</p>
+  <div class="tablebox">
+  <table>
+    <thead><tr><th>Area</th><th>What happens there</th><th>Who lives there</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Paddy Village</strong></td><td>Elder Finn sends you out. Shop, inn, five villagers who react to your adventure.</td><td>Friends only</td></tr>
+      <tr><td><strong>The Shallows</strong></td><td>First swims and battles. At the Old Stump, Bubble catches up and teaches Happy Balloon Time: your first friend.</td><td>Guppies (L1–2), Angelfish (L2)</td></tr>
+      <tr><td><strong>Reedwater</strong></td><td>Tall reeds hide fish until you're close. A trail of five huge, strange scales leads uphill. Helmet at L3, Gravel Grenade at L4.</td><td>Angelfish, Sneaky Catfish, the new Dragonfly Nymph (L3–5)</td></tr>
+      <tr><td><strong>Highwater</strong>, the city on the next terrace</td><td>Up a wide spillway: a bigger shop, an inn, townsfolk with rumors of a long shadow, and the Lock-Keeper's errand.</td><td>Cichlids (L5) in the spillway's side pools</td></tr>
+      <tr><td><strong>The Murk</strong></td><td>Dark water lit by a glow-moss lantern; three lost cogs for the drain gate; optional edge zones with Level-10 fish. Full Metal and bigger balloons at L7.</td><td>Cichlids and the new Snapping Crayfish (L6 near, L7–8 deep), edge fish (L10)</td></tr>
+      <tr><td><strong>The Sunken Ditch</strong></td><td>A spring to rest at, the missing fish in a reed cage, and the Gargantuan Gar.</td><td>The Gar</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <figure>
+    <img src="mockups/screen-village.png" alt="Mock of the village map at phone size: code-drawn water and mud banks, dome buildings, the betta and Bubble, villagers and rice tufts.">
+    <figcaption>Mock of Paddy Village at phone size. The water and banks are drawn by the game itself; the buildings and villagers are new pictures made to match the original art.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2>The mystery</h2>
+  <p>The Gar is the last fish of the old river, older than the terraces. When the paddies were built it was shut into the drainage pool beneath them, alone, for a hundred years. Last spring's flood burst the pool's old outflow pipe and shook the drain gate's three cogs loose into the Murk. Since then the Gar slips up the pipe at night, "when the rice stalks sway," and carries fish home to its pool. It doesn't eat them. It wants company.</p>
+  <blockquote>"It doesn't eat us. It brings us here and just... watches us. It hums at night. I think it's lonely." (Mossy, in the reed cage)</blockquote>
+  <p>That's why a party of friends can reach it, and why winning by fins is a little sad. You learn the story in pieces: a scale as big as Bubble's head, Highwater rumors, the Lock-Keeper, a long shadow sliding into the pipe in the Murk, and Mossy.</p>
+  <div class="two">
+    <div class="card"><h3>The fins ending</h3><p>Bring the Gar down. The fish swim home to a hero's welcome. Elder Finn: "A hundred years shut under our paddies, alone. No wonder it wanted company."</p></div>
+    <div class="card"><h3>The friendship ending</h3><p>With at least five friends, Party! brings them all bursting in, and four balloons of party win the Gar over. The Lock-Keeper fits the pipe with a door the Gar can open, so it visits. Party hats for everyone, the Gar included.</p></div>
+  </div>
+  <figure>
+    <img src="mockups/screen-gar.png" alt="Mock of the Gar battle: the armored betta and Bubble face the huge Gargantuan Gar in an old drainage pool, with a friends counter and a party meter.">
+    <figcaption>Mock of the final battle, with the friends counter and party meter. A rim of light keeps the dark armored betta visible. The Gar here is the first try; in the game it will be much bigger.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2>The cast</h2>
+  <div class="tablebox">
+  <table>
+    <thead><tr><th>Who</th><th>Looks like</th><th>Does</th></tr></thead>
+    <tbody>
+      <tr><td><strong>You</strong></td><td>The original betta, in the color you pick, from bare fins to full metal (with a crest plume in your color)</td><td>The hero</td></tr>
+      <tr><td><strong>Bubble the Brave</strong></td><td>Small, round, lemon-yellow, turquoise fin tips, big eyes</td><td>Your companion: nips, heals once a fight, sometimes takes a hit for you (and gets dizzy)</td></tr>
+      <tr><td><strong>Elder Finn</strong></td><td>Old grey-white betta, long ragged fins, a drooping whisker beard</td><td>Gives the quest and always knows where to go next</td></tr>
+      <tr><td><strong>Shopkeeper Coral</strong></td><td>Salmon-pink with cream fin edges and a shell necklace</td><td>Fish Mart; sells the submarine once you've reached Highwater</td></tr>
+      <tr><td><strong>Guard Captain Reef</strong></td><td>Black-and-gold, pebble helmet, reed spear</td><td>Keeps the east gate; won't let you out alone</td></tr>
+      <tr><td><strong>Innkeeper Seaweed</strong></td><td>White-and-mint marbled, kelp-leaf shawl</td><td>Rest for 5 Betta Bites (free if you're broke)</td></tr>
+      <tr><td><strong>Lock-Keeper Whorl</strong></td><td>Old snail, brass spectacles, a ring of keys on his shell</td><td>Gives the lantern and the drain-gate errand</td></tr>
+      <tr><td><strong>Pip</strong></td><td>Cheerful pink shrimp in a tiny apron</td><td>Highwater's shop</td></tr>
+      <tr><td><strong>The Gargantuan Gar</strong></td><td>Enormous, ancient, armored, a little sad-eyed; more than twice your length</td><td>The boss, or your biggest friend</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="two">
+    <figure><img src="mockups/mk6-villagers.png" alt="The original red betta beside the five new villagers: Elder Finn, Coral, Reef, Bubble and Seaweed."><figcaption>The original betta (left) beside the new villagers: Elder Finn, Coral, Reef, Bubble and Seaweed, drawn to its pixel size.</figcaption></figure>
+    <figure><img src="mockups/mk8-gargantuan-gar.png" alt="The original betta beside a first try at the Gargantuan Gar, an armored pixel-art gar only a little longer than the betta."><figcaption>A first try at the Gargantuan Gar, beside the betta. It isn't gargantuan yet: in the game it will be redrawn at least twice the betta's length and height.</figcaption></figure>
+    <figure><img src="mockups/mk7-enemies.png" alt="The betta beside two new creatures: a small brown Dragonfly Nymph and a red Snapping Crayfish."><figcaption>New creatures beside the betta: the Dragonfly Nymph (strikes first; this one is too small and muddy and will be redone) and the Snapping Crayfish (its shell softens hits until a Gravel Grenade cracks it).</figcaption></figure>
+    <figure><img src="mockups/mk9a-highwater-buildings.png" alt="Highwater's buildings: a tall inn, a shell-roofed stall and the lock house."><figcaption>Highwater: its inn, Pip's stall and the lock house.</figcaption></figure>
+    <figure><img src="mockups/mk9b-drain-gate-and-folk.png" alt="The old concrete drain gate with three empty cog sockets, Whorl the snail and Pip the shrimp."><figcaption>The drain gate with its three empty cog sockets, Lock-Keeper Whorl and Pip.</figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h2>The look and sound</h2>
+  <p>Chunky pixel art with bold dark outlines, flat bright colors and one shade step, exactly like the original sprites. One art pixel is one screen pixel at every size, so new art and old art sit together without smearing. The water and mud banks are drawn by the game itself (shimmer, light shafts, deeper water darker). Backdrops are underwater side views, calm in the middle where the fighters stand.</p>
+  <div class="two">
+    <figure><img src="mockups/mk5a-village-buildings-a.png" alt="Elder Finn's dwelling, the Fish Mart and the Swishy Solace Inn: golden scale-tiled domes with fin crests."><figcaption>Elder Finn's dwelling, the Fish Mart and the Swishy Solace Inn, shaped after the original Paddy Village domes, in daylight colors.</figcaption></figure>
+    <figure><img src="mockups/mk5b-village-buildings-b.png" alt="The guard post with a flag, Bubble's little dome home and the reed-pillar south gate."><figcaption>Reef's guard post, Bubble's home and the village's south gate.</figcaption></figure>
+    <figure><img src="mockups/mk10a-props.png" alt="Small props: reeds, a lily pad, stones, a rice stem, a straw bundle, a culvert mouth, a spillway step, the Old Stump and a reed cage, closed and open."><figcaption>Props, including the fallen straw bundle, the Old Stump and the reed cage (closed and open).</figcaption></figure>
+    <figure><img src="mockups/mk10b-icons.png" alt="Item icons: a Betta Bite, a strange scale, a brass cog, a moss lantern, a kelp snack, bubble water, a seed cake and fizzy water."><figcaption>Item icons: Betta Bite, the strange scale, a brass cog, the lantern, and the snacks and drinks.</figcaption></figure>
+    <figure><img src="mockups/mk2-shallows-backdrop.png" alt="Battle backdrop: bright, shallow paddy water with a sandy bottom and rice stems."><figcaption>The Shallows battle backdrop.</figcaption></figure>
+    <figure><img src="mockups/mk3-murk-backdrop.png" alt="Battle backdrop: deep murky water with roots at the edges and a lighter band across the middle."><figcaption>The Murk battle backdrop, first try: too bright (the middle reads as open sky), so it will be redone darker, with only a dim teal glow.</figcaption></figure>
+  </div>
+  <div class="card">
+    <h3>Music and sound</h3>
+    <ul>
+      <li><strong>Six looping songs:</strong> a cozy village theme (also the title and endings), a bright, flowing paddies theme, a bustling Highwater theme, a low and mysterious Murk theme, a bouncy battle theme, and a big, ancient theme with drums for the Gar</li>
+      <li><strong>About 30 sound effects:</strong> one for every action, from the swish of swimming to the party horn of Happy Balloon Time, the clank of new armor and the Gar's roar</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2>Controls</h2>
+  <div class="two">
+    <div class="card"><h3>Keyboard</h3><ul><li>Swim: arrows or WASD</li><li>Talk, choose: Space, Enter or E</li><li>Back: Esc · Pause: Esc or P</li><li>Battle: arrows and Enter, or 1–5</li><li>Home to the village: Home or H</li><li>Mute: M</li></ul></div>
+    <div class="card"><h3>Phone (landscape)</h3><ul><li>Swim: drag anywhere on the left side; a thumbstick appears under your thumb</li><li>Talk: a big round button, bottom right, only when someone's near</li><li>Battle: one row of five big buttons</li><li>Pause, mute and home: small buttons top right</li></ul></div>
+  </div>
+</section>
+
+<section>
+  <h2>How big a job</h2>
+  <div class="stats">
+    <div class="stat"><b>6</b><span>areas (a hub and a city among them)</span></div>
+    <div class="stat"><b>10</b><span>characters who talk, with lines that change as you play</span></div>
+    <div class="stat"><b>7</b><span>kinds of fish to fight or befriend, plus the boss</span></div>
+    <div class="stat"><b>~40</b><span>new pieces of art, beside the 26 kept from the original</span></div>
+    <div class="stat"><b>6 + 30</b><span>songs and sound effects</span></div>
+  </div>
+  <p>The hardest parts: balancing battles so both the fins path and the friendship path feel good (a battle simulator checks 23 targets); making new art that sits on the original sprites' pixel grid; and fitting exploration and battles onto a phone without covering the action.</p>
+  <p class="note">Two review rounds (a player's view, a builder's view, and an art-and-sound view) shaped this design: 64 findings, all addressed. A few nice extras (a swimming animation, a Gar lunge) are saved for later.</p>
+</section>
+
+<section>
+  <h2>What I'd love comments on</h2>
+  <ul>
+    <li>Does the mystery's answer feel right for this world?</li>
+    <li>Do the new characters and creatures belong next to the original art?</li>
+    <li>Is anything from the original missing that you'd miss?</li>
+    <li>Fins or friendship: which ending do you think most players will reach first?</li>
+  </ul>
+</section>
+
+<footer>Betta Fish RPG, a remake of the original game by Rich Conlan. Design for review, November 2026. The pictures here are early art made for the game.</footer>
+
+</div>
+</body>
+</html>

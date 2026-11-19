@@ -1,0 +1,69 @@
+[
+ {
+  "name": "reed_clump",
+  "target": 24,
+  "dim": "w",
+  "out": "game/assets/native/props/reed_clump.png"
+ },
+ {
+  "name": "lily_pad",
+  "target": 20,
+  "dim": "w",
+  "out": "game/assets/native/props/lily_pad.png"
+ },
+ {
+  "name": "stones",
+  "target": 18,
+  "dim": "w",
+  "out": "game/assets/native/props/stones.png"
+ },
+ {
+  "name": "broken_stem",
+  "target": 12,
+  "dim": "h",
+  "out": "game/assets/native/props/broken_stem.png"
+ },
+ {
+  "name": "straw_bundle",
+  "target": 64,
+  "dim": "w",
+  "out": "game/assets/native/props/straw_bundle.png"
+ },
+ {
+  "name": "culvert_mouth",
+  "target": 48,
+  "dim": "w",
+  "out": "game/assets/native/props/culvert_mouth.png"
+ },
+ {
+  "name": "spillway_lip",
+  "target": 64,
+  "dim": "w",
+  "out": "game/assets/native/props/spillway_lip.png"
+ },
+ {
+  "name": "plain_stump_extra",
+  "skip": true,
+  "target": 0
+ },
+ {
+  "name": "old_stump",
+  "target": 48,
+  "dim": "w",
+  "out": "game/assets/native/props/old_stump.png"
+ },
+ {
+  "name": "reed_cage_closed",
+  "target": 40,
+  "dim": "w",
+  "out": "game/assets/native/props/reed_cage_closed.png",
+  "cell": 5
+ },
+ {
+  "name": "reed_cage_open",
+  "target": 40,
+  "dim": "w",
+  "out": "game/assets/native/props/reed_cage_open.png",
+  "cell": 5
+ }
+]

@@ -1,0 +1,8 @@
+[
+ {
+  "name": "moss_lantern",
+  "target": 14,
+  "dim": "h",
+  "out": "game/assets/native/icons/moss_lantern.png"
+ }
+]

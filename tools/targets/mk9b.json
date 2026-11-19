@@ -1,0 +1,20 @@
+[
+ {
+  "name": "drain_gate",
+  "target": 120,
+  "dim": "w",
+  "out": "game/assets/native/buildings/drain_gate.png"
+ },
+ {
+  "name": "whorl",
+  "target": 32,
+  "dim": "w",
+  "out": "game/assets/native/villagers/whorl.png"
+ },
+ {
+  "name": "pip",
+  "target": 28,
+  "dim": "w",
+  "out": "game/assets/native/villagers/pip.png"
+ }
+]

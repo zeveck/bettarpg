@@ -29,8 +29,8 @@ Original untouched; this is a new folder and repo with fresh history.
 - [x] Remake plan approved
 - [x] Brief: design/BRIEF.md
 - [x] Design: first draft written; 6 areas, ~40 new images, 8 songs, 23 sounds
-- [ ] Design review (2 rounds): round 1 reviewers running
-- [ ] Mock pictures + shared design page
+- [x] Design review: 2 rounds, 64 findings, all fixed; battle sim 23/23 (tools/sim_design.py)
+- [ ] Mock pictures + shared design page: making mockups (cap $10)
 - — stops here (--plan-only) —
 - [ ] Art, animation and audio
 - [ ] Build

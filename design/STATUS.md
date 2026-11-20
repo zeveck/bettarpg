@@ -4,6 +4,7 @@
 
 1. `/gamegen --remake https://github.com/zeveck/bettarpg --leeway lots --plan-only --share-design --mockups $10`
 2. (plan approval) "Proceed with the plan."
+3. `/gamegen --plans` (approved: "yes")
 
 From: https://github.com/zeveck/bettarpg (zeveck's own repo), remake, leeway lots.
 Original untouched; this is a new folder and repo with fresh history.
@@ -22,6 +23,10 @@ Original untouched; this is a new folder and repo with fresh history.
 - ElevenLabs tier: creator
 - Available: imagegen2 + anim8gen (OpenAI ok), nanogen (Gemini ok), audiogen (ElevenLabs ok), playwright-cli, node, python3 + Pillow
 - Decisions agreed with the person: smooth the early difficulty; cheat keys ($ and %) only in a debug mode
+
+## Plans page
+
+- Plans page: yes (approved 2026-11-20). Card at https://synapticnoise.com/plans/ (status Planned); design page https://synapticnoise.com/plans/betta-fish-rpg/; plan files in zeveck/synapticnoise plans/betta-fish-rpg/ (private repo).
 
 ## Phases
 

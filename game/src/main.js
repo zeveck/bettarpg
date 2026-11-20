@@ -974,6 +974,19 @@ function update(dt, now) {
     const canMove = !G.busy() && !nav.top() && !G.wipe;
     G.world.update(dt, canMove);
     if (G.mode === 'world' && G.world) G.story.update(G.world, dt);
+    // swimming off the edge through an opening: the next area
+    if (G.mode === 'world' && G.world && canMove && !G.leaving) {
+      const p = G.world.player;
+      for (const ex of G.world.def.exits || []) {
+        const [x, y, w, h] = ex.rect;
+        if (p.x >= x - 6 && p.x <= x + w + 6 && p.y >= y - 6 && p.y <= y + h + 6) {
+          G.leaving = true;
+          input.releaseAll();
+          G.enterArea(ex.to, ex.entry).finally(() => { G.leaving = false; });
+          break;
+        }
+      }
+    }
     for (const e of G.world.walkers || []) { if (e.walkTo) { const dx = e.walkTo.x - e.x, dy = e.walkTo.y - e.y, d = Math.hypot(dx, dy), sp = e.walkTo.speed * dt; if (d <= sp) { e.x = e.walkTo.x; e.y = e.walkTo.y; const r = e.walkTo.done; e.walkTo = null; r?.(); } else { e.x += dx / d * sp; e.y += dy / d * sp; e.face = dx > 0 ? 1 : -1; } } }
     G.s.playTime += dt;
   }

@@ -68,6 +68,7 @@ export class World {
     this.fx.clear(); this.ripples = [];
     this.safeT = 1.0;
     this.redHintShown = false;
+    this.edgeWarned = false;
     // static things
     const trng = makeRng(def.seed || 1);
     this.tufts = bankSpots(this.terrain, Math.round((def.w * def.h) / 22000), () => trng.next()).map((q) => ({ ...q, ph: trng.next() * 6 }));
@@ -226,6 +227,11 @@ export class World {
         if (s.hp < PLAYER.maxHp(s.level)) s.hp++;
         if (s.mp < PLAYER.maxMp(s.level)) s.mp++;
       }
+    }
+    // the original's warning, once a visit, on entering an edge zone
+    if (!this.edgeWarned && depthAt(this.terrain, p.x, p.y) === 5) {
+      this.edgeWarned = true;
+      this.G.toast('The water here teems with dangerous predators!', 2600);
     }
     this.safeT = Math.max(0, this.safeT - dt);
     this.bumpCool = Math.max(0, this.bumpCool - dt);

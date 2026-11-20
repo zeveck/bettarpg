@@ -81,12 +81,14 @@ async (page) => {
 
   async function go(x, y, tol = 7, policy = route.policy || 'fight') {
     let best = 1e9, bestAt = Date.now();
+    const area0 = (await st()).area;
     for (;;) {
       if (Date.now() - T0 > LIMIT) await fail(`time limit going to ${x},${y}`);
       let s = await st();
       if (s.inBattle) { await hold([]); await log(`battle ${s.inBattle.kind} L${s.inBattle.level} at ${s.player.x},${s.player.y}`); justFought = true; s = await battle(s.inBattle.scripted === 'stump' ? 'stump' : policy); await log(`after battle hp ${s.hp}/${maxHp(s.level)} L${s.level}`); best = 1e9; bestAt = Date.now(); continue; }
       if (s.dialog || s.busy || s.menus.length) { await hold([]); if (s.menus.some((m) => !['dialog', 'banner', 'credits'].includes(m))) { await fail('unexpected menu ' + s.menus.join(',')); } s = await clearDialogs(); best = 1e9; bestAt = Date.now(); continue; }
       if (s.mode !== 'world' || s.transition) { await hold([]); await sleep(150); best = 1e9; bestAt = Date.now(); continue; }
+      if (s.area !== area0) { await hold([]); return s; } // swam through an exit
       const p = s.player, dx = x - p.x, dy = y - p.y, d = Math.hypot(dx, dy);
       if (d <= tol) { await hold([]); return s; }
       if (d < best - 2) { best = d; bestAt = Date.now(); }
@@ -104,6 +106,14 @@ async (page) => {
   try {
     for (const step of route.steps) {
       if (!step.battle) justFought = false;
+      if (step.title) {
+        // from the title, as a player: New Game (confirm if a save exists), Swim to Village
+        await page.evaluate(() => localStorage.removeItem('bettarpg-save'));
+        await page.reload(); await sleep(2500);
+        await press('Enter'); await sleep(500);
+        await press('Enter'); await sleep(3000);
+        await log('new game');
+      }
       if (step.start !== undefined) { await page.evaluate((n) => window.__game.goToLevel(n), step.start); await sleep(600); await log(`start area ${step.start}`); }
       if (step.seed !== undefined) await page.evaluate((n) => window.__game.seed(n), step.seed);
       if (step.set) await page.evaluate((o) => window.__game.set(o), step.set);
@@ -127,6 +137,7 @@ async (page) => {
       }
       if (step.wait) await sleep(step.wait);
       if (step.expect) {
+        for (let i = 0; i < 40; i++) { const s = await st(); if (!s.transition && s.mode === 'world') break; await sleep(100); }
         await clearDialogs();
         const s = await st();
         for (const [k, v] of Object.entries(step.expect)) {

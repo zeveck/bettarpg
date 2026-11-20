@@ -345,7 +345,7 @@ export function createStory(G) {
       // the Gate Spring is your wake-up point from the moment you arrive
       f.springKnown = true; s.rest = 'spring'; G.save();
       G.toast('The Gate Spring bubbles nearby: you\'ll wake here if you fall.', 3000);
-      G.cutscene(() => G.say('bubble', 'Look, a spring! If the old Gar gets the better of us, we\'ll wake up right here. Swim into it for a rest!'));
+      G.cutscene(() => G.say('bubble', 'A spring! If the old Gar beats us, we\'ll wake up right here. Swim into it for a good rest.'));
     }
     if (w.areaId === 'ditch' && !f.garDefeated && !f.garFriend) {
       const gar = w.extra.find((q) => q.id === 'gar');

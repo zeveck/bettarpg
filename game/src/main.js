@@ -901,7 +901,7 @@ function openCredits(kind) {
       c('Original sprites', 'from the original Betta Fish RPG'),
       c('Remake', 'made with gamegen (Claude)'),
       c('New art, music and sounds', 'generated, finished in code'),
-      c('Font', 'Pixelify Sans (SIL Open Font License)'),
+      c('Font', 'Pixelify Sans (SIL&nbsp;OFL)'),
       `<div><p class="role">Thanks for playing!</p><p>${kind === 'fins' ? 'Maybe the old Gar would like a party...' : 'Party on, little fish.'}</p></div>`,
     ].join('');
     show('credits');

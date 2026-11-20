@@ -27,6 +27,8 @@ export const PARTY = {
   small: { base: 0.25, perHp: 0.40, perFriend: 0.03, max: 0.80 },
   big: { base: 0.35, perHp: 0.50, perFriend: 0.05, max: 0.95 },
   edgeFactor: 0.5,
+  // fish above your level are harder to win over: x0.6 per level above you, never below x0.2
+  gapFactor: 0.6, gapFloor: 0.2,
   refundMp: 5,
   healFrac: 0.15,
   garFriendsNeeded: 5,

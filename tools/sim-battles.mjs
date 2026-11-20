@@ -91,6 +91,8 @@ row('Reedwater FIGHT: Catfish L4 vs L4 B (half)', 'win >= 97% (baseline)', (s) =
 const bef = (minfr) => (s) => s.friend >= minfr && s.win >= .97 && s.hp >= fightRow.hp - .05 && s.mp <= fightRow.mp;
 row('Reedwater BEFRIEND: Catfish L4 vs L4 B, 0 friends (half)', 'friend >= 45%, friend-or-win >= 97%, HP within 5 points, net MP <= fighting', bef(.45), { kind: 'cat', el: 4, L: 4, mpFrac: .5, befriend: true, friends: 0 });
 row('Reedwater BEFRIEND: Catfish L4 vs L4 B, 3 friends (half)', 'friend >= 55%, same HP and MP rule', bef(.55), { kind: 'cat', el: 4, L: 4, mpFrac: .5, befriend: true, friends: 3 });
+row('Befriend one level up: Catfish L5 vs L4 B, 0 friends (half)', 'friend >= 25%, friend-or-win >= 95%', (s) => s.friend >= .25 && s.win >= .95, { kind: 'cat', el: 5, L: 4, mpFrac: .5, befriend: true, friends: 0 });
+row('Befriend a red fish: Catfish L6 vs L3 B, 0 friends (full)', 'friend <= 15% (no cheap grind)', (s) => s.friend <= .15, { kind: 'cat', el: 6, L: 3, befriend: true, friends: 0 });
 row('Cichlid L5 vs L5 B (half)', 'win >= 95%', (s) => s.win >= .95, { kind: 'cich', el: 5, L: 5, mpFrac: .5 });
 row('Murk near: Cichlid L6 vs L5 B (full)', 'win >= 90%, >= 30% HP', (s) => s.win >= .9 && s.hp >= .3, { kind: 'cich', el: 6, L: 5 });
 row('Murk near: Crayfish L6 vs L5 B (full)', 'win >= 90%, >= 30% HP', (s) => s.win >= .9 && s.hp >= .3, { kind: 'cray', el: 6, L: 5 });

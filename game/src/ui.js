@@ -267,6 +267,13 @@ function sayNow(speaker, text, choices = null) {
       } });
   });
 }
+// Drop every line, shown or queued (quitting to the title, debug jumps).
+export function resetDialogs() {
+  if (dlg) { clearInterval(dlg.timer); dlg = null; }
+  sayChain = Promise.resolve();
+  nav.remove('dialog');
+  $('dialog').hidden = true;
+}
 export function dialogTap() { if (dlg && !(dlg.done && dlg.choices)) dlg.advance(); }
 
 // Fill text templates with the player's current controls.

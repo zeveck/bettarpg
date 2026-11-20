@@ -48,10 +48,15 @@ SEED, KELP, BWATER = 30, 10, 8
 
 def armor(L): return 3 if L >= 7 else 2 if L >= 5 else 1 if L >= 3 else 0
 
-def hbt_chance(L, ehp, ehp0, friends, edge=False):
+GAP_FACTOR, GAP_FLOOR = 0.6, 0.2
+
+def hbt_chance(L, ehp, ehp0, friends, edge=False, el=None):
     frac = 1 - ehp / ehp0
     if L >= 7: c = min(0.95, 0.35 + 0.50 * frac + 0.05 * friends)
     else:      c = min(0.80, 0.25 + 0.40 * frac + 0.03 * friends)
+    # fish above your level: x0.6 per level, never below x0.2 (edge fish are Level 10)
+    gap = (10 if edge else (el or L)) - L
+    if gap > 0: c *= max(GAP_FLOOR, GAP_FACTOR ** gap)
     return c / 2 if edge else c
 
 def fight(kind, el, L, bubble=True, kelp=0, seed=0, bw=0, edge=False, mp_frac=1.0,
@@ -141,7 +146,7 @@ def fight(kind, el, L, bubble=True, kelp=0, seed=0, bw=0, edge=False, mp_frac=1.
             nip_max = (5 + L // 2) if bubble else 0
             if befriend and mp >= 5 and (ehp <= ehp0 / 2 or ehp <= mx + nip_max):
                 mp -= 5; mp_used += 5
-                if random.random() < hbt_chance(L, ehp, ehp0, friends, edge):
+                if random.random() < hbt_chance(L, ehp, ehp0, friends, edge, el):
                     mp = min(mpmax, mp + 5); mp_used -= 5
                     hp = min(hpmax, hp + math.floor(0.15 * hpmax))
                     return ('friend', turn, hp / hpmax, mp_used)
@@ -189,6 +194,8 @@ def main():
         return lambda st: (st['friend'] >= minfr and st['win'] >= .97 and st['hp'] >= fightrow['hp'] - .05 and st['mp'] <= fightrow['mp'])
     run('Reedwater BEFRIEND: Catfish L4 vs L4 B, 0 friends (half)', 'friend >= 45%, friend-or-win >= 97%, HP left within 5 points of fighting, net MP <= fighting', bef(.45), kind='cat', el=4, L=4, mp_frac=.5, befriend=True, friends=0)
     run('Reedwater BEFRIEND: Catfish L4 vs L4 B, 3 friends (half)', 'friend >= 55%, same HP and MP rule', bef(.55), kind='cat', el=4, L=4, mp_frac=.5, befriend=True, friends=3)
+    run('Befriend one level up: Catfish L5 vs L4 B, 0 friends (half)', 'friend >= 25%, friend-or-win >= 95%', lambda s: s['friend'] >= .25 and s['win'] >= .95, kind='cat', el=5, L=4, mp_frac=.5, befriend=True, friends=0)
+    run('Befriend a red fish: Catfish L6 vs L3 B, 0 friends (full)', 'friend <= 15% (no cheap grind)', lambda s: s['friend'] <= .15, kind='cat', el=6, L=3, befriend=True, friends=0)
     run('Cichlid L5 vs L5 B (half)', 'win >= 95%', lambda s: s['win'] >= .95, kind='cich', el=5, L=5, mp_frac=.5)
     run('Murk near: Cichlid L6 vs L5 B (full)', 'win >= 90%, >= 30% HP', lambda s: s['win'] >= .9 and s['hp'] >= .3, kind='cich', el=6, L=5)
     run('Murk near: Crayfish L6 vs L5 B (full)', 'win >= 90%, >= 30% HP', lambda s: s['win'] >= .9 and s['hp'] >= .3, kind='cray', el=6, L=5)

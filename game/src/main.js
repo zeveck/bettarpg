@@ -68,7 +68,7 @@ function resize() {
   document.body.classList.toggle('short', ch < 500);
   const portraitPhone = input.isTouch && ch > cw;
   $('rotate').hidden = !portraitPhone;
-  if (portraitPhone && G.mode === 'world' && !nav.has('pause')) openPause();
+  // turning the phone upright just freezes the game (the loop skips updates)
 }
 G.cssToLogicalY = (y) => ((y - cssRect.top) * G.view.H) / cssRect.height;
 G.cssToLogicalX = (x) => ((x - cssRect.left) * G.view.W) / cssRect.width;
@@ -203,7 +203,11 @@ G.collect = (q) => {
 G.startBattle = async ({ enemy = null, kind, level, edge = false, scripted = null }) => {
   if (G.mode !== 'world' || G.battle || G.starting) return;
   G.starting = true;
-  if (enemy) { kind = enemy.kind; level = enemy.level; edge = !!enemy.edge; scripted = enemy.tutorial ? 'tutorial' : enemy.stump ? 'stump' : null; }
+  if (enemy) {
+    kind = enemy.kind; level = enemy.level; edge = !!enemy.edge;
+    // the lesson (first Attack dodged, Bubble Blast hint) fires on your first fight, whichever fish it is
+    scripted = enemy.stump ? 'stump' : !G.s.flags.tutorialDone && kind !== 'gar' ? 'tutorial' : null;
+  }
   const bg = kind === 'gar' ? 'garpool' : (G.world.def.battleBg || 'shallows');
   input.releaseAll();
   ui.hideHint();
@@ -236,6 +240,7 @@ G.afterBattle = async (scene, result) => {
     for (const L of levels) if (LEVEL_UP_LINES[L]) lines.push(LEVEL_UP_LINES[L]);
     if (scene.entity) {
       G.world.enemies = G.world.enemies.filter((q) => q !== scene.entity);
+      if (result === 'win') G.world.faints.push({ kind: e.kind, edge: e.edge, x: scene.entity.x, y: scene.entity.y, face: scene.entity.face, t: 0 });
       // the new friend stays, in its party hat, where you met it
       if (result === 'friend' && e.kind !== 'gar' && G.world.friends.length < WORLD.maxFriendsShown) {
         const q = scene.entity;
@@ -358,7 +363,10 @@ function showWorldUI(on) {
   if (!on) { $('prompt').hidden = true; $('talkbtn').hidden = true; }
 }
 let hudKey = '';
+let sceneBtns = null;
 function updateHud() {
+  const busyNow = G.busy() || !$('dialog').hidden;
+  if (busyNow !== sceneBtns) { sceneBtns = busyNow; $('bHome').style.visibility = $('bPause').style.visibility = busyNow ? 'hidden' : ''; }
   const s = G.s;
   const key = [s.name, s.level, s.hp, s.mp, s.bb, s.color, s.wearHat].join('|');
   if (key === hudKey) return;
@@ -460,7 +468,7 @@ function openTitle() {
   m.innerHTML = '';
   if (G.titleSave) m.append(button('Continue', () => continueGame(), 'btn primary'));
   m.append(button('New Game', async () => {
-    if (state.load()) { if (!(await G.confirm('Start a new game? Your saved game will be replaced.'))) return; }
+    if (state.saveExists()) { if (!(await G.confirm(state.load() ? 'Start a new game? Your saved game will be replaced.' : 'Your saved game could not be read (a copy is kept). Start a new game?'))) return; }
     openCreate();
   }, 'btn' + (G.titleSave ? '' : ' primary')));
   m.append(button('How to play', () => openHowTo()));
@@ -486,7 +494,17 @@ async function continueGame() {
   G.s = s;
   hide('title'); nav.remove('title');
   G.worldRng = makeRng(Date.now() & 0xffff);
-  await G.enterArea(s.area || 'village', s.pos || 'home');
+  try {
+    // a position that isn't open water falls back to the area's main entry
+    let pos = s.pos;
+    if (pos && !G.world) G.world = new World(G);
+    if (pos) { const t = terrainFor(s.area); const { isWater } = await import('./terrain.js'); if (!isWater(t, pos.x, pos.y)) pos = null; }
+    await G.enterArea(s.area, pos || Object.keys(MAPS[s.area].entries)[0]);
+  } catch (e) {
+    console.warn('Continue fell back to the village', e);
+    G.wipe = null;
+    await G.enterArea('village', 'home', { wipe: false });
+  }
 }
 
 // ---------- create your betta ----------
@@ -635,6 +653,7 @@ G.innOffer = async (inn) => {
 let pausePage = null;
 function openPause(page = null) {
   if (G.mode !== 'world' && G.mode !== 'battle') return;
+  if (G.busy() || !$('dialog').hidden || G.wipe) return; // never in the middle of a scene
   if (nav.has('pause')) { if (page) showPausePage(page); return; }
   window.gameReport?.snapshot();
   input.releaseAll();
@@ -725,8 +744,18 @@ function showPausePage(page, focusPage = false) {
   for (const b of $('pauseMenu').children) b.classList.toggle('primary', b.dataset.page === page);
   if (focusPage) { const f = p.querySelector('.btn'); if (f) nav.setFocus(f, false); }
 }
+// End whatever scene is running: lines shown or queued, cutscene waits, battle.
+function endScene() {
+  ui.resetDialogs();
+  G.busyCount = 0;
+  G.waits = [];
+  G.starting = false;
+  G.leaving = false;
+  if (G.battle) { G.battle.end(); G.battle = null; }
+}
 async function quitToTitle() {
   await fade(true);
+  endScene();
   G.world = null; G.battle = null;
   openTitle();
   await fade(false);
@@ -803,10 +832,13 @@ function openControls() {
       input.capture = (k, v) => {
         if (k === 'key' && kind === 'key') {
           if (v === 'Escape') { endCapture('Cancelled.'); return; }
+          // menu keys stay menu keys (Talk may keep Space), so no one can lock themselves out
+          if (['Enter', 'NumpadEnter', 'Backspace'].includes(v) || (v === 'Space' && action !== 'talk')) { endCapture(`${keyCap(v)} is kept for menus.`); return; }
           const other = input.controls.bindKey(action, slot, v);
           endCapture(other === false ? "That key can't be used." : other ? `${keyCap(v)} was ${escapeHtml(actName(other))}'s; ${escapeHtml(actName(other))} now has ${keyNames(other)}.` : 'Saved.');
         } else if (k === 'pad' && kind === 'pad') {
           if (v === 1 && performance.now() - downAt > 900) { endCapture('Cancelled.'); return; }
+          if (v === 1 || v === 9 || (v === 0 && action !== 'talk')) { endCapture(`${padCap(v)} is kept for menus.`); return; }
           const other = input.controls.bindPad(action, slot, v);
           endCapture(other === false ? "That button can't be used." : other ? `That button was ${actName(other)}'s; they swapped.` : 'Saved.');
         } else if (k === 'key' && v === 'Escape') endCapture('Cancelled.');
@@ -944,7 +976,10 @@ function setupTouch() {
     else input.setDevice('touch');
     if (e.target === cv && G.mode === 'title' && !nav.top()) openTitle();
   }, true);
-  cv.addEventListener('click', () => { if (G.canTalkNow() && G.world.interactTarget()) interact(); });
+  cv.addEventListener('click', () => {
+    if (G.mode === 'battle' && G.battle?.continueBtn) { ui.press(G.battle.continueBtn); return; }
+    if (G.canTalkNow() && G.world.interactTarget()) interact();
+  });
 }
 
 // ---------- the loop ----------
@@ -1054,8 +1089,8 @@ window.__game = {
     if (!id) return false;
     for (const l of [...nav.stack]) { hide(l.id); }
     nav.stack = [];
+    endScene();
     for (const sc of ['title', 'create', 'pause', 'shop', 'settings', 'controls', 'howto', 'confirm', 'banner', 'credits']) hide(sc);
-    if (G.battle) { G.battle.end(); G.battle = null; }
     const st = AREA_START[id];
     const s = state.newSave(G.s?.name && G.mode !== 'title' ? G.s.name : 'Tester', G.s?.color || 'red');
     s.level = st.level; s.hp = PLAYER.maxHp(st.level); s.mp = PLAYER.maxMp(st.level);
@@ -1105,7 +1140,12 @@ async function boot() {
   input.init(controls);
   input.listener = onInput;
   input.onDevice = () => { promptKey = ''; updateTitlePress(); };
-  input.onPadLost = () => { G.padLost = true; if (G.mode === 'world' || G.mode === 'battle') openPause(); $('padLost').hidden = false; };
+  input.onPadLost = () => {
+    if (G.mode !== 'world' && G.mode !== 'battle') return;
+    G.padLost = true; openPause();
+    $('padLost').hidden = !nav.has('pause');
+    if (!nav.has('pause')) G.padLost = false;
+  };
   audio.loadSettings(state.loadSettings());
   resize();
   addEventListener('resize', resize);
@@ -1136,7 +1176,7 @@ async function boot() {
     if (e.key === '$') { G.s.bb += 50; G.toast('Debug: +50 Betta Bites'); }
     if (e.key === '%' && G.s.level < 10) { G.s.exp = 0; G.s.level++; G.s.hp = PLAYER.maxHp(G.s.level); G.s.mp = PLAYER.maxMp(G.s.level); G.toast('Debug: level up'); }
   });
-  await Promise.all([document.fonts.load('16px "Pixelify Sans"').catch(() => {}), audio.init(),
+  await Promise.all([document.fonts.load('16px "Pixelify Sans"').catch(() => {}), document.fonts.load('600 16px "Pixelify Sans"').catch(() => {}), audio.init(),
     loadAll((p) => { $('loadFill').style.width = Math.round(p * 100) + '%'; })]);
   // build the first areas' terrain while the title shows
   setTimeout(() => { terrainFor('village'); terrainFor('shallows'); }, 50);

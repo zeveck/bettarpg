@@ -27,6 +27,7 @@ export function goalLine(s) {
   if (f.trailFound) return 'Up the spillway lies Highwater. Ask them about the shadow.';
   if (f.stumpDone) {
     if (s.scales.length >= 5) return 'Take the scales to the straw bundle at the Spillway\'s foot.';
+    if (s.scales.length || s.area === 'reedwater') return `Follow the strange scales uphill through Reedwater. (Scales ${s.scales.length}/5)`;
     return `Captain Reef will open the reed gate east. Follow where that scale leads. (Scales ${s.scales.length}/5)`;
   }
   if (f.metFinn) return 'Swim to the Old Stump at the far end of the Shallows. Mossy was last seen there.';
@@ -73,7 +74,7 @@ export const LINES = {
     'Welcome, young one. I sense great potential in you.',
     'There have been strange happenings lately... fish have been disappearing from the outer paddies.',
     'The rumors speak of dark shadows that come when the rice stalks sway. Perhaps you could investigate?',
-    'Mossy was last seen at the Old Stump. Swim to the Old Stump at the far end of the Shallows. Mossy was last seen there.',
+    'Mossy was last seen at the Old Stump, at the far end of the Shallows. Swim there and see what you can find.',
     'I\'ll have the south gate opened for you. Swim safely, {name}.',
   ],
   coral: [

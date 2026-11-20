@@ -58,7 +58,7 @@ export class BattleScene {
     const ui = $('battleui');
     ui.hidden = false;
     $('bLog').innerHTML = '';
-    $('bLog').onclick = () => $('bLog').classList.toggle('open');
+    $('bLog').onclick = () => { if (this.continueBtn) press(this.continueBtn); else $('bLog').classList.toggle('open'); };
     $('eName').textContent = this.enemy.name;
     $('eLv').textContent = 'Lv ' + this.enemy.level;
     $('garBox').hidden = this.enemy.kind !== 'gar';
@@ -133,15 +133,19 @@ export class BattleScene {
   }
 
   buildRow(focus = false) {
+    if (this.over) return; // the result row (Continue) stays put
     const defs = this.rowDefs();
-    const key = this.row + '|' + defs.map((d) => d.key + d.label + d.small + d.can.ok).join(',') + '|' + this.busy + '|' + this.lit;
+    const key = this.row + '|' + defs.map((d) => d.key + d.label + d.small + d.can.ok).join(',') + '|' + this.busy + '|' + this.lit + '|' + input.device;
     if (key === this.lastRowKey) return;
     const prevFocus = nav.focused()?.dataset?.key;
     this.lastRowKey = key;
     const row = $('bRow');
     row.innerHTML = '';
     defs.forEach((d, i) => {
-      const inner = `${d.icon ? `<img class="ico" src="${img(d.icon)?.toDataURL?.() || ''}" alt="">` : ''}<span>${escapeHtml(d.label)}</span><small>${escapeHtml(d.small || '')}${d.small ? ' · ' : ''}${i + 1}</small>`;
+      // the 1-5 key hints only for keyboard players
+      const digit = input.device === 'keyboard' ? String(i + 1) : '';
+      const small = [d.small || '', digit].filter(Boolean).join(' · ');
+      const inner = `${d.icon ? `<img class="ico" src="${img(d.icon)?.toDataURL?.() || ''}" alt="">` : ''}<span>${escapeHtml(d.label)}</span><small>${escapeHtml(small)}</small>`;
       const b = button(inner, () => this.choose(d.key), 'btn' + (d.can.ok ? '' : ' dim') + (this.lit === d.key ? ' lit' : ''));
       b.dataset.key = d.key;
       b.setAttribute('aria-disabled', d.can.ok ? 'false' : 'true');

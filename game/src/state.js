@@ -29,16 +29,58 @@ export function newSave(name = 'Betta', color = 'red') {
   };
 }
 
-export function load() {
-  try {
-    const raw = localStorage.getItem(SAVE_KEY);
-    if (!raw) return null;
-    const s = JSON.parse(raw);
-    if (!s || s.v !== VERSION || typeof s.level !== 'number') return null;
-    const fresh = newSave(s.name, s.color);
-    return { ...fresh, ...s, items: { ...fresh.items, ...s.items }, flags: { ...s.flags } };
-  } catch { return null; }
+const AREA_IDS = ['village', 'shallows', 'reedwater', 'highwater', 'murk', 'ditch'];
+const KINDS = ['guppy', 'angel', 'cat', 'nymph', 'cich', 'cray'];
+const SCALE_IDS = ['s1', 's2', 's3', 's4', 's5'];
+const COG_IDS = ['c1', 'c2', 'c3'];
+const int = (v, lo, hi, d) => (Number.isFinite(+v) && v !== null && v !== '' ? Math.max(lo, Math.min(hi, Math.floor(+v))) : d);
+const obj = (v) => (v && typeof v === 'object' && !Array.isArray(v) ? v : {});
+const bools = (v) => Object.fromEntries(Object.entries(obj(v)).filter(([, b]) => typeof b === 'boolean'));
+
+// Every field checked and given a default, so a damaged save can't crash Continue.
+export function sanitize(raw) {
+  if (!raw || typeof raw !== 'object' || raw.v !== VERSION) return null;
+  const name = typeof raw.name === 'string' && raw.name.trim() ? raw.name.replace(/[^A-Za-z0-9 '\-]/g, '').slice(0, 12) || 'Betta' : 'Betta';
+  const color = PLAYER.colors.includes(raw.color) ? raw.color : 'red';
+  const s = newSave(name, color);
+  s.level = int(raw.level, 1, PLAYER.maxLevel, 1);
+  s.exp = int(raw.exp, 0, 99999, 0);
+  s.hp = int(raw.hp, 0, maxHp(s), maxHp(s)) || maxHp(s);
+  s.mp = int(raw.mp, 0, maxMp(s), maxMp(s));
+  s.bb = int(raw.bb, 0, 99999, 0);
+  for (const k of Object.keys(s.items)) s.items[k] = int(obj(raw.items)[k], 0, ITEM_MAX, 0);
+  s.subOwned = raw.subOwned === true;
+  s.flags = bools(raw.flags);
+  for (const k of KINDS) { const n = int(obj(raw.friends)[k], 0, 999, 0); if (n) s.friends[k] = n; }
+  s.firstFriendKinds = bools(raw.firstFriendKinds);
+  s.scales = Array.isArray(raw.scales) ? [...new Set(raw.scales.filter((x) => SCALE_IDS.includes(x)))] : [];
+  s.cogs = Array.isArray(raw.cogs) ? [...new Set(raw.cogs.filter((x) => COG_IDS.includes(x)))] : [];
+  s.rest = ['village', 'highwater', 'spring'].includes(raw.rest) ? raw.rest : 'village';
+  if (s.rest === 'spring' && !s.flags.gateOpen) s.rest = 'village';
+  s.freeRest = bools(raw.freeRest);
+  s.area = AREA_IDS.includes(raw.area) ? raw.area : 'village';
+  const p = obj(raw.pos);
+  s.pos = Number.isFinite(p.x) && Number.isFinite(p.y) ? { x: p.x, y: p.y } : null;
+  s.met = bools(raw.met);
+  s.hints = bools(raw.hints);
+  s.wearHat = raw.wearHat === true;
+  s.ending = raw.ending === 'fins' || raw.ending === 'friend' ? raw.ending : null;
+  s.endingsSeen = bools(raw.endingsSeen);
+  s.playTime = int(raw.playTime, 0, 1e9, 0);
+  return s;
 }
+
+export function load() {
+  let raw = null;
+  try { raw = localStorage.getItem(SAVE_KEY); } catch { return null; }
+  if (!raw) return null;
+  let s = null;
+  try { s = sanitize(JSON.parse(raw)); } catch { s = null; }
+  if (!s) { try { localStorage.setItem(SAVE_KEY + '-backup', raw); } catch {} }
+  return s;
+}
+// A save is there (even one that couldn't be read): New Game asks first.
+export function saveExists() { try { return !!localStorage.getItem(SAVE_KEY); } catch { return false; } }
 export function store(s) {
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(s)); return true; } catch { return false; }
 }

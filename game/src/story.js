@@ -241,6 +241,8 @@ export function createStory(G) {
       await G.moveBubbleTo(p.x - 30, p.y + 4);
       G.sfx('bubble_chirp');
       await G.say('bubble', STORY.bubbleArrives);
+      // Bubble cheers you up before the fight, so arriving hurt can't lose the lesson
+      if (s.hp < maxHp(s)) { s.hp = maxHp(s); G.sfx('inn', { vol: 0.6 }); G.toast('Bubble cheers you on: HP restored!'); }
       await G.say('bubble', STORY.stumpScale);
       // the angelfish charges in
       const e = w.makeEnemy({ kind: 'angel', level: 2, x: p.x + 200, y: p.y - 30, id: 'stumpAngel', stump: true, still: true });
@@ -324,7 +326,11 @@ export function createStory(G) {
     if (w.areaId === 'ditch' && f.gateOpen && springCool <= 0 && Math.hypot(p.x - 640, p.y - 110) < 30) { springCool = 4; springRest(); }
     if (w.areaId === 'ditch' && !f.garDefeated && !f.garFriend) {
       const gar = w.extra.find((q) => q.id === 'gar');
-      if (gar && Math.abs(p.x - gar.x) < 112 && Math.abs(p.y - gar.y) < 34) {
+      const near = gar && Math.abs(p.x - gar.x) < 112 && Math.abs(p.y - gar.y) < 34;
+      // after fleeing or losing, the Gar waits until you swim away and come back
+      if (gar && !near && Math.hypot(p.x - gar.x, p.y - gar.y) > 170) gar.armed = true;
+      if (near && gar.armed !== false && w.safeT <= 0) {
+        gar.armed = false;
         if (!f.mossyTalked) {
           f.mossyTalked = true;
           G.cutscene(async () => { await sayAll('mossy', LINES.mossy[0][1]); s.met.mossy = true; }).then(() => G.startBattle({ kind: 'gar', level: 10 }));

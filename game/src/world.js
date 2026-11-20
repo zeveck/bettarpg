@@ -65,7 +65,7 @@ export class World {
     const p = this.player;
     p.x = e.x; p.y = e.y; p.vx = 0; p.vy = 0; p.face = e.face || 1; p.trail = [];
     this.bubble.x = p.x - 24 * p.face; this.bubble.y = p.y + 6; this.bubble.face = p.face;
-    this.fx.clear(); this.ripples = [];
+    this.fx.clear(); this.ripples = []; this.faints = [];
     this.safeT = 1.0;
     this.redHintShown = false;
     this.edgeWarned = false;
@@ -263,6 +263,8 @@ export class World {
       }
       q.rustle = Math.max(0, (q.rustle || 0) - dt);
     }
+    for (const f of this.faints) f.t += dt;
+    this.faints = this.faints.filter((f) => f.t < 1.6);
     for (const r of this.ripples) { r.r += dt * 14; r.life -= dt; }
     this.ripples = this.ripples.filter((r) => r.life > 0);
     this.fx.update(dt);
@@ -469,6 +471,7 @@ export class World {
     for (const n of this.extra) if (!n.hidden) list.push({ y: n.y + (n.sortOff || 10), d: () => (n.draw ? n.draw(ctx, n, t) : this.drawNpc(ctx, n)) });
     for (const f of this.friends) list.push({ y: f.y + 8, d: () => drawFish(ctx, hatted(f.kind), f.x, f.y, { flip: f.face < 0, sway: Math.sin(f.t * 5) * 1, bob: Math.round(Math.sin(f.t * 2)) }) });
     for (const e of this.enemies) if (!e.hidden || !this.def.reeds) list.push({ y: e.y + 8, d: () => this.drawEnemy(ctx, e) });
+    for (const f of this.faints) list.push({ y: f.y + 8, d: () => this.drawFaint(ctx, f) });
     if (s.flags.bubbleJoined) list.push({ y: this.bubble.y + 8, d: () => this.drawBubble(ctx) });
     list.push({ y: this.player.y + 9, d: () => this.drawPlayer(ctx) });
     list.sort((a, b) => a.y - b.y);
@@ -570,6 +573,18 @@ export class World {
       ctx.globalAlpha = 0.5 + pulse * 0.5; drawFish(ctx, glow(v, '#FF3B3B'), e.x, e.y, opts); ctx.globalAlpha = 1;
     }
     drawFish(ctx, v, e.x, e.y, opts);
+  }
+  // A defeated fish: flips belly-up, fades and sinks, then it's gone.
+  drawFaint(ctx, f) {
+    let v = plain(ENEMIES[f.kind].sprite);
+    if (!v) return;
+    if (f.edge) v = tinted(v, '#7B3FD0', 0.35);
+    const k = Math.min(1, f.t / 1.6);
+    ctx.save();
+    ctx.translate(0, Math.round(f.y + k * 10) * 2);
+    ctx.scale(1, -1);
+    drawFish(ctx, v, f.x, Math.round(f.y + k * 10), { flip: f.face < 0, alpha: 1 - k });
+    ctx.restore();
   }
   drawTag(ctx, e) {
     if (e.hidden) {

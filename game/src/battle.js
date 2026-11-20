@@ -41,6 +41,8 @@ export function partyChance(L, enemy, friends) {
   const p = L >= PLAYER_BIG() ? PARTY.big : PARTY.small;
   const frac = 1 - enemy.hp / enemy.hpMax;
   let c = Math.min(p.max, p.base + p.perHp * frac + p.perFriend * friends);
+  const gap = enemy.level - L;
+  if (gap > 0) c *= Math.max(PARTY.gapFloor, Math.pow(PARTY.gapFactor, gap));
   if (enemy.edge) c *= PARTY.edgeFactor;
   return c;
 }
@@ -212,7 +214,7 @@ export class Battle {
         if (this.scripted === 'tutorial' && !this.tutorialDodged) {
           this.tutorialDodged = true;
           this.push({ t: 'miss', target: 'enemy' });
-          this.log('The guppy darts aside!');
+          this.log(`The ${e.name} darts aside!`);
           this.push({ t: 'hint', text: 'Quick fish! Bubble Blast never misses (3 MP).', spell: 'bubbleBlast' });
           return;
         }

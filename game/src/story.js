@@ -261,7 +261,7 @@ export function createStory(G) {
       await G.say('bubble', STORY.bundleShove);
       G.sfx('shell_crack', { rate: 0.6 });
       G.shake(3);
-      const w = G.world();
+      const w = G.world;
       const b = w.props.find((q) => q.id === 'bundle');
       f.trailFound = true;
       if (b) { b.until = null; await G.tweenProp(b, b.x + 80, b.y + 30, 0.7); b.until = 'trailFound'; }
@@ -312,7 +312,7 @@ export function createStory(G) {
   function update(w, dt) {
     const s = S(), f = s.flags, p = w.player;
     springCool = Math.max(0, springCool - dt);
-    if (G.busy()) return;
+    if (G.busy() || G.battle || G.starting || G.mode !== 'world') return;
     if (w.areaId === 'shallows' && f.metFinn && !f.bubbleJoined) {
       const st = w.props.find((q) => q.id === 'stump');
       if (st && Math.hypot(p.x - st.x, p.y - (st.y - 16)) < 90) stumpScene(w);
@@ -325,7 +325,7 @@ export function createStory(G) {
     if (w.areaId === 'ditch' && f.gateOpen && springCool <= 0 && Math.hypot(p.x - 640, p.y - 110) < 30) { springCool = 4; springRest(); }
     if (w.areaId === 'ditch' && !f.garDefeated && !f.garFriend) {
       const gar = w.extra.find((q) => q.id === 'gar');
-      if (gar && Math.abs(p.x - gar.x) < 75 && Math.abs(p.y - gar.y) < 28) {
+      if (gar && Math.abs(p.x - gar.x) < 112 && Math.abs(p.y - gar.y) < 34) {
         if (!f.mossyTalked) {
           f.mossyTalked = true;
           G.cutscene(async () => { await sayAll('mossy', LINES.mossy[0][1]); s.met.mossy = true; }).then(() => G.startBattle({ kind: 'gar', level: 10 }));
@@ -343,7 +343,7 @@ export function createStory(G) {
       G.save();
       if (n === 3) await G.say('bubble', STORY.thirdScale);
       if (n === 5) {
-        const w = G.world(), b = w.props.find((x) => x.id === 'bundle');
+        const w = G.world, b = w.props.find((x) => x.id === 'bundle');
         if (b && Math.hypot(w.player.x - b.x, w.player.y - b.y) < WORLD.bundleRange) await bundleScene();
         else await G.say('bubble', STORY.allScales);
       }
@@ -365,15 +365,12 @@ export function createStory(G) {
       await G.say('bubble', 'You did it! A friend in a party hat!');
       await G.say('bubble', 'Let\'s go tell Captain Reef. He\'ll open the reed gate east!');
     }
-    if (e.kind === 'gar' && (result === 'win' || result === 'friend')) {
-      const first = !(f.garDefeated || f.garFriend);
-      const ending = result === 'friend' ? 'friend' : 'fins';
-      if (result === 'friend') f.garFriend = true; else f.garDefeated = true;
-      if (!s.ending) s.ending = ending;
-      const seen = s.endingsSeen[ending];
+    if (e.kind === 'gar' && G.pendingEnding) {
+      const ending = G.pendingEnding;
+      G.pendingEnding = null;
       s.endingsSeen[ending] = true;
       G.save();
-      if (!seen) await G.playEnding(ending);
+      await G.playEnding(ending);
     }
   }
 

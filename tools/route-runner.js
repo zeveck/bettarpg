@@ -85,8 +85,8 @@ async (page) => {
       if (Date.now() - T0 > LIMIT) await fail(`time limit going to ${x},${y}`);
       let s = await st();
       if (s.inBattle) { await hold([]); await log(`battle ${s.inBattle.kind} L${s.inBattle.level} at ${s.player.x},${s.player.y}`); justFought = true; s = await battle(s.inBattle.scripted === 'stump' ? 'stump' : policy); await log(`after battle hp ${s.hp}/${maxHp(s.level)} L${s.level}`); best = 1e9; bestAt = Date.now(); continue; }
-      if (s.dialog || s.busy || s.menus.length) { await hold([]); if (s.menus.includes('confirm')) { await fail('unexpected confirm'); } s = await clearDialogs(); best = 1e9; bestAt = Date.now(); continue; }
-      if (s.mode !== 'world') { await hold([]); await sleep(150); continue; }
+      if (s.dialog || s.busy || s.menus.length) { await hold([]); if (s.menus.some((m) => !['dialog', 'banner', 'credits'].includes(m))) { await fail('unexpected menu ' + s.menus.join(',')); } s = await clearDialogs(); best = 1e9; bestAt = Date.now(); continue; }
+      if (s.mode !== 'world' || s.transition) { await hold([]); await sleep(150); best = 1e9; bestAt = Date.now(); continue; }
       const p = s.player, dx = x - p.x, dy = y - p.y, d = Math.hypot(dx, dy);
       if (d <= tol) { await hold([]); return s; }
       if (d < best - 2) { best = d; bestAt = Date.now(); }
@@ -108,7 +108,7 @@ async (page) => {
       if (step.seed !== undefined) await page.evaluate((n) => window.__game.seed(n), step.seed);
       if (step.set) await page.evaluate((o) => window.__game.set(o), step.set);
       if (step.go) { await go(step.go[0], step.go[1], step.tol, step.policy); if (step.note) await log(step.note); }
-      if (step.path) for (const [x, y] of step.path) await go(x, y, step.tol, step.policy);
+      if (step.path) { for (const [x, y] of step.path) await go(x, y, step.tol, step.policy); if (step.note) await log(step.note); }
       if (step.talk) { await press('Space'); await sleep(250); }
       if (step.choose !== undefined) {
         for (let i = 0; i < 40; i++) { const s = await st(); if (s.dialog) { const b = await page.evaluate(() => window.__game.buttons().filter((x) => x.y > 0)); if (b.some((x) => x.focus)) break; await press('Space'); await sleep(150); } else break; }

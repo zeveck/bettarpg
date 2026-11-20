@@ -196,7 +196,7 @@ G.collect = (q) => {
   audio.play('bite', { rate: 0.7 });
   if (q.type === 'scale' && !s.scales.includes(q.id)) s.scales.push(q.id);
   if (q.type === 'cog' && !s.cogs.includes(q.id)) s.cogs.push(q.id);
-  G.story.collected(q);
+  G.cutscene(() => G.story.collected(q));
 };
 
 // ---------- battles ----------
@@ -243,6 +243,11 @@ G.afterBattle = async (scene, result) => {
       }
     }
     if (scene.battle.scripted === 'tutorial') s.flags.tutorialDone = true;
+    if (e.kind === 'gar') {
+      G.pendingEnding = (result === 'friend' ? !s.endingsSeen.friend : !s.endingsSeen.fins) ? (result === 'friend' ? 'friend' : 'fins') : null;
+      if (result === 'friend') s.flags.garFriend = true; else s.flags.garDefeated = true;
+      if (!s.ending) s.ending = result === 'friend' ? 'friend' : 'fins';
+    }
     G.save();
   } else if (result === 'lose') {
     await G.defeat(scene);
@@ -980,6 +985,14 @@ function draw(dt) {
   else if (G.mode === 'ending' && G.ending) drawEnding(dt);
   else if (G.mode === 'title' || G.mode === 'create') { drawTitle(dt); drawCreatePreview(dt); }
   if (G.wipe) drawWipe(ctx, G.view.W, G.view.H, G.wipe.p, G.wipe.t);
+  if (!$('rotate').hidden) {
+    // the betta swims in place on the "turn your phone" card
+    const rc = $('rotateFish'), g = rc.getContext('2d'), t = performance.now() / 1000;
+    g.imageSmoothingEnabled = false;
+    g.clearRect(0, 0, rc.width, rc.height);
+    const v = bettaSwim([0, 1, 0, 3][Math.floor(t * 7) % 4], G.s.color) || betta(0, G.s.color);
+    drawFish(g, v, 48, 32 + Math.round(Math.sin(t * 2)), { s: 1 });
+  }
 }
 
 // ---------- frame log ----------
@@ -1008,7 +1021,7 @@ function stateSnapshot() {
     inBattle: b ? { kind: b.enemy.kind, level: b.enemy.level, edge: b.enemy.edge, hp: b.enemy.hp, hpMax: b.enemy.hpMax, turn: b.battle.turn,
       playerHp: b.battle.p.hp, playerMp: b.battle.p.mp, meter: b.battle.meter, partyStarted: b.battle.partyStarted, busy: b.busy, over: b.battle.over,
       row: b.row, scripted: b.battle.scripted, dived: b.battle.p.dived, waiting: !!b.continueBtn } : null,
-    busy: G.busy(), dialog: !$('dialog').hidden, menus: nav.stack.map((l) => l.id),
+    busy: G.busy(), transition: !!G.wipe || !!G.starting, dialog: !$('dialog').hidden, menus: nav.stack.map((l) => l.id),
     gameWon: G.gameWon || !!(s.flags.garDefeated || s.flags.garFriend), ending: s.ending, endingsSeen: { ...s.endingsSeen },
     enemies: w ? w.enemies.map((e) => ({ kind: e.kind, level: e.level, x: Math.round(e.x), y: Math.round(e.y), edge: !!e.edge, hidden: e.hidden })) : [],
     input: input.device, padId: input.padId || null, tick: G.tick,

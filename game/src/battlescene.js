@@ -74,6 +74,7 @@ export class BattleScene {
     this.busy = false;
     this.buildRow(true);
     this.G.hintOnce('battle');
+    if (this.battle.hbtLearned && !this.battle.scripted && this.G.s.hints.battle) this.G.hintOnce('befriend');
   }
 
   end() {

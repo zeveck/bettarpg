@@ -1,0 +1,14 @@
+{
+  "area": 3, "name": "The Spillway and Highwater: up the spillway to Lock-Keeper Whorl",
+  "completes": "lantern",
+  "policy": "fight",
+  "timeLimit": 200,
+  "steps": [
+    { "start": 3 },
+    { "seed": 303 },
+    { "path": [[768, 600], [768, 380], [1000, 330], [1110, 290]], "note": "beside Whorl" },
+    { "talk": true },
+    { "say": true },
+    { "expect": { "highwater": true, "lantern": true } }
+  ]
+}

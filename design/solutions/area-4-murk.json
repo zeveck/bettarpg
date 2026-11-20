@@ -1,0 +1,18 @@
+{
+  "area": 4, "name": "The Murk: three brass cogs, then the drain gate",
+  "completes": "gateOpen",
+  "policy": "fight",
+  "timeLimit": 360,
+  "steps": [
+    { "start": 4 },
+    { "seed": 404 },
+    { "path": [[1300, 250], [1380, 420], [1330, 560], [1260, 640]], "note": "cog 1" },
+    { "path": [[1100, 640], [880, 500], [760, 450], [640, 330], [520, 250]], "note": "cog 2" },
+    { "say": true },
+    { "path": [[560, 420], [470, 560], [330, 650]], "note": "cog 3" },
+    { "say": true },
+    { "path": [[250, 560], [180, 460], [132, 455]], "note": "at the drain gate" },
+    { "say": true },
+    { "expect": { "gateOpen": true, "cogs": 3 } }
+  ]
+}

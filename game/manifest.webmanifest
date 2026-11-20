@@ -1,0 +1,16 @@
+{
+  "name": "Betta Fish RPG",
+  "short_name": "Betta RPG",
+  "description": "Small fish, big paddies. Find the missing fish, with your fins or your friendship.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#123a66",
+  "theme_color": "#123a66",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "area": 2, "name": "Reedwater: the five strange scales, then the straw bundle at the Spillway's foot",
+  "completes": "trailFound",
+  "policy": "fight",
+  "timeLimit": 300,
+  "steps": [
+    { "start": 2 },
+    { "seed": 202 },
+    { "go": [330, 470], "note": "scale 1" },
+    { "path": [[480, 560], [610, 610]], "note": "scale 2" },
+    { "path": [[760, 660], [900, 645]], "note": "scale 3" },
+    { "say": true },
+    { "path": [[1060, 610], [1170, 500]], "note": "scale 4" },
+    { "path": [[1250, 400], [1235, 280]], "note": "scale 5" },
+    { "say": true },
+    { "path": [[1200, 180], [1180, 120]], "note": "at the bundle" },
+    { "say": true },
+    { "expect": { "trailFound": true, "scales": 5 } }
+  ]
+}

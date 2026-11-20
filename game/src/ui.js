@@ -192,7 +192,14 @@ export function banner(text, pic = null) {
 let dlg = null;
 export function dialogOpen() { return !!dlg; }
 // say(speaker {name, sprite canvas}, text, choices?) -> Promise<choice index | undefined>
+// Lines never overlap: a second line waits for the first to close.
+let sayChain = Promise.resolve();
 export function say(speaker, text, choices = null) {
+  const p = sayChain.then(() => sayNow(speaker, text, choices));
+  sayChain = p.catch(() => {});
+  return p;
+}
+function sayNow(speaker, text, choices = null) {
   return new Promise((resolve) => {
     const box = $('dialog');
     box.hidden = false;

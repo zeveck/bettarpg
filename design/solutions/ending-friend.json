@@ -1,0 +1,17 @@
+{
+  "area": 5, "name": "The Sunken Ditch, friendship ending: a party of five friends befriends the Gargantuan Gar",
+  "from": "a save at gateOpen: level 8, 5 friends, 2 Bubble Waters",
+  "completes": "garFriend",
+  "policy": "gar-party",
+  "timeLimit": 420,
+  "steps": [
+    { "start": 5 },
+    { "seed": 506 },
+    { "set": { "level": 8, "friends": { "angel": 2, "guppy": 2, "cat": 1 }, "items": { "bwater": 2 } } },
+    { "path": [[560, 110], [630, 112]], "note": "Gate Spring" },
+    { "path": [[560, 300], [560, 430], [612, 430]], "note": "at the Gar" },
+    { "battle": "gar-party" },
+    { "say": true },
+    { "expect": { "garFriend": true } }
+  ]
+}

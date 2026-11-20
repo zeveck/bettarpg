@@ -1,0 +1,19 @@
+{
+  "area": 1, "name": "Peace in the Paddies: the last friend needed (a guppy), from a save with every other kind at 3",
+  "from": "a save after the Old Stump with 3 friends of each kind but the guppy (2): level 4",
+  "completes": "peace",
+  "policy": "party",
+  "timeLimit": 300,
+  "steps": [
+    { "start": 1 },
+    { "seed": 111 },
+    { "set": { "level": 4, "flags": { "bubbleJoined": true, "hbtLearned": true, "stumpDone": true, "tutorialDone": true }, "friends": { "guppy": 2, "angel": 3, "cat": 3, "nymph": 3, "cich": 3, "cray": 3 } } },
+    { "go": [560, 180], "policy": "party", "note": "guppy 1" },
+    { "go": [330, 420], "policy": "party", "note": "guppy 2" },
+    { "go": [690, 420], "policy": "party", "note": "guppy 3" },
+    { "go": [900, 360], "policy": "party", "note": "guppy 4" },
+    { "go": [1260, 380], "policy": "party", "note": "guppy 5" },
+    { "say": true },
+    { "expect": { "peace": true } }
+  ]
+}

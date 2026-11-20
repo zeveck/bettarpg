@@ -229,6 +229,22 @@ export class World {
     }
     this.safeT = Math.max(0, this.safeT - dt);
     this.bumpCool = Math.max(0, this.bumpCool - dt);
+    // swimming into a closed gate says why it's closed (once in a while)
+    if (canMove && this.bumpCool <= 0) {
+      const h = this.headOf(p);
+      for (const g of this.def.gates || []) {
+        if (!g.talk || s.flags[g.openIf]) continue;
+        const [x, y, w, hh] = g.rect;
+        const cx = Math.max(x, Math.min(h.x, x + w)), cy = Math.max(y, Math.min(h.y, y + hh));
+        if (Math.hypot(cx - h.x, cy - h.y) < 11) {
+          this.bumpCool = 4;
+          p.vx = 0; p.vy = 0;
+          this.G.input.releaseAll();
+          this.G.cutscene(() => this.G.story.gateTalk(g.talk));
+          break;
+        }
+      }
+    }
     this.updateNpcs(dt);
     this.updateEnemies(dt, canMove, solids);
     this.updateFriends(dt, solids);

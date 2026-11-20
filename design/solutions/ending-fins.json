@@ -1,0 +1,17 @@
+{
+  "area": 5, "name": "The Sunken Ditch, fins ending: rest at the Gate Spring, then defeat the Gargantuan Gar",
+  "from": "a save at gateOpen: level 9, 3 Seed Cakes and 2 Kelp Snacks (what the Murk and Pip's stall give)",
+  "completes": "garDefeated",
+  "policy": "fight",
+  "timeLimit": 420,
+  "steps": [
+    { "start": 5 },
+    { "seed": 505 },
+    { "set": { "level": 9, "items": { "seedcake": 3, "kelp": 2 }, "bb": 40 } },
+    { "path": [[560, 110], [630, 112]], "note": "Gate Spring" },
+    { "path": [[560, 300], [560, 430], [612, 430]], "note": "at the Gar" },
+    { "battle": "fight" },
+    { "say": true },
+    { "expect": { "garDefeated": true } }
+  ]
+}

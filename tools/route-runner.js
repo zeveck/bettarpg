@@ -91,7 +91,7 @@ async (page) => {
         await hold([]); await log(`battle ${s.inBattle.kind} L${s.inBattle.level} at ${s.player.x},${s.player.y}`); justFought = true;
         s = await battle(s.inBattle.scripted === 'stump' ? 'stump' : policy);
         await log(`after battle hp ${s.hp}/${maxHp(s.level)} L${s.level} friends ${s.friendsTotal}`);
-        if (s.area !== area0 && !s.gameWon) await fail(`lost a battle (woke in ${s.area})`);
+        if (s.lastBattle === 'lose' || (s.area !== area0 && !s.gameWon)) await fail(`lost a battle (woke in ${s.area})`);
         if (s.area !== area0) { await hold([]); return s; } // an ending took us home
         best = 1e9; bestAt = Date.now(); continue;
       }

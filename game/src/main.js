@@ -272,6 +272,7 @@ G.leaveBattle = async (scene) => {
   if (scene.left) return; // never twice for one battle
   scene.left = true;
   const result = scene.battle.over;
+  G.lastBattle = result;
   // Peace in the Paddies: its banner over the battle, before the world shows again
   if (result === 'friend' && !G.s.flags.peace && state.peaceDone(G.s)) await G.story.checkPeace();
   if (G.pendingEnding) {
@@ -302,6 +303,7 @@ G.leaveBattle = async (scene) => {
 };
 
 G.defeat = async (scene) => {
+  G.lastBattle = 'lose';
   await fade(true, STORY.rescued);
   const lost = state.defeatPenalty(G.s);
   scene.end();
@@ -1106,7 +1108,7 @@ function stateSnapshot() {
     busy: G.busy(), transition: !!G.wipe || !!G.starting, dialog: !$('dialog').hidden, menus: nav.stack.map((l) => l.id),
     gameWon: G.gameWon || !!(s.flags.garDefeated || s.flags.garFriend), ending: s.ending, endingsSeen: { ...s.endingsSeen },
     enemies: w ? w.enemies.map((e) => ({ kind: e.kind, level: e.level, x: Math.round(e.x), y: Math.round(e.y), edge: !!e.edge, hidden: e.hidden })) : [],
-    input: input.device, padId: input.padId || null, tick: G.tick,
+    input: input.device, padId: input.padId || null, tick: G.tick, lastBattle: G.lastBattle || null,
   };
 }
 window.__game = {

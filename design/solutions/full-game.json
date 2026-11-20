@@ -2,7 +2,7 @@
  "area": "all",
  "name": "Whole game from the title, real input only, following the goal line: New Game to the ending and credits",
  "completes": "garFriend",
- "policy": "party",
+ "policy": "fight",
  "timeLimit": 2400,
  "newGame": true,
  "steps": [
@@ -617,7 +617,8 @@
    "go": [
     330,
     470
-   ]
+   ],
+   "policy": "party"
   },
   {
    "path": [
@@ -629,7 +630,8 @@
      610,
      610
     ]
-   ]
+   ],
+   "policy": "party"
   },
   {
    "path": [
@@ -641,7 +643,8 @@
      900,
      645
     ]
-   ]
+   ],
+   "policy": "party"
   },
   {
    "say": true
@@ -656,7 +659,8 @@
      1170,
      500
     ]
-   ]
+   ],
+   "policy": "party"
   },
   {
    "path": [
@@ -668,7 +672,8 @@
      1235,
      280
     ]
-   ]
+   ],
+   "policy": "party"
   },
   {
    "say": true
@@ -684,7 +689,8 @@
      120
     ]
    ],
-   "note": "straw bundle"
+   "note": "straw bundle",
+   "policy": "party"
   },
   {
    "say": true
@@ -862,7 +868,8 @@
      -10
     ]
    ],
-   "note": "back up"
+   "note": "back up",
+   "policy": "party"
   },
   {
    "expect": {
@@ -884,7 +891,8 @@
      690
     ]
    ],
-   "note": "west side pool"
+   "note": "west side pool",
+   "policy": "party"
   },
   {
    "path": [
@@ -905,7 +913,8 @@
      650
     ]
    ],
-   "note": "east side pool"
+   "note": "east side pool",
+   "policy": "party"
   },
   {
    "path": [
@@ -922,7 +931,8 @@
      285
     ]
    ],
-   "note": "Kelpie again"
+   "note": "Kelpie again",
+   "policy": "party"
   },
   {
    "talk": true
@@ -948,7 +958,8 @@
      900
     ]
    ],
-   "note": "down to Reedwater (Whorl: grow strong in the pools)"
+   "note": "down to Reedwater (Whorl: grow strong in the pools)",
+   "policy": "party"
   },
   {
    "expect": {
@@ -962,7 +973,8 @@
      -10
     ]
    ],
-   "note": "back up"
+   "note": "back up",
+   "policy": "party"
   },
   {
    "expect": {
@@ -984,7 +996,8 @@
      690
     ]
    ],
-   "note": "west side pool"
+   "note": "west side pool",
+   "policy": "party"
   },
   {
    "path": [
@@ -1005,7 +1018,8 @@
      650
     ]
    ],
-   "note": "east side pool"
+   "note": "east side pool",
+   "policy": "party"
   },
   {
    "path": [
@@ -1022,7 +1036,8 @@
      285
     ]
    ],
-   "note": "Kelpie again"
+   "note": "Kelpie again",
+   "policy": "party"
   },
   {
    "talk": true
@@ -1048,7 +1063,8 @@
      290
     ]
    ],
-   "note": "Whorl again (Level 5: the lantern)"
+   "note": "Whorl again (Level 5: the lantern)",
+   "policy": "party"
   },
   {
    "talk": true
@@ -1087,7 +1103,8 @@
      640
     ]
    ],
-   "note": "to the Shallows again"
+   "note": "to the Shallows again",
+   "policy": "party"
   },
   {
    "expect": {
@@ -1121,7 +1138,8 @@
      815
     ]
    ],
-   "note": "the culvert"
+   "note": "the culvert",
+   "policy": "party"
   },
   {
    "expect": {
@@ -1147,7 +1165,8 @@
      640
     ]
    ],
-   "note": "cog 1"
+   "note": "cog 1",
+   "policy": "party"
   },
   {
    "path": [
@@ -1172,7 +1191,8 @@
      250
     ]
    ],
-   "note": "cog 2"
+   "note": "cog 2",
+   "policy": "party"
   },
   {
    "say": true
@@ -1192,7 +1212,8 @@
      650
     ]
    ],
-   "note": "cog 3"
+   "note": "cog 3",
+   "policy": "party"
   },
   {
    "say": true
@@ -1212,7 +1233,8 @@
      455
     ]
    ],
-   "note": "drain gate"
+   "note": "drain gate",
+   "policy": "party"
   },
   {
    "say": true
@@ -1233,7 +1255,8 @@
      455
     ]
    ],
-   "note": "into the Ditch"
+   "note": "into the Ditch",
+   "policy": "party"
   },
   {
    "expect": {
@@ -1251,7 +1274,8 @@
      112
     ]
    ],
-   "note": "Gate Spring"
+   "note": "Gate Spring",
+   "policy": "party"
   },
   {
    "path": [

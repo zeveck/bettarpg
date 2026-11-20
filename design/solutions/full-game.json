@@ -868,8 +868,7 @@
      -10
     ]
    ],
-   "note": "back up",
-   "policy": "party"
+   "note": "back up"
   },
   {
    "expect": {
@@ -891,8 +890,7 @@
      690
     ]
    ],
-   "note": "west side pool",
-   "policy": "party"
+   "note": "west side pool"
   },
   {
    "path": [
@@ -913,8 +911,7 @@
      650
     ]
    ],
-   "note": "east side pool",
-   "policy": "party"
+   "note": "east side pool"
   },
   {
    "path": [
@@ -931,8 +928,7 @@
      285
     ]
    ],
-   "note": "Kelpie again",
-   "policy": "party"
+   "note": "Kelpie again"
   },
   {
    "talk": true
@@ -958,8 +954,7 @@
      900
     ]
    ],
-   "note": "down to Reedwater (Whorl: grow strong in the pools)",
-   "policy": "party"
+   "note": "down to Reedwater (Whorl: grow strong in the pools)"
   },
   {
    "expect": {
@@ -973,8 +968,7 @@
      -10
     ]
    ],
-   "note": "back up",
-   "policy": "party"
+   "note": "back up"
   },
   {
    "expect": {
@@ -996,8 +990,7 @@
      690
     ]
    ],
-   "note": "west side pool",
-   "policy": "party"
+   "note": "west side pool"
   },
   {
    "path": [
@@ -1018,8 +1011,7 @@
      650
     ]
    ],
-   "note": "east side pool",
-   "policy": "party"
+   "note": "east side pool"
   },
   {
    "path": [
@@ -1036,8 +1028,7 @@
      285
     ]
    ],
-   "note": "Kelpie again",
-   "policy": "party"
+   "note": "Kelpie again"
   },
   {
    "talk": true
@@ -1063,8 +1054,7 @@
      290
     ]
    ],
-   "note": "Whorl again (Level 5: the lantern)",
-   "policy": "party"
+   "note": "Whorl again (Level 5: the lantern)"
   },
   {
    "talk": true
@@ -1103,8 +1093,7 @@
      640
     ]
    ],
-   "note": "to the Shallows again",
-   "policy": "party"
+   "note": "to the Shallows again"
   },
   {
    "expect": {
@@ -1138,8 +1127,7 @@
      815
     ]
    ],
-   "note": "the culvert",
-   "policy": "party"
+   "note": "the culvert"
   },
   {
    "expect": {
@@ -1165,8 +1153,7 @@
      640
     ]
    ],
-   "note": "cog 1",
-   "policy": "party"
+   "note": "cog 1"
   },
   {
    "path": [
@@ -1191,8 +1178,7 @@
      250
     ]
    ],
-   "note": "cog 2",
-   "policy": "party"
+   "note": "cog 2"
   },
   {
    "say": true
@@ -1212,8 +1198,7 @@
      650
     ]
    ],
-   "note": "cog 3",
-   "policy": "party"
+   "note": "cog 3"
   },
   {
    "say": true
@@ -1233,8 +1218,7 @@
      455
     ]
    ],
-   "note": "drain gate",
-   "policy": "party"
+   "note": "drain gate"
   },
   {
    "say": true
@@ -1255,8 +1239,7 @@
      455
     ]
    ],
-   "note": "into the Ditch",
-   "policy": "party"
+   "note": "into the Ditch"
   },
   {
    "expect": {
@@ -1274,8 +1257,7 @@
      112
     ]
    ],
-   "note": "Gate Spring",
-   "policy": "party"
+   "note": "Gate Spring"
   },
   {
    "path": [

@@ -89,6 +89,67 @@ Controls never cover the betta: the camera keeps the player in the centre-upper 
 phones. Landscape only; in portrait, a friendly "Turn your phone sideways" card with the
 betta swimming in place.
 
+### Controller (PS5 DualSense, Xbox, Switch Pro and others)
+
+Plug in, press any button, and play the whole game with it, title to credits. Prompts show
+the controller last used (✕ ○ □ △ drawn as shapes for PlayStation; A B X Y for Xbox and
+others), and switch back to keys the moment a key is pressed. Works best in Chrome or Edge.
+
+| Action | Gamepad (by position; PlayStation / Xbox) |
+|---|---|
+| Swim | Left stick (analog, dead zone 0.25) or d-pad |
+| Talk / interact / confirm | Bottom: ✕ / A |
+| Back / cancel | Right: ○ / B |
+| Open Items (pause menu, Items page) | Left: □ / X |
+| Go home to the village (asks to confirm) | Top: △ / Y |
+| Pause menu | Options / Menu (button 9) |
+| Battle menu | Stick or d-pad moves along the row, ✕ chooses, ○ goes back a row; L1/R1 jump to the row's first/last button |
+| Every menu (title, create, shop, inn, pause, settings, Controls, credits) | Stick or d-pad moves focus (repeat after 350 ms, every 120 ms), ✕ chooses, ○ back; focused button has a bright gold outline |
+| Name entry | ✕ on "Random name" picks one; typing still needs a keyboard or the phone's own keyboard |
+
+- Title screen: "Press any key or button" until a controller has been seen.
+- Unplugged mid-game: pause with "Controller disconnected" until it's back or a key is pressed.
+- Rumble (Settings → Vibration, on by default): 120 ms on taking a hit, a longer soft one on
+  the Gar's roar and on level-up. Never constant.
+
+### Changeable controls (Controls screen, from Settings)
+
+Players can rebind each action's keys (up to two) and its controller button, using the
+bundled `controls.js`. **The defaults are exactly the tables above.**
+
+| Action | Default keys | Default button | Changeable |
+|---|---|---|---|
+| Swim up | ↑, W | d-pad up (stick always works) | yes |
+| Swim down | ↓, S | d-pad down | yes |
+| Swim left | ←, A | d-pad left | yes |
+| Swim right | →, D | d-pad right | yes |
+| Talk / interact | Space, E | ✕ (0) | yes |
+| Items | I | □ (2) | yes |
+| Go home | H, Home | △ (3) | yes |
+| Mute | M | — | yes |
+| Pause | Escape, P | Options (9) | **fixed** |
+
+- Menus aren't actions: they always use Enter/Space/✕ to confirm and Escape/Backspace/○ to
+  go back, plus 1–5 in battle rows, so a player can never lock themselves out.
+- Everything that names a control (hints, How to play, the battle prompts, the Talk hint)
+  asks one label function, so it shows the player's current keys or buttons.
+- The Controls screen lists "Ctrl+Shift+F: report a bug" (fixed, not an action) and has
+  "Reset to defaults" (asks first). Touch controls aren't remapped.
+- New key: **I** opens Items from anywhere outside battle (the same page as pause → Items).
+
+### Report a bug (`--feedback on`)
+
+- **"Report a bug"** in the pause menu and in Settings, drawn like the other buttons, usable
+  by mouse, touch, keys and controller. It opens the bundled gh-feedback form (dark theme,
+  sun-gold accent `#F7C948`, the game's pixel font) with a picture of the moment; the player
+  finishes the report on GitHub (needs a GitHub account; the form says so).
+- **Ctrl+Shift+F** opens it from anywhere, even if the game is stuck. The game doesn't use
+  Ctrl or Shift, so the letter stays F.
+- It appears only once the game is published to a public repo (the repo name is filled in
+  then). Reports become issues there; `/gamegen --fix #N` fixes them.
+- The report's state: area, position, level, HP/MP, Betta Bites, flags, friends count,
+  current goal, in battle or not (and against whom), last input (keyboard/touch/gamepad).
+
 ### Swimming feel
 
 - Top speed 90 logical px/s; reaches it in 0.15 s, glides to a stop in 0.25 s; diagonals
@@ -468,7 +529,7 @@ the canvas.
 - **Battle:** described above; floating damage numbers.
 - **Pause:** current goal at the top; Resume, **Items** (the 4 kinds with counts; tap to
   use, HP and MP bars update in place), Friends (party-hat portraits by kind, x/3 each, and
-  the Gar), How to play, Settings (music volume, sound volume, mute), Wear party hat (after
+  the Gar), How to play, Settings (music volume, sound volume, mute, Vibration, Controls, Report a bug), Wear party hat (after
   your first friend), Save & quit to title.
 - **Defeat:** short fade, "Rescued by the villagers", wake at the last rest point.
 - **Ending + credits:** two endings as above; credits include "Idea and original game by
@@ -908,6 +969,15 @@ Shallows/title/Gar's-pool backdrops, the Crayfish. To fix in the build (from the
   the Old Stump fight, and trying to attack/flee there; Party! at the Gar with 4 friends; a
   half-MP party with no items; Home/H from the Ditch, then back; the Murk entered at L5; a
   defeat with 0 Betta Bites.
+
+## Budget $50 (from `--continue`, 2026-11-20)
+
+The person raised the budget to $50, so the build makes everything marked *(budget 30)*: the
+Gar lunge (A1) and betta swim (A2) animations (each kept only if it matches the kept art;
+code sway is the fallback), a separate title track and ending track, a paddy ambience
+loop, and a dedicated Highwater townsfolk sheet. It also redoes the three weak mockups (a
+bigger Gargantuan Gar, a darker Murk backdrop, a better Dragonfly Nymph), and has room for
+retakes. Nothing on the cut list is cut unless something can't be made to work.
 
 ## Cut list (drop first → last)
 

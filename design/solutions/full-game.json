@@ -1,62 +1,1318 @@
 {
-  "area": "all", "name": "Whole game from the title, real input only: New Game to the friendship ending and credits",
-  "completes": "garFriend",
-  "policy": "party",
-  "timeLimit": 1700,
-  "newGame": true,
-  "steps": [
-    { "title": true },
-    { "say": true },
-    { "path": [[400, 300], [512, 320], [512, 560], [512, 640]], "note": "village to the Shallows" },
-    { "expect": { "area": "shallows" } },
-    { "go": [768, 146], "tol": 4, "note": "tutorial guppy" },
-    { "path": [[700, 250], [640, 470], [900, 470], [1060, 720], [1240, 760], [1335, 758]], "note": "Old Stump" },
-    { "say": true },
-    { "expect": { "stumpDone": true } },
-    { "path": [[1240, 760], [1060, 720], [900, 470], [768, 330], [768, 120], [768, 10]], "note": "back to the village" },
-    { "expect": { "area": "village" } },
-    { "path": [[512, 330], [900, 320], [1030, 320]], "note": "east reed gate" },
-    { "expect": { "area": "reedwater" } },
-    { "go": [330, 470] },
-    { "path": [[480, 560], [610, 610]] },
-    { "path": [[760, 660], [900, 645]] },
-    { "say": true },
-    { "path": [[1060, 610], [1170, 500]] },
-    { "path": [[1250, 400], [1235, 280]] },
-    { "say": true },
-    { "path": [[1200, 180], [1180, 120]], "note": "straw bundle" },
-    { "say": true },
-    { "expect": { "trailFound": true } },
-    { "path": [[1180, 60], [1180, -10]], "note": "up the spillway" },
-    { "expect": { "area": "highwater" } },
-    { "path": [[768, 600], [768, 380], [1000, 330], [1110, 290]], "note": "Whorl" },
-    { "talk": true },
-    { "say": true },
-    { "expect": { "lantern": true } },
-    { "path": [[700, 330], [400, 300], [335, 285]], "note": "Kelpie's inn" },
-    { "talk": true },
-    { "choose": 0 },
-    { "say": true },
-    { "key": "KeyH" },
-    { "key": "ArrowRight" },
-    { "key": "Enter", "after": 1500 },
-    { "expect": { "area": "village" } },
-    { "path": [[512, 400], [512, 640]], "note": "to the Shallows again" },
-    { "path": [[700, 250], [560, 470], [420, 560], [230, 700], [110, 800], [45, 815]], "note": "the culvert" },
-    { "expect": { "area": "murk" } },
-    { "path": [[1300, 250], [1380, 420], [1330, 560], [1260, 640]], "note": "cog 1" },
-    { "path": [[1100, 640], [880, 500], [760, 450], [640, 330], [520, 250]], "note": "cog 2" },
-    { "say": true },
-    { "path": [[560, 420], [470, 560], [330, 650]], "note": "cog 3" },
-    { "say": true },
-    { "path": [[250, 560], [180, 460], [132, 455]], "note": "drain gate" },
-    { "say": true },
-    { "expect": { "gateOpen": true } },
-    { "path": [[60, 455], [5, 455]], "note": "into the Ditch" },
-    { "expect": { "area": "ditch" } },
-    { "path": [[560, 110], [630, 112]], "note": "Gate Spring" },
-    { "path": [[560, 300], [560, 430], [612, 430]], "note": "the Gar", "policy": "gar-party" },
-    { "say": true },
-    { "expect": { "gameWon": true } }
-  ]
+ "area": "all",
+ "name": "Whole game from the title, real input only: New Game to the friendship ending and credits",
+ "completes": "garFriend",
+ "policy": "party",
+ "timeLimit": 2700,
+ "newGame": true,
+ "steps": [
+  {
+   "title": true
+  },
+  {
+   "say": true
+  },
+  {
+   "path": [
+    [
+     400,
+     300
+    ],
+    [
+     512,
+     320
+    ],
+    [
+     512,
+     560
+    ],
+    [
+     512,
+     640
+    ]
+   ],
+   "note": "village to the Shallows"
+  },
+  {
+   "expect": {
+    "area": "shallows"
+   }
+  },
+  {
+   "go": [
+    768,
+    146
+   ],
+   "tol": 4,
+   "note": "tutorial guppy"
+  },
+  {
+   "path": [
+    [
+     700,
+     160
+    ],
+    [
+     560,
+     180
+    ]
+   ],
+   "note": "guppy"
+  },
+  {
+   "path": [
+    [
+     700,
+     250
+    ],
+    [
+     768,
+     330
+    ],
+    [
+     768,
+     120
+    ],
+    [
+     768,
+     -10
+    ]
+   ],
+   "note": "back to the village"
+  },
+  {
+   "expect": {
+    "area": "village"
+   }
+  },
+  {
+   "path": [
+    [
+     700,
+     300
+    ],
+    [
+     775,
+     216
+    ]
+   ],
+   "note": "Seaweed's inn"
+  },
+  {
+   "talk": true
+  },
+  {
+   "choose": 0
+  },
+  {
+   "say": true
+  },
+  {
+   "path": [
+    [
+     700,
+     300
+    ],
+    [
+     512,
+     320
+    ],
+    [
+     512,
+     560
+    ],
+    [
+     512,
+     640
+    ]
+   ],
+   "note": "to the Shallows"
+  },
+  {
+   "expect": {
+    "area": "shallows"
+   }
+  },
+  {
+   "path": [
+    [
+     690,
+     420
+    ]
+   ],
+   "note": "guppy"
+  },
+  {
+   "path": [
+    [
+     900,
+     360
+    ]
+   ],
+   "note": "guppy"
+  },
+  {
+   "path": [
+    [
+     900,
+     470
+    ],
+    [
+     1060,
+     720
+    ],
+    [
+     1240,
+     760
+    ],
+    [
+     1335,
+     758
+    ]
+   ],
+   "note": "Old Stump"
+  },
+  {
+   "say": true
+  },
+  {
+   "expect": {
+    "stumpDone": true
+   }
+  },
+  {
+   "path": [
+    [
+     1240,
+     760
+    ],
+    [
+     1060,
+     720
+    ],
+    [
+     900,
+     470
+    ],
+    [
+     768,
+     330
+    ],
+    [
+     768,
+     120
+    ],
+    [
+     768,
+     -10
+    ]
+   ],
+   "note": "back to the village"
+  },
+  {
+   "expect": {
+    "area": "village"
+   }
+  },
+  {
+   "path": [
+    [
+     700,
+     300
+    ],
+    [
+     775,
+     216
+    ]
+   ],
+   "note": "Seaweed's inn"
+  },
+  {
+   "talk": true
+  },
+  {
+   "choose": 0
+  },
+  {
+   "say": true
+  },
+  {
+   "path": [
+    [
+     700,
+     300
+    ],
+    [
+     512,
+     320
+    ],
+    [
+     512,
+     560
+    ],
+    [
+     512,
+     640
+    ]
+   ],
+   "note": "to the Shallows"
+  },
+  {
+   "expect": {
+    "area": "shallows"
+   }
+  },
+  {
+   "path": [
+    [
+     700,
+     160
+    ],
+    [
+     560,
+     180
+    ]
+   ],
+   "note": "guppy"
+  },
+  {
+   "path": [
+    [
+     420,
+     220
+    ],
+    [
+     300,
+     330
+    ],
+    [
+     330,
+     420
+    ]
+   ],
+   "note": "guppy"
+  },
+  {
+   "path": [
+    [
+     690,
+     420
+    ]
+   ],
+   "note": "guppy"
+  },
+  {
+   "path": [
+    [
+     560,
+     470
+    ],
+    [
+     768,
+     330
+    ],
+    [
+     768,
+     120
+    ],
+    [
+     768,
+     -10
+    ]
+   ],
+   "note": "back to the village"
+  },
+  {
+   "expect": {
+    "area": "village"
+   }
+  },
+  {
+   "path": [
+    [
+     700,
+     300
+    ],
+    [
+     775,
+     216
+    ]
+   ],
+   "note": "Seaweed's inn"
+  },
+  {
+   "talk": true
+  },
+  {
+   "choose": 0
+  },
+  {
+   "say": true
+  },
+  {
+   "path": [
+    [
+     700,
+     300
+    ],
+    [
+     512,
+     320
+    ],
+    [
+     512,
+     560
+    ],
+    [
+     512,
+     640
+    ]
+   ],
+   "note": "to the Shallows"
+  },
+  {
+   "expect": {
+    "area": "shallows"
+   }
+  },
+  {
+   "path": [
+    [
+     900,
+     360
+    ]
+   ],
+   "note": "guppy"
+  },
+  {
+   "path": [
+    [
+     900,
+     220
+    ],
+    [
+     980,
+     160
+    ]
+   ],
+   "note": "guppy"
+  },
+  {
+   "path": [
+    [
+     1100,
+     150
+    ],
+    [
+     1260,
+     300
+    ],
+    [
+     1260,
+     380
+    ]
+   ],
+   "note": "guppy"
+  },
+  {
+   "path": [
+    [
+     1180,
+     520
+    ]
+   ],
+   "note": "angelfish"
+  },
+  {
+   "path": [
+    [
+     1000,
+     560
+    ],
+    [
+     950,
+     810
+    ]
+   ],
+   "note": "angelfish"
+  },
+  {
+   "path": [
+    [
+     800,
+     740
+    ],
+    [
+     640,
+     740
+    ]
+   ],
+   "note": "angelfish"
+  },
+  {
+   "path": [
+    [
+     640,
+     620
+    ],
+    [
+     560,
+     470
+    ],
+    [
+     768,
+     330
+    ],
+    [
+     768,
+     120
+    ],
+    [
+     768,
+     -10
+    ]
+   ],
+   "note": "back to the village"
+  },
+  {
+   "expect": {
+    "area": "village"
+   }
+  },
+  {
+   "path": [
+    [
+     700,
+     300
+    ],
+    [
+     775,
+     216
+    ]
+   ],
+   "note": "Seaweed's inn"
+  },
+  {
+   "talk": true
+  },
+  {
+   "choose": 0
+  },
+  {
+   "say": true
+  },
+  {
+   "path": [
+    [
+     700,
+     300
+    ],
+    [
+     512,
+     320
+    ],
+    [
+     512,
+     560
+    ],
+    [
+     512,
+     640
+    ]
+   ],
+   "note": "to the Shallows"
+  },
+  {
+   "expect": {
+    "area": "shallows"
+   }
+  },
+  {
+   "path": [
+    [
+     700,
+     160
+    ],
+    [
+     560,
+     180
+    ]
+   ],
+   "note": "guppy"
+  },
+  {
+   "path": [
+    [
+     420,
+     220
+    ],
+    [
+     300,
+     330
+    ],
+    [
+     330,
+     420
+    ]
+   ],
+   "note": "guppy"
+  },
+  {
+   "path": [
+    [
+     690,
+     420
+    ]
+   ],
+   "note": "guppy"
+  },
+  {
+   "path": [
+    [
+     900,
+     360
+    ]
+   ],
+   "note": "guppy"
+  },
+  {
+   "path": [
+    [
+     900,
+     220
+    ],
+    [
+     980,
+     160
+    ]
+   ],
+   "note": "guppy"
+  },
+  {
+   "path": [
+    [
+     1100,
+     150
+    ],
+    [
+     1260,
+     300
+    ],
+    [
+     1260,
+     380
+    ]
+   ],
+   "note": "guppy"
+  },
+  {
+   "path": [
+    [
+     900,
+     360
+    ],
+    [
+     768,
+     330
+    ],
+    [
+     768,
+     120
+    ],
+    [
+     768,
+     -10
+    ]
+   ],
+   "note": "back to the village"
+  },
+  {
+   "expect": {
+    "area": "village"
+   }
+  },
+  {
+   "path": [
+    [
+     700,
+     300
+    ],
+    [
+     775,
+     216
+    ]
+   ],
+   "note": "Seaweed's inn"
+  },
+  {
+   "talk": true
+  },
+  {
+   "choose": 0
+  },
+  {
+   "say": true
+  },
+  {
+   "path": [
+    [
+     900,
+     320
+    ],
+    [
+     1030,
+     320
+    ]
+   ],
+   "note": "east reed gate"
+  },
+  {
+   "expect": {
+    "area": "reedwater"
+   }
+  },
+  {
+   "go": [
+    330,
+    470
+   ]
+  },
+  {
+   "path": [
+    [
+     480,
+     560
+    ],
+    [
+     610,
+     610
+    ]
+   ]
+  },
+  {
+   "path": [
+    [
+     760,
+     660
+    ],
+    [
+     900,
+     645
+    ]
+   ]
+  },
+  {
+   "say": true
+  },
+  {
+   "path": [
+    [
+     1060,
+     610
+    ],
+    [
+     1170,
+     500
+    ]
+   ]
+  },
+  {
+   "path": [
+    [
+     1250,
+     400
+    ],
+    [
+     1235,
+     280
+    ]
+   ]
+  },
+  {
+   "say": true
+  },
+  {
+   "path": [
+    [
+     1200,
+     180
+    ],
+    [
+     1180,
+     120
+    ]
+   ],
+   "note": "straw bundle"
+  },
+  {
+   "say": true
+  },
+  {
+   "expect": {
+    "trailFound": true
+   }
+  },
+  {
+   "path": [
+    [
+     1180,
+     60
+    ],
+    [
+     1180,
+     -10
+    ]
+   ],
+   "note": "up the spillway"
+  },
+  {
+   "expect": {
+    "area": "highwater"
+   }
+  },
+  {
+   "path": [
+    [
+     768,
+     600
+    ],
+    [
+     768,
+     380
+    ],
+    [
+     1000,
+     330
+    ],
+    [
+     1110,
+     290
+    ]
+   ],
+   "note": "Whorl"
+  },
+  {
+   "talk": true
+  },
+  {
+   "say": true
+  },
+  {
+   "expect": {
+    "lantern": true
+   }
+  },
+  {
+   "path": [
+    [
+     700,
+     330
+    ],
+    [
+     400,
+     300
+    ],
+    [
+     335,
+     285
+    ]
+   ],
+   "note": "Kelpie's inn"
+  },
+  {
+   "talk": true
+  },
+  {
+   "choose": 0
+  },
+  {
+   "say": true
+  },
+  {
+   "path": [
+    [
+     768,
+     420
+    ],
+    [
+     768,
+     690
+    ],
+    [
+     620,
+     690
+    ],
+    [
+     420,
+     690
+    ]
+   ],
+   "note": "west side pool"
+  },
+  {
+   "path": [
+    [
+     620,
+     690
+    ],
+    [
+     768,
+     650
+    ],
+    [
+     900,
+     650
+    ],
+    [
+     1120,
+     650
+    ]
+   ],
+   "note": "east side pool"
+  },
+  {
+   "path": [
+    [
+     768,
+     650
+    ],
+    [
+     768,
+     380
+    ],
+    [
+     335,
+     285
+    ]
+   ],
+   "note": "Kelpie again"
+  },
+  {
+   "talk": true
+  },
+  {
+   "choose": 0
+  },
+  {
+   "say": true
+  },
+  {
+   "path": [
+    [
+     700,
+     330
+    ],
+    [
+     768,
+     420
+    ],
+    [
+     768,
+     900
+    ]
+   ],
+   "note": "down to Reedwater"
+  },
+  {
+   "expect": {
+    "area": "reedwater"
+   }
+  },
+  {
+   "path": [
+    [
+     1180,
+     -10
+    ]
+   ],
+   "note": "back up"
+  },
+  {
+   "expect": {
+    "area": "highwater"
+   }
+  },
+  {
+   "path": [
+    [
+     768,
+     690
+    ],
+    [
+     620,
+     690
+    ],
+    [
+     420,
+     690
+    ]
+   ],
+   "note": "west side pool"
+  },
+  {
+   "path": [
+    [
+     620,
+     690
+    ],
+    [
+     768,
+     650
+    ],
+    [
+     900,
+     650
+    ],
+    [
+     1120,
+     650
+    ]
+   ],
+   "note": "east side pool"
+  },
+  {
+   "path": [
+    [
+     768,
+     650
+    ],
+    [
+     768,
+     380
+    ],
+    [
+     335,
+     285
+    ]
+   ],
+   "note": "Kelpie again"
+  },
+  {
+   "talk": true
+  },
+  {
+   "choose": 0
+  },
+  {
+   "say": true
+  },
+  {
+   "path": [
+    [
+     700,
+     330
+    ],
+    [
+     768,
+     420
+    ],
+    [
+     768,
+     900
+    ]
+   ],
+   "note": "down to Reedwater"
+  },
+  {
+   "expect": {
+    "area": "reedwater"
+   }
+  },
+  {
+   "path": [
+    [
+     1180,
+     -10
+    ]
+   ],
+   "note": "back up"
+  },
+  {
+   "expect": {
+    "area": "highwater"
+   }
+  },
+  {
+   "path": [
+    [
+     768,
+     690
+    ],
+    [
+     620,
+     690
+    ],
+    [
+     420,
+     690
+    ]
+   ],
+   "note": "west side pool"
+  },
+  {
+   "path": [
+    [
+     620,
+     690
+    ],
+    [
+     768,
+     650
+    ],
+    [
+     900,
+     650
+    ],
+    [
+     1120,
+     650
+    ]
+   ],
+   "note": "east side pool"
+  },
+  {
+   "path": [
+    [
+     768,
+     650
+    ],
+    [
+     768,
+     380
+    ],
+    [
+     335,
+     285
+    ]
+   ],
+   "note": "Kelpie again"
+  },
+  {
+   "talk": true
+  },
+  {
+   "choose": 0
+  },
+  {
+   "say": true
+  },
+  {
+   "key": "KeyH"
+  },
+  {
+   "key": "ArrowRight"
+  },
+  {
+   "key": "Enter",
+   "after": 1500
+  },
+  {
+   "expect": {
+    "area": "village"
+   }
+  },
+  {
+   "path": [
+    [
+     512,
+     400
+    ],
+    [
+     512,
+     640
+    ]
+   ],
+   "note": "to the Shallows again"
+  },
+  {
+   "expect": {
+    "area": "shallows"
+   }
+  },
+  {
+   "path": [
+    [
+     700,
+     250
+    ],
+    [
+     560,
+     470
+    ],
+    [
+     420,
+     560
+    ],
+    [
+     230,
+     700
+    ],
+    [
+     110,
+     800
+    ],
+    [
+     45,
+     815
+    ]
+   ],
+   "note": "the culvert"
+  },
+  {
+   "expect": {
+    "area": "murk"
+   }
+  },
+  {
+   "path": [
+    [
+     1300,
+     250
+    ],
+    [
+     1380,
+     420
+    ],
+    [
+     1330,
+     560
+    ],
+    [
+     1260,
+     640
+    ]
+   ],
+   "note": "cog 1"
+  },
+  {
+   "path": [
+    [
+     1100,
+     640
+    ],
+    [
+     880,
+     500
+    ],
+    [
+     760,
+     450
+    ],
+    [
+     640,
+     330
+    ],
+    [
+     520,
+     250
+    ]
+   ],
+   "note": "cog 2"
+  },
+  {
+   "say": true
+  },
+  {
+   "path": [
+    [
+     560,
+     420
+    ],
+    [
+     470,
+     560
+    ],
+    [
+     330,
+     650
+    ]
+   ],
+   "note": "cog 3"
+  },
+  {
+   "say": true
+  },
+  {
+   "path": [
+    [
+     250,
+     560
+    ],
+    [
+     180,
+     460
+    ],
+    [
+     132,
+     455
+    ]
+   ],
+   "note": "drain gate"
+  },
+  {
+   "say": true
+  },
+  {
+   "expect": {
+    "gateOpen": true
+   }
+  },
+  {
+   "path": [
+    [
+     60,
+     455
+    ],
+    [
+     5,
+     455
+    ]
+   ],
+   "note": "into the Ditch"
+  },
+  {
+   "expect": {
+    "area": "ditch"
+   }
+  },
+  {
+   "path": [
+    [
+     560,
+     110
+    ],
+    [
+     630,
+     112
+    ]
+   ],
+   "note": "Gate Spring"
+  },
+  {
+   "path": [
+    [
+     560,
+     300
+    ],
+    [
+     560,
+     430
+    ],
+    [
+     612,
+     430
+    ]
+   ],
+   "note": "the Gar",
+   "policy": "gar-party"
+  },
+  {
+   "say": true
+  },
+  {
+   "expect": {
+    "gameWon": true
+   }
+  }
+ ]
 }

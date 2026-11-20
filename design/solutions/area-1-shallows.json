@@ -331,22 +331,24 @@
   {
    "key": "KeyH",
    "note": "home (H)",
-   "skipIfFriends": 3
+   "skipIfFriends": 3,
+   "onlyInArea": "shallows"
   },
   {
    "key": "ArrowRight",
-   "skipIfFriends": 3
+   "skipIfFriends": 3,
+   "onlyInArea": "shallows"
   },
   {
    "key": "Enter",
    "after": 1500,
-   "skipIfFriends": 3
+   "skipIfFriends": 3,
+   "onlyInArea": "shallows"
   },
   {
    "expect": {
     "area": "village"
-   },
-   "skipIfFriends": 3
+   }
   },
   {
    "path": [
@@ -505,22 +507,24 @@
   {
    "key": "KeyH",
    "note": "home (H)",
-   "skipIfFriends": 3
+   "skipIfFriends": 3,
+   "onlyInArea": "shallows"
   },
   {
    "key": "ArrowRight",
-   "skipIfFriends": 3
+   "skipIfFriends": 3,
+   "onlyInArea": "shallows"
   },
   {
    "key": "Enter",
    "after": 1500,
-   "skipIfFriends": 3
+   "skipIfFriends": 3,
+   "onlyInArea": "shallows"
   },
   {
    "expect": {
     "area": "village"
-   },
-   "skipIfFriends": 3
+   }
   },
   {
    "path": [

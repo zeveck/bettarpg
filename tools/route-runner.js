@@ -113,7 +113,8 @@ async (page) => {
   try {
     for (const step of route.steps) {
       if (!step.battle) justFought = false;
-      if (step.skipIfFriends && (await st()).friendsTotal >= step.skipIfFriends) continue;
+      if (step.onlyInArea) { if ((await st()).area !== step.onlyInArea) continue; }
+      else if (step.skipIfFriends && (await st()).friendsTotal >= step.skipIfFriends) continue;
       if (step.title) {
         // from the title, as a player: New Game (confirm if a save exists), Swim to Village
         await page.evaluate(() => localStorage.removeItem('bettarpg-save'));

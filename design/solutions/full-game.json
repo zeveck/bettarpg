@@ -839,6 +839,206 @@
    "say": true
   },
   {
+   "path": [
+    [
+     700,
+     330
+    ],
+    [
+     768,
+     420
+    ],
+    [
+     768,
+     900
+    ]
+   ],
+   "note": "down to Reedwater (Whorl: grow strong in the pools)"
+  },
+  {
+   "expect": {
+    "area": "reedwater"
+   }
+  },
+  {
+   "path": [
+    [
+     1180,
+     -10
+    ]
+   ],
+   "note": "back up"
+  },
+  {
+   "expect": {
+    "area": "highwater"
+   }
+  },
+  {
+   "path": [
+    [
+     768,
+     690
+    ],
+    [
+     620,
+     690
+    ],
+    [
+     420,
+     690
+    ]
+   ],
+   "note": "west side pool"
+  },
+  {
+   "path": [
+    [
+     620,
+     690
+    ],
+    [
+     768,
+     650
+    ],
+    [
+     900,
+     650
+    ],
+    [
+     1120,
+     650
+    ]
+   ],
+   "note": "east side pool"
+  },
+  {
+   "path": [
+    [
+     768,
+     650
+    ],
+    [
+     768,
+     380
+    ],
+    [
+     335,
+     285
+    ]
+   ],
+   "note": "Kelpie again"
+  },
+  {
+   "talk": true
+  },
+  {
+   "choose": 0
+  },
+  {
+   "say": true
+  },
+  {
+   "path": [
+    [
+     700,
+     330
+    ],
+    [
+     768,
+     420
+    ],
+    [
+     768,
+     900
+    ]
+   ],
+   "note": "down to Reedwater (Whorl: grow strong in the pools)"
+  },
+  {
+   "expect": {
+    "area": "reedwater"
+   }
+  },
+  {
+   "path": [
+    [
+     1180,
+     -10
+    ]
+   ],
+   "note": "back up"
+  },
+  {
+   "expect": {
+    "area": "highwater"
+   }
+  },
+  {
+   "path": [
+    [
+     768,
+     690
+    ],
+    [
+     620,
+     690
+    ],
+    [
+     420,
+     690
+    ]
+   ],
+   "note": "west side pool"
+  },
+  {
+   "path": [
+    [
+     620,
+     690
+    ],
+    [
+     768,
+     650
+    ],
+    [
+     900,
+     650
+    ],
+    [
+     1120,
+     650
+    ]
+   ],
+   "note": "east side pool"
+  },
+  {
+   "path": [
+    [
+     768,
+     650
+    ],
+    [
+     768,
+     380
+    ],
+    [
+     335,
+     285
+    ]
+   ],
+   "note": "Kelpie again"
+  },
+  {
+   "talk": true
+  },
+  {
+   "choose": 0
+  },
+  {
+   "say": true
+  },
+  {
    "key": "KeyH"
   },
   {

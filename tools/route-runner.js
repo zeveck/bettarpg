@@ -85,7 +85,13 @@ async (page) => {
     for (;;) {
       if (Date.now() - T0 > LIMIT) await fail(`time limit going to ${x},${y}`);
       let s = await st();
-      if (s.inBattle) { await hold([]); await log(`battle ${s.inBattle.kind} L${s.inBattle.level} at ${s.player.x},${s.player.y}`); justFought = true; s = await battle(s.inBattle.scripted === 'stump' ? 'stump' : policy); await log(`after battle hp ${s.hp}/${maxHp(s.level)} L${s.level}`); best = 1e9; bestAt = Date.now(); continue; }
+      if (s.inBattle) {
+        await hold([]); await log(`battle ${s.inBattle.kind} L${s.inBattle.level} at ${s.player.x},${s.player.y}`); justFought = true;
+        s = await battle(s.inBattle.scripted === 'stump' ? 'stump' : policy);
+        await log(`after battle hp ${s.hp}/${maxHp(s.level)} L${s.level} friends ${s.friendsTotal}`);
+        if (s.area !== area0) await fail(`lost a battle (woke in ${s.area})`);
+        best = 1e9; bestAt = Date.now(); continue;
+      }
       if (s.dialog || s.busy || s.menus.length) { await hold([]); if (s.menus.some((m) => !['dialog', 'banner', 'credits'].includes(m))) { await fail('unexpected menu ' + s.menus.join(',')); } s = await clearDialogs(); best = 1e9; bestAt = Date.now(); continue; }
       if (s.mode !== 'world' || s.transition) { await hold([]); await sleep(150); best = 1e9; bestAt = Date.now(); continue; }
       if (s.area !== area0) { await hold([]); return s; } // swam through an exit

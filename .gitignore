@@ -6,3 +6,4 @@ assets/anim8gen/
 .*-history.jsonl
 node_modules/
 .DS_Store
+__pycache__/

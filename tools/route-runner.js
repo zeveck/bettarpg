@@ -67,7 +67,7 @@ async (page) => {
         const lit = btns.length && !btns[0].dim;
         if (b.scripted === 'stump') { if (lit) { await pick('Digit3'); continue; } await pick('Digit1'); continue; }
         // wear the fish down with bites (keeping MP for the party), then Party!
-        if (lit && mp >= 5 && ehpFrac <= 0.6) { await pick('Digit3'); continue; }
+        if (lit && mp >= 5 && (ehpFrac <= 0.6 || b.level < L)) { await pick('Digit3'); continue; }
         if (!lit && mp >= 3) { await pick('Digit2', 'Digit1'); continue; }
         await pick('Digit1');
         continue;

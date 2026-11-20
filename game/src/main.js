@@ -506,7 +506,7 @@ function openCreate() {
   markSwatch();
   $('nameIn').value = '';
   show('create');
-  nav.push({ id: 'create', el: screenEl('create'), back: () => { hide('create'); nav.remove('create'); openTitle(); }, initial: '#randName',
+  nav.push({ id: 'create', el: screenEl('create'), back: () => { hide('create'); nav.remove('create'); openTitle(); }, initial: '#createGo',
     keys: (ev) => {
       if (ev.fromField) { $('nameIn').blur(); nav.setFocus($('createGo')); return true; }
       return false;
@@ -526,10 +526,11 @@ async function startNewGame() {
   let name = cleanName($('nameIn').value);
   if (!name) name = NAMES[Math.floor(Math.random() * NAMES.length)];
   G.s = state.newSave(name, createColor);
-  hide('create'); nav.remove('create');
+  nav.remove('create');
   G.worldRng = makeRng(1001);
   G.battleRng = makeRng(2002);
   await fade(true);
+  hide('create');
   await G.enterArea('village', 'start', { wipe: false, quiet: true });
   await fade(false);
   banner(AREA_NAMES.village, img('bettahome'));

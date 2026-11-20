@@ -1,0 +1,16 @@
+{
+  "area": 1, "name": "The Shallows: tutorial guppy, then the Old Stump (befriend the angelfish)",
+  "completes": "stumpDone",
+  "policy": "fight",
+  "timeLimit": 200,
+  "steps": [
+    { "start": 1 },
+    { "seed": 101 },
+    { "go": [768, 146], "tol": 4, "note": "at the tutorial guppy" },
+    { "battle": "fight" },
+    { "path": [[700, 250], [640, 470], [900, 470], [1060, 720], [1240, 760], [1335, 758]], "policy": "fight" },
+    { "battle": "stump" },
+    { "say": true },
+    { "expect": { "stumpDone": true, "bubbleJoined": true, "hbtLearned": true } }
+  ]
+}

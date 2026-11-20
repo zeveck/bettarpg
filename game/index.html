@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Betta Fish RPG: a pixel-art adventure in the rice paddies</title>
+<meta name="description" content="Swim out of Paddy Village, battle or befriend the fish of the terraced rice paddies, and find out why fish are vanishing. A cozy pixel-art RPG for desktop and phones.">
+<meta name="theme-color" content="#123a66">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Betta Fish RPG">
+<meta property="og:description" content="Small fish, big paddies. Find the missing fish, with your fins or your friendship.">
+<meta property="og:image" content="social-card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A red betta fish swimming in front of an underwater rice-paddy village">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preload" href="fonts/PixelifySans.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="stylesheet" href="style.css">
+<script src="vendor/report.js"></script>
+<script src="vendor/controls.js"></script>
+</head>
+<body>
+<div id="game">
+  <canvas id="cv" aria-label="Betta Fish RPG"></canvas>
+
+  <!-- exploring HUD -->
+  <div id="hud" class="layer" hidden>
+    <div class="panel hudbox">
+      <canvas class="portrait" id="hudPortrait" width="48" height="48"></canvas>
+      <div class="hudtext">
+        <div class="hudrow"><span id="hudName"></span><span class="lv" id="hudLv"></span></div>
+        <div class="bar hp"><i id="hudHp"></i><b id="hudHpT"></b></div>
+        <div class="bar mp"><i id="hudMp"></i><b id="hudMpT"></b></div>
+      </div>
+    </div>
+    <div class="panel bbbox"><img class="ico" src="assets/native/icons/betta_bite.png" alt=""><span id="hudBB">0 BB</span></div>
+  </div>
+  <div id="topbtns" class="layer" hidden>
+    <button class="btn sq" id="bHome" aria-label="Go home to the village"><svg viewBox="0 0 9 9" class="ic"><path d="M4 0h1v1h1v1h1v1h1v1h1v1H8v4H5V6H4v3H1V5H0V4h1V3h1V2h1V1h1z"/></svg></button>
+    <button class="btn sq" id="bPause" aria-label="Pause"><svg viewBox="0 0 9 9" class="ic"><path d="M1 1h3v7H1zM5 1h3v7H5z"/></svg></button>
+    <button class="btn sq" id="bMute" aria-label="Mute"></button>
+  </div>
+  <div id="banner" class="layer" hidden><div class="panel bannerbox"><canvas id="bannerPic" width="88" height="52" hidden></canvas><span id="bannerText"></span></div></div>
+  <div id="toasts" class="layer"></div>
+  <div id="hint" class="layer" hidden><div class="panel hintbox" id="hintText"></div></div>
+  <div id="prompt" class="layer" hidden></div>
+  <div id="touch" class="layer" hidden>
+    <div id="stickzone"></div>
+    <div id="stick" hidden><div id="knob"></div></div>
+    <button id="talkbtn" class="btn round" hidden>Talk</button>
+  </div>
+
+  <!-- battle -->
+  <div id="battleui" class="layer" hidden>
+    <div class="panel hudbox" id="bHud">
+      <canvas class="portrait" id="bPortrait" width="48" height="48"></canvas>
+      <div class="hudtext">
+        <div class="hudrow"><span id="bName"></span><span class="lv" id="bLv"></span></div>
+        <div class="bar hp"><i id="bHp"></i><b id="bHpT"></b></div>
+        <div class="bar mp"><i id="bMp"></i><b id="bMpT"></b></div>
+      </div>
+    </div>
+    <div class="panel enemybox" id="eHud">
+      <div class="hudrow"><span id="eName"></span><span class="lv" id="eLv"></span></div>
+      <div class="bar ehp"><i id="eHp"></i></div>
+      <div id="garBox" hidden>
+        <div class="friendsrow"><img class="ico hat" src="assets/native/original/artifacts/partyhat.png" alt=""><span id="garFriends"></span></div>
+        <div class="meter" id="garMeter" hidden></div>
+      </div>
+    </div>
+    <div class="bottom">
+      <button class="btn round dive" id="bDive" hidden>Dive</button>
+      <div class="panel log" id="bLog" role="log" aria-live="polite"></div>
+      <div class="row" id="bRow"></div>
+    </div>
+  </div>
+
+  <!-- dialogue -->
+  <div id="dialog" class="layer" hidden>
+    <div class="panel dlgbox">
+      <canvas class="portrait big" id="dPortrait" width="48" height="48"></canvas>
+      <div class="dlgtext">
+        <div class="dname" id="dName"></div>
+        <div class="dline" id="dText"></div>
+        <div class="choices" id="dChoices"></div>
+      </div>
+      <div class="dnext" id="dNext"></div>
+    </div>
+  </div>
+
+  <!-- screens -->
+  <section data-screen="title" class="screen title" hidden>
+    <div class="titlewrap">
+      <h1 class="logo">Betta Fish RPG</h1>
+      <p class="sub">Small fish, big paddies.</p>
+      <div class="menu col" id="titleMenu"></div>
+      <p class="press" id="titlePress"></p>
+    </div>
+    <button class="btn sq corner" id="tMute" aria-label="Mute"></button>
+  </section>
+
+  <section data-screen="create" class="screen dim" hidden>
+    <div class="panel card create">
+      <h2>Create your betta</h2>
+      <label class="lbl" for="nameIn">Name your betta</label>
+      <div class="namerow">
+        <input id="nameIn" maxlength="12" autocomplete="off" spellcheck="false" placeholder="Enter name">
+        <button class="btn" id="randName">Random name</button>
+      </div>
+      <div class="lbl">Choose your color</div>
+      <div class="swatches" id="swatches"></div>
+      <div class="previewrow"><canvas id="createPreview" width="120" height="84"></canvas></div>
+      <div class="menu rowc">
+        <button class="btn" id="createBack">Back</button>
+        <button class="btn primary" id="createGo">Swim to Village</button>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen="pause" class="screen dim" hidden>
+    <div class="panel card pause">
+      <div class="goal" id="pauseGoal"></div>
+      <div id="padLost" class="warn" hidden>Controller disconnected</div>
+      <div class="pausebody">
+        <div class="menu col" id="pauseMenu"></div>
+        <div class="page" id="pausePage"></div>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen="shop" class="screen dim" hidden>
+    <div class="panel card shop">
+      <h2 id="shopTitle">Fish Mart</h2>
+      <div class="list" id="shopList"></div>
+      <div class="shopfoot"><span id="shopBB"></span><span id="shopMsg"></span></div>
+      <div class="menu rowc"><button class="btn" id="shopDone">Goodbye</button></div>
+    </div>
+  </section>
+
+  <section data-screen="settings" class="screen dim" hidden>
+    <div class="panel card settings">
+      <h2>Settings</h2>
+      <div class="list" id="setList"></div>
+      <div class="menu rowc"><button class="btn" id="setDone">Back</button></div>
+    </div>
+  </section>
+
+  <section data-screen="controls" class="screen dim" hidden>
+    <div class="panel card controls">
+      <h2>Controls</h2>
+      <p class="note" id="ctlNote"></p>
+      <div class="ctlgrid" id="ctlList"></div>
+      <p class="note" id="ctlMsg" aria-live="polite"></p>
+      <div class="menu rowc"><button class="btn" id="ctlReset">Reset to defaults</button><button class="btn" id="ctlDone">Back</button></div>
+    </div>
+  </section>
+
+  <section data-screen="howto" class="screen dim" hidden>
+    <div class="panel card howto">
+      <h2 id="howTitle"></h2>
+      <div id="howBody"></div>
+      <div class="menu rowc"><button class="btn" id="howPrev">Back</button><span id="howPage"></span><button class="btn" id="howNext">Next</button></div>
+    </div>
+  </section>
+
+  <section data-screen="confirm" class="screen dim" hidden>
+    <div class="panel card confirm">
+      <p id="confirmText"></p>
+      <div class="menu rowc"><button class="btn" id="confirmNo">No</button><button class="btn primary" id="confirmYes">Yes</button></div>
+    </div>
+  </section>
+
+  <section data-screen="banner" class="screen bigbanner" hidden>
+    <div class="panel card bigcard"><h2 id="bigTitle"></h2><p id="bigText"></p><div class="menu rowc"><button class="btn primary" id="bigOk">Hooray!</button></div></div>
+  </section>
+
+  <section data-screen="credits" class="screen dim" hidden>
+    <div class="panel card credits">
+      <h2>Betta Fish RPG</h2>
+      <div id="creditsBody"></div>
+      <div class="menu rowc"><button class="btn primary" id="creditsOk">Keep playing</button></div>
+    </div>
+  </section>
+
+  <div id="fade" class="layer" hidden><span id="fadeText"></span></div>
+  <div id="rotate" hidden><canvas id="rotateFish" width="96" height="64"></canvas><p>Turn your phone sideways</p></div>
+  <div id="loading"><div class="loadbar"><i id="loadFill"></i></div></div>
+</div>
+<gh-feedback id="report" trigger="none" repo="" template="bug.yml" heading="Report a bug" types="bug,feature" theme="dark" color="#F7C948"></gh-feedback>
+<script type="module" src="vendor/gh-feedback.js"></script>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

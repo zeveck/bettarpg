@@ -32,7 +32,7 @@ export function goalLine(s) {
   if (f.stumpDone) {
     if (s.scales.length >= 5) return 'Take the scales to the straw bundle at the Spillway\'s foot.';
     if (s.scales.length || s.area === 'reedwater') return `Follow the strange scales uphill through Reedwater. (Scales ${s.scales.length}/5)`;
-    return `Captain Reef will open the reed gate east. Follow where that scale leads. (Scales ${s.scales.length}/5)`;
+    return `The reed gate east is open. Follow where that scale leads. (Scales ${s.scales.length}/5)`;
   }
   if (f.metFinn) return 'Swim to the Old Stump at the far end of the Shallows. Mossy was last seen there.';
   return 'Talk to Elder Finn.';
@@ -115,7 +115,7 @@ export const LINES = {
   reefGateClosed: {
     alone: ['Not alone, little one. Come back with a friend.'],
     stump: ['That angelfish at the Old Stump won\'t let anyone pass in peace. Settle it first.'],
-    friends: (n) => `Reedwater fish are Level 3 to 5, and they chase. Show me you can win fish over first: three friends, then I'll open the gate. (Friends ${n}/3)`,
+    friends: (n) => `Reedwater fish are Level 3 to 5, and they chase. Show me you can win fish over first: three friends, then I'll open the gate. (Friends ${n}/3) Tip: bite them down first, then throw the party.`,
     open: ['Three friends! You\'re ready. The reed gate is open: go east, and follow that scale.', 'Tip: catfish slip aside from a plain bite. Spells never miss. Rest at the inn before you go.'],
   },
   bubbleHome: [

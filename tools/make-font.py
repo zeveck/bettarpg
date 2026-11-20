@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Makes the game's two static fonts from Pixelify Sans (OFL, no Reserved Font
-Name), with one change: the capital B gets square left corners, because the
-original's cut-off corners make "Betta" read as "Getta" at small sizes.
+Name), with a few changes for readability at small sizes: the capital B gets
+square left corners ("Betta" read as "Getta"), and the digits 0, 2 and 5 are
+redrawn on the font's own pixel grid (and Z given a flat top) so they can't
+be read as O, Z and S.
 Needs fontTools (pip install fonttools). Writes game/fonts/BettaPixel-400.ttf
 and BettaPixel-600.ttf; the original and its OFL.txt stay alongside."""
 import os
@@ -41,6 +43,37 @@ def square_b(font):
         pen.closePath()
     glyf['B'] = pen.glyph()
 
+DIGITS = {
+    'zero': ['.###.', '#...#', '#..##', '#.#.#', '##..#', '#...#', '.###.'],
+    'two':  ['.###.', '#...#', '....#', '...#.', '..#..', '.#...', '#####'],
+    'five': ['#####', '#....', '####.', '....#', '....#', '#...#', '.###.'],
+    'Z':    ['#####', '....#', '...#.', '..#..', '.#...', '#....', '#####'],
+}
+
+def redraw_digits(font):
+    """Draw 0, 2 and 5 as pixel bitmaps on the font's grid (5 x 7 cells)."""
+    glyf = font['glyf']
+    ref = glyf['zero']; ref.recalcBounds(glyf)
+    x0, y0, x1, y1 = ref.xMin, ref.yMin, ref.xMax, ref.yMax
+    cw, ch = (x1 - x0) / 5, (y1 - y0) / 7
+    # stroke = the B's left stem (outer to inner contour), a little more than a cell
+    b = glyf['B']; coords = list(b.getCoordinates(glyf)[0]); ends = list(b.endPtsOfContours)
+    stem = min(x for x, _ in coords[ends[0] + 1:]) - min(x for x, _ in coords[:ends[0] + 1])
+    extra = max(0, stem - cw)
+    for name, rows in DIGITS.items():
+        pen = TTGlyphPen(glyf)
+        for r, row in enumerate(rows):
+            c = 0
+            while c < 5:
+                if row[c] != '#': c += 1; continue
+                e = c
+                while e < 5 and row[e] == '#': e += 1
+                left = round(x0 + c * cw); right = round(min(x1, x0 + e * cw + extra))
+                top = round(y1 - r * ch); bottom = round(max(y0, y1 - (r + 1) * ch - extra))
+                pen.moveTo((left, bottom)); pen.lineTo((left, top)); pen.lineTo((right, top)); pen.lineTo((right, bottom)); pen.closePath()
+                c = e
+        glyf[name] = pen.glyph()
+
 def rename(font, suffix):
     for rec in font['name'].names:
         if rec.nameID in (1, 3, 4, 6, 16):
@@ -51,6 +84,7 @@ for wght in (400, 600):
     f = TTFont(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fonts', 'PixelifySans.ttf'))
     st = instancer.instantiateVariableFont(f, {'wght': wght})
     square_b(st)
+    redraw_digits(st)
     rename(st, str(wght))
     out = os.path.join(fonts, f'BettaPixel-{wght}.ttf')
     st.save(out)

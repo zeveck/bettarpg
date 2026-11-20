@@ -281,6 +281,9 @@ That's why a party of friends can reach it, and why the fins ending is a little 
   Highwater's L5–6; the deep half is L7–8.
 - After a battle or fleeing, 2 seconds of safety (nearby fish swim away).
 - **Level-up** restores HP and MP to full.
+- **Starting kit:** one Bubble Water, so the first Party! attempts don't strand you without MP.
+  Bubble and Reef both give the tip "bite a fish down first, then throw the party".
+- **Fled fish** keep away from you until you've swum off, so they can't restart the fight where you wait.
 - **Catch-up EXP:** below the level an area expects (Shallows 3, Reedwater 5, Highwater 6, the Murk 7, the Ditch 8), fights there give ×1.5 EXP ("Catch-up bonus!"), so a player who follows the goal line and takes the fights in their way reaches the expected levels. The Spillway has a Cichlid in its main channel, and Reef's three-friends errand puts a few Shallows fights on the main path.
 - **The lesson** (first Attack dodged, the Bubble Blast hint) fires on your first fight, whichever fish it is, so swimming past the tutorial guppy doesn't skip it.
 - **Defeated fish** flip belly-up, fade and sink on the map instead of vanishing.
@@ -290,8 +293,9 @@ That's why a party of friends can reach it, and why the fins ending is a little 
   Gate Spring) with full HP and MP, having lost 25% of the Betta Bites you carry. No game
   over.
 - **The Gate Spring:** a bubbling spring just inside the Sunken Ditch, past the drain gate.
-  Once `gateOpen` is set, touching it is a free full rest and makes it your wake-up point, so
-  a lost Gar fight never means swimming back through the Murk.
+  Once `gateOpen` is set, it becomes your wake-up point the moment you enter the Ditch (a toast
+  and a Bubble line say so), and touching it is a free full rest, so a lost Gar fight never
+  means swimming back through the Murk.
 - Fleeing: 75% normally; **10% from Level 5+ enemies** (kept). This includes the Gar.
 - Expected levels: Shallows done at L2–3, Reedwater L4–5, Spillway/Highwater L5–6, Murk
   L6–8, Gar at L8–10. Inn rest 5 BB, so grinding is never a punishment.
@@ -753,7 +757,7 @@ extraction first. Target sizes are art pixels (width unless marked "tall").
 | UI3 | App icon and favicons | code from K1 | 512 + sizes | maskable margin | — | must |
 | UI4 | Social card, GitHub preview | code (title screen) | 1200×630, 1280×640 | no | — | must |
 | UI5 | Panels, buttons, bars, party meter | code | — | — | — | must |
-| F1 | Pixel font with arrows (e.g. Pixelify Sans, OFL), bundled with its licence; draw ← ↑ → ↓ as icons if missing; built as two static weights with a squarer capital B (tools/make-font.py), since Pixelify's B read as G | download (OFL) | — | — | — | must |
+| F1 | Pixel font with arrows (e.g. Pixelify Sans, OFL), bundled with its licence; draw ← ↑ → ↓ as icons if missing; built as two static weights with a squarer capital B and redrawn 0 (slashed), 2, 5 and a flat-topped Z (tools/make-font.py), since Pixelify's B read as G, 5 as S, 0 as O and 2 as Z | download (OFL) | — | — | — | must |
 | M1–M6 | Music (above) | audiogen music | 5 × 75 s + 1 × 150 s mp3 | — | loop | must (M3: should) |
 | S1–S26 | Sound effects (above) | audiogen sfx | 0.3–5 s mp3 (S26 loop) | — | — | must |
 | A1 | Gar lunge (4 frames) | anim8gen | E3 size | yes | yes | *(budget 30)* |

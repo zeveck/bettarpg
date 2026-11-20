@@ -269,6 +269,8 @@ G.afterBattle = async (scene, result) => {
 };
 
 G.leaveBattle = async (scene) => {
+  if (scene.left) return; // never twice for one battle
+  scene.left = true;
   const result = scene.battle.over;
   await G.transition(async () => {
     scene.end();
@@ -278,7 +280,7 @@ G.leaveBattle = async (scene) => {
     G.world.safeT = WORLD.safeAfterBattle;
     audio.playMusic(G.world.def.music);
     audio.playAmbience(G.world.def.ambience);
-    if (result === 'fled' && scene.entity) { scene.entity.state = 'return'; scene.entity.cool = 4; }
+    if (result === 'fled' && scene.entity) { scene.entity.state = 'return'; scene.entity.cool = 4; scene.entity.avoid = true; }
   });
   G.save();
   if (result === 'friend' && scene.enemy.kind !== 'gar' && scene.battle.scripted !== 'stump' && !G.s.hints.friendMade) {
@@ -315,7 +317,8 @@ G.playEnding = async (kind) => {
   await fade(false);
   await G.wait(800);
   for (const [who, line] of G.story.endingLines(kind)) await G.say(who, line);
-  await G.wait(300);
+  // hold the picture a moment with nothing over it, then the credits as a low band
+  await G.wait(3500);
   await openCredits(kind);
   G.ending = null;
   G.endingParty = kind === 'friend';
@@ -426,7 +429,9 @@ function drawTitle(dt) {
   if (bg) ctx.drawImage(bg, bx, by, 864, 400);
   // the village picture in an oval, x2, in the calm patch mid-right
   const home = img('bettahome');
-  const ox = Math.round(v.W * 0.70), oy = Math.round(v.H * 0.48);
+  // on short phone screens the menu column is wide: picture and betta move right
+  const shortScr = document.body.classList.contains('short');
+  const ox = Math.round(v.W * (shortScr ? 0.79 : 0.70)), oy = Math.round(v.H * 0.48);
   if (home) {
     if (!G.titleOval) {
       const c = document.createElement('canvas'); c.width = 96; c.height = 60;
@@ -456,7 +461,7 @@ function drawTitle(dt) {
   const s = G.titleSave || null;
   const stage = s ? PLAYER.armorStage(s.level) : 0, color = s ? s.color : 'red';
   const t = titleFish.t;
-  const fx = Math.round(v.W * 0.42 + Math.sin(t * 0.35) * v.W * 0.08), fy = Math.round(v.H * 0.62 + Math.sin(t * 0.9) * 8);
+  const fx = Math.round(v.W * (shortScr ? 0.6 : 0.42) + Math.sin(t * 0.35) * v.W * (shortScr ? 0.05 : 0.08)), fy = Math.round(v.H * 0.62 + Math.sin(t * 0.9) * 8);
   const face = Math.cos(t * 0.35) >= 0 ? 1 : -1;
   let fv = betta(stage, color, s?.wearHat);
   if (stage === 0 && !s?.wearHat) fv = bettaSwim([0, 1, 0, 3][Math.floor(t * 7) % 4], color) || fv;
@@ -889,15 +894,15 @@ function openHowTo() {
 function openCredits(kind) {
   return new Promise((resolve) => {
     const s = G.s;
+    const c = (role, name) => `<div><p class="role">${role}</p><p>${name}</p></div>`;
     $('creditsBody').innerHTML = [
-      `<p>${kind === 'friend' ? 'The friendship ending: the old Gar has a village now.' : 'The fins ending: the paddies are safe.'}</p>`,
-      `<p>${escapeHtml(s.name)} · Level ${s.level} · Friends ${state.friendsTotal(s)}${s.flags.garFriend ? ' + the Gar' : ''}</p>`,
-      '<p class="role">Idea and original game by</p><p>Rich Conlan</p>',
-      '<p class="role">Original sprites</p><p>from the original Betta Fish RPG</p>',
-      '<p class="role">Remake</p><p>made with gamegen (Claude)</p>',
-      '<p class="role">New art, music and sounds</p><p>generated (GPT Image, Gemini, ElevenLabs) and finished in code</p>',
-      '<p class="role">Font</p><p>Pixelify Sans (SIL Open Font License)</p>',
-      `<p>Thanks for playing!${kind === 'fins' ? ' Maybe the old Gar would like a party...' : ''}</p>`,
+      `<div style="grid-column: 1 / -1"><p>${kind === 'friend' ? 'The friendship ending: the old Gar has a village now.' : 'The fins ending: the paddies are safe.'} ${escapeHtml(s.name)} · Level ${s.level} · Friends ${state.friendsTotal(s)}${s.flags.garFriend ? ' + the Gar' : ''}</p></div>`,
+      c('Idea and original game by', 'Rich Conlan'),
+      c('Original sprites', 'from the original Betta Fish RPG'),
+      c('Remake', 'made with gamegen (Claude)'),
+      c('New art, music and sounds', 'generated, finished in code'),
+      c('Font', 'Pixelify Sans (SIL Open Font License)'),
+      `<div><p class="role">Thanks for playing!</p><p>${kind === 'fins' ? 'Maybe the old Gar would like a party...' : 'Party on, little fish.'}</p></div>`,
     ].join('');
     show('credits');
     const done = () => { hide('credits'); nav.remove('credits'); resolve(); };
@@ -928,9 +933,11 @@ function onInput(ev) {
   if (!$('rotate').hidden) return;
   if (G.padLost && ev.device === 'keyboard') { G.padLost = false; $('padLost').hidden = true; }
   updateTitlePress();
-  if (ev.action === 'mute' && !(nav.top()?.id === 'create' && input.textFocused())) { toggleMute(); return; }
+  if (ev.action === 'mute' && !nav.top()) { toggleMute(); return; }
   if (G.wipe) return;
   if (nav.top()) {
+    // a menu gets its keys first; Mute only if the menu didn't use the key
+    if (ev.action === 'mute' && !ev.menu && !ev.digit) { toggleMute(); return; }
     if (nav.top().id === 'title' && !ev.menu && !ev.digit) return;
     if (nav.handle(ev)) return;
     if (nav.top()?.id !== 'battle') return;

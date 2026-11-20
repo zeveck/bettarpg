@@ -11,7 +11,7 @@ export function newSave(name = 'Betta', color = 'red') {
   return {
     v: VERSION, name, color,
     level: 1, exp: 0, hp: PLAYER.maxHp(1), mp: PLAYER.maxMp(1), bb: 0,
-    items: { kelp: 0, seedcake: 0, bwater: 0, fizzy: 0 },
+    items: { kelp: 0, seedcake: 0, bwater: 1, fizzy: 0 },
     subOwned: false,
     flags: {},
     friends: {},          // kind -> count (gar counted separately as flags.garFriend)
@@ -48,9 +48,11 @@ export function sanitize(raw) {
   s.hp = int(raw.hp, 0, maxHp(s), maxHp(s)) || maxHp(s);
   s.mp = int(raw.mp, 0, maxMp(s), maxMp(s));
   s.bb = int(raw.bb, 0, 99999, 0);
-  for (const k of Object.keys(s.items)) s.items[k] = int(obj(raw.items)[k], 0, ITEM_MAX, 0);
+  for (const k of Object.keys(s.items)) s.items[k] = int(obj(raw.items)[k], 0, ITEM_MAX, s.items[k]);
   s.subOwned = raw.subOwned === true;
   s.flags = bools(raw.flags);
+  // saves from before Reef's errand: past the gate means it was open
+  if (s.flags.stumpDone && !s.flags.eastOpen && ((Array.isArray(raw.scales) && raw.scales.length) || s.flags.trailFound || !['village', 'shallows'].includes(raw.area))) s.flags.eastOpen = true;
   for (const k of KINDS) { const n = int(obj(raw.friends)[k], 0, 999, 0); if (n) s.friends[k] = n; }
   s.firstFriendKinds = bools(raw.firstFriendKinds);
   s.scales = Array.isArray(raw.scales) ? [...new Set(raw.scales.filter((x) => SCALE_IDS.includes(x)))] : [];

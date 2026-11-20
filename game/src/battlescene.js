@@ -85,7 +85,7 @@ export class BattleScene {
   // ---------- input ----------
   onKey(ev) {
     if (this.over && this.continueBtn) {
-      if (ev.menu === 'confirm' || ev.action === 'talk') { press(this.continueBtn); return true; }
+      if (ev.menu === 'confirm' || ev.action === 'talk') { if (!ev.repeat) press(this.continueBtn); return true; }
       return true;
     }
     if (ev.digit) {
@@ -142,10 +142,9 @@ export class BattleScene {
     const row = $('bRow');
     row.innerHTML = '';
     defs.forEach((d, i) => {
-      // the 1-5 key hints only for keyboard players
-      const digit = input.device === 'keyboard' ? String(i + 1) : '';
-      const small = [d.small || '', digit].filter(Boolean).join(' · ');
-      const inner = `${d.icon ? `<img class="ico" src="${img(d.icon)?.toDataURL?.() || ''}" alt="">` : ''}<span>${escapeHtml(d.label)}</span><small>${escapeHtml(small)}</small>`;
+      // the 1-5 key hints only for keyboard players, as a little key cap apart from the count
+      const digit = input.device === 'keyboard' ? `<span class="k">${i + 1}</span>` : '';
+      const inner = `${d.icon ? `<img class="ico" src="${img(d.icon)?.toDataURL?.() || ''}" alt="">` : ''}<span>${escapeHtml(d.label)}</span><small>${escapeHtml(d.small || '')}${digit}</small>`;
       const b = button(inner, () => this.choose(d.key), 'btn' + (d.can.ok ? '' : ' dim') + (this.lit === d.key ? ' lit' : ''));
       b.dataset.key = d.key;
       b.setAttribute('aria-disabled', d.can.ok ? 'false' : 'true');
@@ -428,9 +427,11 @@ export class BattleScene {
       const r = b.rewards;
       if (result === 'win') audio.play('fanfare', { vol: 0.8 });
       const out = await G.afterBattle(this, result);
-      this.log(`Victory! +${r.exp} EXP and +${r.bites} Betta Bites.`);
-      for (const line of out.lines) { this.log(line); await this.wait(250); }
+      if (result === 'win') this.faint = 0; // the beaten fish flips, fades and sinks
+      // notes first (catch-up, gifts, levels), the result line last so it stays on screen
+      for (const line of out.lines) { this.log(line); await this.wait(350); }
       if (out.levels.length) await this.levelUpAnim(out.levels);
+      this.log(`${result === 'friend' ? 'New friend!' : 'Victory!'} +${r.exp} EXP and +${r.bites} Betta Bites.`, 'result');
       this.updateHud(true);
     } else if (result === 'lose') {
       await this.wait(500);
@@ -444,7 +445,10 @@ export class BattleScene {
     // Continue
     const row = $('bRow');
     row.innerHTML = '';
-    this.continueBtn = button('<span>Continue</span>', () => { this.continueBtn = null; G.leaveBattle(this); }, 'btn primary');
+    this.continueBtn = button('<span>Continue</span>', () => {
+      if (this.leaving) return; // a double tap leaves once
+      this.leaving = true; this.continueBtn = null; G.leaveBattle(this);
+    }, 'btn primary');
     this.continueBtn.style.gridColumn = '2 / 5';
     row.append(this.continueBtn);
     nav.setFocus(this.continueBtn, false);
@@ -517,6 +521,7 @@ export class BattleScene {
       if (k >= 1) tw.r(); else this.tweens.push(tw);
     }
     this.fx.update(dt);
+    if (this.faint != null) this.faint += dt;
     this.shake = Math.max(0, this.shake - dt * 10);
     this.dim = Math.max(0, this.dim - dt * 0.9);
     for (const k of ['player', 'enemy', 'bubble']) if (this.flash[k] > 0) this.flash[k] -= dt * 60 / 1;
@@ -584,6 +589,14 @@ export class BattleScene {
       let ev = this.enemySpriteV(this.befriended);
       ev = R(ev);
       const exx = L.ex - Math.round(this.lunge.enemy * 60);
+      if (this.faint != null) {
+        // beaten: belly-up, fading and sinking
+        const k = Math.min(1, this.faint / 1.4);
+        const y = L.ey + Math.round(k * 24);
+        ctx.save(); ctx.translate(0, y * 2); ctx.scale(1, -1);
+        drawFish(ctx, ev, exx, y, { s: 2, flip: true, alpha: Math.max(0, 1 - k) });
+        ctx.restore();
+      } else {
       const opts = { s: 2, flip: true, sway: Math.sin(t * 6) * 1, bob: Math.round(Math.sin(t * 1.8)) * 2 };
       if (this.charging) { ctx.globalAlpha = 0.5 + 0.5 * Math.sin(t * 10); drawFish(ctx, glow(ev, '#F7C948'), exx, L.ey, opts); ctx.globalAlpha = 1; }
       if (this.enemy.edge) { ctx.globalAlpha = 0.5 + 0.5 * Math.sin(t * 3); drawFish(ctx, glow(ev, '#B57BFF'), exx, L.ey, opts); ctx.globalAlpha = 1; }
@@ -596,6 +609,7 @@ export class BattleScene {
         ctx.translate(bxp * 2 + hv.bw * 2, 0); ctx.scale(-1, 1);
         ctx.drawImage(hd.c, bxp - hv.ox * 2, byp - hv.oy * 2 + Math.round(hd.y), hd.c.width * 2, hd.c.height * 2);
         ctx.restore();
+      }
       }
     }
     // a sad balloon that pops

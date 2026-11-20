@@ -341,6 +341,12 @@ export function createStory(G) {
     }
     if (w.areaId === 'murk' && !f.shadowSeen && p.x < w.def.deepBelowX) shadowScene(w);
     if (w.areaId === 'ditch' && f.gateOpen && springCool <= 0 && Math.hypot(p.x - 640, p.y - 110) < 30) { springCool = 4; springRest(); }
+    if (w.areaId === 'ditch' && f.gateOpen && s.rest !== 'spring' && !f.springKnown) {
+      // the Gate Spring is your wake-up point from the moment you arrive
+      f.springKnown = true; s.rest = 'spring'; G.save();
+      G.toast('The Gate Spring bubbles nearby: you\'ll wake here if you fall.', 3000);
+      G.cutscene(() => G.say('bubble', 'Look, a spring! If the old Gar gets the better of us, we\'ll wake up right here. Swim into it for a rest!'));
+    }
     if (w.areaId === 'ditch' && !f.garDefeated && !f.garFriend) {
       const gar = w.extra.find((q) => q.id === 'gar');
       const near = gar && Math.abs(p.x - gar.x) < 112 && Math.abs(p.y - gar.y) < 34;
@@ -386,6 +392,7 @@ export function createStory(G) {
       G.save();
       await G.say('bubble', 'You did it! A friend in a party hat!');
       await G.say('bubble', 'Captain Reef guards the reed gate east. Let\'s make a couple more friends out here, then show him!');
+      await G.say('bubble', 'Tip: bite a fish down first, then throw the party. It works much better!');
     }
     if (e.kind === 'gar' && G.pendingEnding) {
       const ending = G.pendingEnding;

@@ -257,7 +257,7 @@ function sayNow(speaker, text, choices = null) {
     }, 32);
     nav.push({ id: 'dialog', el: box, modal: true, noAutoFocus: true,
       keys: (ev) => {
-        if (ev.menu === 'confirm' || (ev.action === 'talk' && !ev.menu)) {
+        if (ev.menu === 'confirm' || ev.action === 'talk') {
           if (state.done && choices) return false;
           state.advance(); return true;
         }

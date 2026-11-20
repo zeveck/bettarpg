@@ -51,7 +51,7 @@ export function createStory(G) {
     if (w.areaId === 'ditch') {
       const resolved = f.garDefeated || f.garFriend;
       if (!resolved) {
-        const cap = [['mossy', 175, 452], ['cap1', 150, 440], ['cap2', 200, 438], ['cap3', 185, 428]];
+        const cap = [['cap3', 184, 430], ['cap1', 168, 440], ['cap2', 196, 444], ['mossy', 180, 454]];
         for (const [id, x, y] of cap) w.extra.push({ id, sprite: id, x, y, face: 1, t: Math.random() * 6, sortOff: 0, talk: true, talkRange: 46 });
       }
       w.props.find((p) => p.id === 'cage').sprite = resolved ? 'p_cageopen' : 'p_cage';
@@ -123,7 +123,7 @@ export function createStory(G) {
       return;
     }
     switch (id) {
-      case 'finn': return sayAll('finn', pick('finn'));
+      case 'finn': if (!f.metFinn) return opening(); return sayAll('finn', pick('finn'));
       case 'coral': {
         const lines = s.met.coral ? pick('coral') : LINES.coral.find(([c]) => c === 'first')[1];
         s.met.coral = true;
@@ -211,8 +211,7 @@ export function createStory(G) {
   // ---------- scenes ----------
   async function opening() {
     const s = S();
-    await G.wait(500);
-    G.player().face = -1;
+    await G.wait(300);
     const L = LINES.finnOpening;
     for (const l of L.slice(0, 4)) await G.say('finn', fill(l));
     s.flags.metFinn = true;

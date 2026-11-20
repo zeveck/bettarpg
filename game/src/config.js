@@ -96,7 +96,7 @@ export const WORLD = {
   reedReveal: 80, lanternRadius: 128,
   safeAfterBattle: 2,
   regenEvery: 2,
-  touchRange: 30, talkRange: 34,
+  touchRange: 30, talkRange: 42,
   redGlowGap: 2,
   maxFriendsShown: 6,
   bundleRange: 64,

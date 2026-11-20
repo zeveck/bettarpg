@@ -803,7 +803,7 @@ function openControls() {
         if (k === 'key' && kind === 'key') {
           if (v === 'Escape') { endCapture('Cancelled.'); return; }
           const other = input.controls.bindKey(action, slot, v);
-          endCapture(other === false ? "That key can't be used." : other ? `${input.controls.label(v)} was ${actName(other)}'s; ${actName(other)} now has ${keyNames(other)}.` : 'Saved.');
+          endCapture(other === false ? "That key can't be used." : other ? `${keyCap(v)} was ${escapeHtml(actName(other))}'s; ${escapeHtml(actName(other))} now has ${keyNames(other)}.` : 'Saved.');
         } else if (k === 'pad' && kind === 'pad') {
           if (v === 1 && performance.now() - downAt > 900) { endCapture('Cancelled.'); return; }
           const other = input.controls.bindPad(action, slot, v);
@@ -814,8 +814,8 @@ function openControls() {
     }, 180);
   };
   const actName = (id) => input.controls.actions().find((a) => a.id === id)?.name || id;
-  const keyNames = (id) => input.controls.keys(id).map((k) => input.controls.label(k)).join(', ');
-  const endCapture = (msg) => { capturing = null; input.capture = null; $('ctlMsg').textContent = msg; audio.blip('select'); build(); };
+  const keyNames = (id) => input.controls.keys(id).map((k) => keyCap(k)).join(' ');
+  const endCapture = (msg) => { capturing = null; input.capture = null; $('ctlMsg').innerHTML = msg; audio.blip('select'); build(); };
   build();
   show('controls');
   const done = () => { if (capturing) { endCapture('Cancelled.'); return; } hide('controls'); nav.remove('controls'); };
@@ -901,10 +901,10 @@ function onInput(ev) {
     return;
   }
   if (G.mode !== 'world' || G.busy()) return;
-  if (ev.action === 'pause' || ev.menu === 'back') { openPause(); return; }
+  if (ev.action === 'pause' || (ev.menu === 'back' && ev.device === 'gamepad')) { openPause(); return; }
   if (ev.action === 'items') { openPause('items'); return; }
   if (ev.action === 'home') { goHome(); return; }
-  if (ev.action === 'talk' || ev.menu === 'confirm') { interact(); return; }
+  if (ev.action === 'talk' || ev.code === 'Enter' || ev.code === 'NumpadEnter') { interact(); return; }
 }
 
 // touch: the floating stick on the left 40%, and taps

@@ -150,3 +150,12 @@ Starting total (mockups): $7.70. This agent's cap: $10.
 - Gar is 141x60 (not 120x48): the drawn grid, +17.5 % of target, kept un-resampled. At x2 in battle it is 282x120 logical.
 - Animation frame canvases are larger than the static sprite: betta 45x39 (static at (0,1)), gar 145x67 (static at (1,7)).
 - anim8gen's align-frames step errors on its own relative-path handling (alignment-metrics.json); its validation, contact sheet and GIFs ran. The game frames come from tools/anim-native.py, not from anim8gen's aligned/ output.
+
+## Extra job: rice props (lead request, cap $2)
+
+| ID | File | Tool | Model / quality | Prompt (short) | Tries | Est. cost | Running (this agent) | Verdict |
+|---|---|---|---|---|---|---|---|---|
+| T4 | .gamegen/candidates/rice-take1.png | imagegen2 | 2.6-flare high 1536x1024 transparent, refs betta + rice_paddy_tuft (from source-art/) | 4 clumps of 5-7 young rice stalks, ~16x24 big px, bright green, lighter tips, darker base, bold outline, in one row | 1 | $0.450 | $6.02 | **accepted** -> props/rice_stalks.png 18x24 (clump a) and props/rice_row.png 64x25 (clumps a, c, d, a-mirrored centred every 16 px; pixels past the edges wrap, so rows tile seamlessly; tools/rice-row.py). Drawn grids 17-20 px. Plain palette snap gave olive/tan straw (no light yellow-green or dark green in the palette), so the fill was remapped by luminance to palette greens: base 2E6F80 (water teal), mid 5B8C3A, tip 3AB435 (tools/tone-remap.py); outline 2A1A12 kept |
+
+**This agent's total: $6.02**; game art total $7.70 + $6.02 = **$13.72**.
+Note: game/assets/original/ is gone (the builder moved the full-size kept art to source-art/); refs were taken from there.

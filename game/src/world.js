@@ -79,8 +79,26 @@ export class World {
       for (let y = 40; y < def.h - 20; y += 26) {
         for (let x = 24 + ((y / 26) % 2) * 9; x < def.w - 20; x += 18) {
           if (depthAt(t, x, y) !== 1 || !near(x, y, 34) || near(x, y, 10)) continue;
-          if (trng.next() < 0.35) continue;
+          if (trng.next() < 0.5) continue;
           this.tufts.push({ x: Math.round(x), y: Math.round(y), ph: trng.next() * 6, rice: true });
+        }
+      }
+      // rows of rice planted along straight paddy edges (bank just above, open water below)
+      this.riceRows = [];
+      if (hasReal('p_riceRow') && def.rice !== false) {
+        const W = 64, ok = (x, y) => depthAt(t, x, y) === 1 && depthAt(t, x, y - 10) === 0 && depthAt(t, x, y + 14) === 1;
+        for (let y = 20; y < def.h - 20; y += 2) {
+          for (let x = 8; x < def.w - W - 8; x += 4) {
+            let good = true;
+            for (let k = 0; k <= W; k += 8) if (!ok(x + k, y)) { good = false; break; }
+            if (!good || this.riceRows.some((r) => Math.abs(r.y - y) < 30 && r.x < x + W + 6 && r.x + W + 6 > x)) continue;
+            this.riceRows.push({ x, y: y + 6, ph: trng.next() * 6 });
+            x += W;
+          }
+        }
+        // bunds: straight rows that tile edge to edge, only over open shallow water
+        for (const [x1, y, x2] of def.riceRows || []) for (let x = x1; x + W <= x2; x += W) {
+          if ([0, 16, 32, 48, 63].every((k) => depthAt(t, x + k, y) === 1)) this.riceRows.push({ x, y, ph: trng.next() * 6 });
         }
       }
     }
@@ -498,8 +516,12 @@ export class World {
         ctx.filter = 'none';
       } });
     }
-    const tuft = img('tuft');
-    if (tuft) for (const q of this.tufts) list.push({ y: q.y, d: () => this.drawSwayRows(ctx, tuft, q.x, q.y, Math.sin(t * 1.6 + q.ph) * 1.5 + (q.rustle ? Math.sin(t * 20) * 1.5 : 0)) });
+    // tufts lightened toward rice green; planted rice uses the rice sprites when they're there
+    const tuft = recolor('tuft', [{ any: true, shift: -10, sat: 1.1, val: 1.3, minS: 0.1 }], 'rice') || img('tuft');
+    const stalk = hasReal('p_rice') ? img('p_rice') : tuft;
+    if (tuft) for (const q of this.tufts) list.push({ y: q.y, d: () => this.drawSwayRows(ctx, q.rice ? stalk : tuft, q.x, q.y, Math.sin(t * 1.6 + q.ph) * 1.5 + (q.rustle ? Math.sin(t * 20) * 1.5 : 0)) });
+    const row = img('p_riceRow');
+    if (row) for (const r of this.riceRows || []) list.push({ y: r.y, d: () => this.drawSwayRows(ctx, row, r.x + 32, r.y, Math.sin(t * 1.3 + r.ph) * 1.2) });
     const reed = img('p_reeds');
     if (reed) for (const q of this.reeds) list.push({ y: q.y + 6, d: () => this.drawSwayRows(ctx, reed, q.x, q.y + 6, Math.sin(t * 1.4 + q.ph) * 1.5 + (q.rustle ? Math.sin(t * 22) * 1.5 : 0)) });
     for (const [lx, ly] of this.def.lanterns || []) list.push({ y: ly, d: () => this.drawLanternPost(ctx, lx, ly, t) });

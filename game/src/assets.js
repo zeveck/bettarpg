@@ -55,6 +55,8 @@ export const MANIFEST = {
   b_pip: [[N + 'buildings/pip_stall.png'], { w: 104, h: 121, c: '#dca' }],
   b_lock: [[N + 'buildings/lock_house.png'], { w: 118, h: 144, c: '#999' }],
   b_draingate: [[N + 'buildings/drain_gate.png'], { w: 113, h: 100, c: '#777' }],
+  p_rice: [[N + 'props/rice_stalks.png'], null],
+  p_riceRow: [[N + 'props/rice_row.png'], null],
   p_reeds: [[N + 'props/reed_clump.png'], { w: 24, h: 25, c: '#5B8C3A' }],
   p_lily: [[N + 'props/lily_pad.png'], { w: 21, h: 16, c: '#4a8a3a' }],
   p_stones: [[N + 'props/stones.png'], { w: 18, h: 14, c: '#888' }],

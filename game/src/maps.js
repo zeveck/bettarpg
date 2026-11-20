@@ -57,6 +57,7 @@ export const MAPS = {
       start: { x: 290, y: 214, face: -1 }, south: { x: 512, y: 580, face: -1 },
       east: { x: 975, y: 330, face: -1 }, inn: { x: 800, y: 240, face: -1 }, home: { x: 512, y: 340, face: 1 },
     },
+    riceRows: [[90, 566, 410], [620, 566, 940]],
     spawns: [], bites: [],
   },
 
@@ -95,6 +96,7 @@ export const MAPS = {
       north: { x: 768, y: 40, face: 1 }, culvert: { x: 120, y: 800, face: 1 }, stump: { x: 1320, y: 760, face: 1 },
     },
     tutorial: { x: 768, y: 150 },
+    riceRows: [[200, 470, 460], [1040, 470, 1300], [560, 860, 900]],
     spawns: [
       { kind: 'guppy', lv: [1, 2], x: 560, y: 180 }, { kind: 'guppy', lv: [1, 2], x: 980, y: 150 },
       { kind: 'guppy', lv: [1, 2], x: 330, y: 420 }, { kind: 'guppy', lv: [1, 2], x: 690, y: 420 },
@@ -119,6 +121,7 @@ export const MAPS = {
       ['e', 1000, 400, 90, 70, 0],
       ['e', 820, 770, 90, 30, 0],
     ],
+    riceRows: [[180, 520, 330], [1000, 860, 1200]],
     reeds: [[420, 290, 140, 90], [760, 520, 150, 100], [1240, 420, 70, 110], [600, 720, 120, 60], [1330, 640, 90, 60]],
     paths: [], buildings: [], npcs: [],
     props: [

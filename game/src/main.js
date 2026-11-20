@@ -1092,6 +1092,8 @@ window.__game = {
   seed: (n) => { G.worldRng = makeRng(n); G.battleRng = makeRng(n * 7 + 3); return n; },
   battle: (kind, level = 1, opts = {}) => { G.startBattle({ kind, level, edge: !!opts.edge, scripted: opts.scripted || null }); return true; },
   input: () => ({ device: input.device, padId: input.padId, lastInput: input.lastInput }),
+  // play-test only: show an ending scene ('fins' or 'friend') without changing flags
+  ending: (kind = 'friend') => { G.playEnding(kind); return true; },
   assets: () => assetReport(),
   save: () => { G.save(); return true; },
 };

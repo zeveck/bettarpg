@@ -1,0 +1,104 @@
+{
+  "_note": "Times in seconds of the decoded file. Each looping file runs `crossfade` s past loopEnd with a fade-out baked in, and bar 1 starts at firstDownbeat. To loop: start the next copy (from loopStart) at loopEnd, on the beat; let the old copy play out its baked tail (or ramp it down over `crossfade` too). Browser mp3 decoders can differ by about 25 ms; the crossfade covers that. ending.mp3 doesn't loop: it plays once (75 s) and resolves.",
+  "tracks": {
+    "village": {
+      "file": "music/village.mp3",
+      "loop": true,
+      "bpm": 96.0,
+      "metre": "4/4",
+      "barSeconds": 2.5,
+      "firstDownbeat": 0.023,
+      "loopStart": 0,
+      "loopEnd": 70.023,
+      "bars": 28,
+      "crossfade": 1.0,
+      "fileSeconds": 71.02
+    },
+    "paddies": {
+      "file": "music/paddies.mp3",
+      "loop": true,
+      "bpm": 112.0,
+      "metre": "4/4",
+      "barSeconds": 2.1429,
+      "firstDownbeat": 0.023,
+      "loopStart": 0,
+      "loopEnd": 145.738,
+      "bars": 68,
+      "crossfade": 1.0,
+      "fileSeconds": 146.73
+    },
+    "highwater": {
+      "file": "music/highwater.mp3",
+      "loop": true,
+      "bpm": 104.02,
+      "metre": "4/4",
+      "barSeconds": 2.3072,
+      "firstDownbeat": 0.023,
+      "loopStart": 0,
+      "loopEnd": 73.855,
+      "bars": 32,
+      "crossfade": 1.0,
+      "fileSeconds": 74.85
+    },
+    "murk": {
+      "file": "music/murk.mp3",
+      "loop": true,
+      "bpm": 72.02,
+      "metre": "4/4",
+      "barSeconds": 3.3324,
+      "firstDownbeat": 0.012,
+      "loopStart": 0,
+      "loopEnd": 66.66,
+      "bars": 20,
+      "crossfade": 1.5,
+      "fileSeconds": 68.15
+    },
+    "battle": {
+      "file": "music/battle.mp3",
+      "loop": true,
+      "bpm": 131.98,
+      "metre": "4/4",
+      "barSeconds": 1.8185,
+      "firstDownbeat": 0.012,
+      "loopStart": 0,
+      "loopEnd": 72.75,
+      "bars": 40,
+      "crossfade": 0.5,
+      "fileSeconds": 73.25
+    },
+    "gar": {
+      "file": "music/gar.mp3",
+      "loop": true,
+      "bpm": 90,
+      "metre": "6/8",
+      "barSeconds": 2.0004,
+      "firstDownbeat": 0.012,
+      "loopStart": 0,
+      "loopEnd": 72.028,
+      "bars": 36,
+      "crossfade": 0.75,
+      "fileSeconds": 72.77,
+      "beatNote": "6/8: two dotted-quarter pulses per 2.0 s bar (eighths at 180/min; quarter = 90)"
+    },
+    "title": {
+      "file": "music/title.mp3",
+      "loop": true,
+      "bpm": 95.96,
+      "metre": "4/4",
+      "barSeconds": 2.501,
+      "firstDownbeat": 0.023,
+      "loopStart": 0,
+      "loopEnd": 70.052,
+      "bars": 28,
+      "crossfade": 1.0,
+      "fileSeconds": 71.04
+    },
+    "ending": {
+      "file": "music/ending.mp3",
+      "loop": false,
+      "bpm": 96,
+      "metre": "4/4",
+      "fileSeconds": 75.05
+    }
+  }
+}

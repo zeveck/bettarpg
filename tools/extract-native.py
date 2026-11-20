@@ -35,6 +35,11 @@ OUTLINE = (0x2A, 0x1A, 0x12)
 DESIGN_COLOURS = ['3290D1', '2B7FC4', '1B4F8A', '0E2A47', '081A2E', '5B8C3A', '6B4E2E', '2A1A12',
                   'E8C552', 'E5401F', 'FF4FA3', 'F7C948', '2E6F80', '9FD8E0']
 
+# Reserved slots (design fix 4): salmon (Coral, clear of the player's orange), olive (Nymph),
+# lilac (Highwater inn awning, Kelpie), neutral near-black (Reef), mint (Seaweed), light grey.
+RESERVED_COLOURS = ['F2827A', '6E7432', 'B89AD8', '2A2A2C', '9ED8B4', 'C8C8C8',
+                    'E1DDD1']  # + the old palette's cream-white, so whites don't fall to the grey
+
 # Measured cell sizes (design table) used only as the search window for detection.
 KEPT_HINT = {
     'player_betta': 18.8, 'player_betta_with_helmet': 21.0, 'player_betta_with_almost_armor': 19.8,
@@ -257,6 +262,7 @@ def trim(im):
 # ---------------------------------------------------------------- palette
 _snap_cache = {}
 _palette = None
+EXCLUDE = set()  # palette colours left out of snapping (--exclude), e.g. neutral greys for backdrops
 
 
 def load_palette():
@@ -264,6 +270,7 @@ def load_palette():
     if _palette is None:
         im = Image.open(PALETTE_PNG).convert('RGB')
         _palette = list(dict.fromkeys(im.get_flattened_data() if hasattr(im, 'get_flattened_data') else im.getdata()))
+        _palette = [c for c in _palette if '%02X%02X%02X' % c not in EXCLUDE]
     return _palette
 
 
@@ -286,7 +293,7 @@ def snap(c):
 
 
 def build_palette(native_dir, out):
-    fixed = [hexrgb(h) for h in DESIGN_COLOURS]
+    fixed = [hexrgb(h) for h in DESIGN_COLOURS + RESERVED_COLOURS]
     seen = {}
     for dp, _, fs in os.walk(native_dir):
         for f in sorted(fs):
@@ -312,7 +319,7 @@ def build_palette(native_dir, out):
     # hybrid: 20 colours by median cut over the distinct kept colours (density), then the rest by
     # max-coverage (farthest-point): each new colour is the kept colour farthest from all chosen
     # so far, so the small sprites' light greys, whites, pinks and yellows get a slot too
-    n_mc = 20
+    n_mc = 16
     src = Image.new('RGB', (len(pix), 1))
     src.putdata(pix)
     q = src.quantize(colors=n_mc, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
@@ -630,7 +637,10 @@ def main():
     ap.add_argument('--force-box', action='store_true')
     ap.add_argument('--backdrop')
     ap.add_argument('--out')
+    ap.add_argument('--exclude', nargs='*', default=[],
+                    help='palette hex colours not to snap to (backdrops: the neutral greys A19D9D C8C8C8 565C56 2A2A2C)')
     a = ap.parse_args()
+    EXCLUDE.update(h.upper().lstrip('#') for h in a.exclude)
     if a.kept:
         mode_kept(a.src, a.dst)
     elif a.palette:

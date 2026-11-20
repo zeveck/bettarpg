@@ -1,0 +1,6 @@
+[
+ {"name": "townsfolk_1", "target": 44, "dim": "w", "out": "game/assets/native/villagers/townsfolk_1.png"},
+ {"name": "townsfolk_2", "target": 44, "dim": "w", "out": "game/assets/native/villagers/townsfolk_2.png"},
+ {"name": "townsfolk_3", "target": 44, "dim": "w", "out": "game/assets/native/villagers/townsfolk_3.png"},
+ {"name": "kelpie", "target": 44, "dim": "w", "out": "game/assets/native/villagers/kelpie.png"}
+]

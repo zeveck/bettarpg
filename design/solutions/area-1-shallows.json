@@ -1,16 +1,554 @@
 {
-  "area": 1, "name": "The Shallows: tutorial guppy, then the Old Stump (befriend the angelfish)",
-  "completes": "stumpDone",
-  "policy": "fight",
-  "timeLimit": 200,
-  "steps": [
-    { "start": 1 },
-    { "seed": 101 },
-    { "go": [768, 146], "tol": 4, "note": "at the tutorial guppy" },
-    { "battle": "fight" },
-    { "path": [[700, 250], [640, 470], [900, 470], [1060, 720], [1240, 760], [1335, 758]], "policy": "fight" },
-    { "battle": "stump" },
-    { "say": true },
-    { "expect": { "stumpDone": true, "bubbleJoined": true, "hbtLearned": true } }
-  ]
+ "area": 1,
+ "name": "The Shallows: the lesson, the Old Stump, then three friends for Captain Reef (the east gate opens)",
+ "completes": "eastOpen",
+ "policy": "party",
+ "timeLimit": 400,
+ "steps": [
+  {
+   "start": 1
+  },
+  {
+   "seed": 101
+  },
+  {
+   "go": [
+    768,
+    146
+   ],
+   "tol": 4,
+   "note": "tutorial guppy"
+  },
+  {
+   "path": [
+    [
+     700,
+     250
+    ],
+    [
+     640,
+     470
+    ],
+    [
+     900,
+     470
+    ],
+    [
+     1060,
+     720
+    ],
+    [
+     1240,
+     760
+    ],
+    [
+     1335,
+     758
+    ]
+   ],
+   "note": "Old Stump"
+  },
+  {
+   "say": true
+  },
+  {
+   "expect": {
+    "stumpDone": true
+   }
+  },
+  {
+   "path": [
+    [
+     1240,
+     760
+    ],
+    [
+     1060,
+     720
+    ],
+    [
+     900,
+     470
+    ],
+    [
+     900,
+     360
+    ],
+    [
+     900,
+     220
+    ],
+    [
+     980,
+     160
+    ],
+    [
+     1100,
+     150
+    ],
+    [
+     1260,
+     300
+    ],
+    [
+     1260,
+     380
+    ],
+    [
+     1180,
+     520
+    ],
+    [
+     1000,
+     560
+    ],
+    [
+     950,
+     810
+    ],
+    [
+     800,
+     740
+    ],
+    [
+     640,
+     740
+    ],
+    [
+     640,
+     620
+    ],
+    [
+     560,
+     470
+    ],
+    [
+     560,
+     470
+    ],
+    [
+     690,
+     420
+    ],
+    [
+     560,
+     470
+    ],
+    [
+     330,
+     420
+    ],
+    [
+     300,
+     330
+    ],
+    [
+     420,
+     220
+    ],
+    [
+     560,
+     180
+    ],
+    [
+     700,
+     160
+    ]
+   ],
+   "untilFriends": 3,
+   "note": "making friends"
+  },
+  {
+   "key": "KeyH",
+   "note": "home (H)"
+  },
+  {
+   "key": "ArrowRight"
+  },
+  {
+   "key": "Enter",
+   "after": 1500
+  },
+  {
+   "expect": {
+    "area": "village"
+   }
+  },
+  {
+   "path": [
+    [
+     700,
+     300
+    ],
+    [
+     775,
+     216
+    ]
+   ],
+   "note": "rest at Seaweed's",
+   "skipIfFriends": 3
+  },
+  {
+   "talk": true,
+   "skipIfFriends": 3
+  },
+  {
+   "choose": 0,
+   "skipIfFriends": 3
+  },
+  {
+   "say": true,
+   "skipIfFriends": 3
+  },
+  {
+   "path": [
+    [
+     700,
+     300
+    ],
+    [
+     512,
+     320
+    ],
+    [
+     512,
+     560
+    ],
+    [
+     512,
+     640
+    ]
+   ],
+   "note": "back to the Shallows for friends",
+   "skipIfFriends": 3
+  },
+  {
+   "expect": {
+    "area": "shallows"
+   },
+   "skipIfFriends": 3
+  },
+  {
+   "path": [
+    [
+     768,
+     330
+    ],
+    [
+     900,
+     360
+    ],
+    [
+     900,
+     360
+    ],
+    [
+     900,
+     220
+    ],
+    [
+     980,
+     160
+    ],
+    [
+     1100,
+     150
+    ],
+    [
+     1260,
+     300
+    ],
+    [
+     1260,
+     380
+    ],
+    [
+     1180,
+     520
+    ],
+    [
+     1000,
+     560
+    ],
+    [
+     950,
+     810
+    ],
+    [
+     800,
+     740
+    ],
+    [
+     640,
+     740
+    ],
+    [
+     640,
+     620
+    ],
+    [
+     560,
+     470
+    ],
+    [
+     560,
+     470
+    ],
+    [
+     690,
+     420
+    ],
+    [
+     560,
+     470
+    ],
+    [
+     330,
+     420
+    ],
+    [
+     300,
+     330
+    ],
+    [
+     420,
+     220
+    ],
+    [
+     560,
+     180
+    ],
+    [
+     700,
+     160
+    ]
+   ],
+   "untilFriends": 3,
+   "policy": "party",
+   "note": "making friends again",
+   "skipIfFriends": 3
+  },
+  {
+   "key": "KeyH",
+   "note": "home (H)",
+   "skipIfFriends": 3
+  },
+  {
+   "key": "ArrowRight",
+   "skipIfFriends": 3
+  },
+  {
+   "key": "Enter",
+   "after": 1500,
+   "skipIfFriends": 3
+  },
+  {
+   "expect": {
+    "area": "village"
+   },
+   "skipIfFriends": 3
+  },
+  {
+   "path": [
+    [
+     700,
+     300
+    ],
+    [
+     775,
+     216
+    ]
+   ],
+   "note": "rest at Seaweed's",
+   "skipIfFriends": 3
+  },
+  {
+   "talk": true,
+   "skipIfFriends": 3
+  },
+  {
+   "choose": 0,
+   "skipIfFriends": 3
+  },
+  {
+   "say": true,
+   "skipIfFriends": 3
+  },
+  {
+   "path": [
+    [
+     700,
+     300
+    ],
+    [
+     512,
+     320
+    ],
+    [
+     512,
+     560
+    ],
+    [
+     512,
+     640
+    ]
+   ],
+   "note": "back to the Shallows for friends",
+   "skipIfFriends": 3
+  },
+  {
+   "expect": {
+    "area": "shallows"
+   },
+   "skipIfFriends": 3
+  },
+  {
+   "path": [
+    [
+     768,
+     330
+    ],
+    [
+     900,
+     360
+    ],
+    [
+     900,
+     360
+    ],
+    [
+     900,
+     220
+    ],
+    [
+     980,
+     160
+    ],
+    [
+     1100,
+     150
+    ],
+    [
+     1260,
+     300
+    ],
+    [
+     1260,
+     380
+    ],
+    [
+     1180,
+     520
+    ],
+    [
+     1000,
+     560
+    ],
+    [
+     950,
+     810
+    ],
+    [
+     800,
+     740
+    ],
+    [
+     640,
+     740
+    ],
+    [
+     640,
+     620
+    ],
+    [
+     560,
+     470
+    ],
+    [
+     560,
+     470
+    ],
+    [
+     690,
+     420
+    ],
+    [
+     560,
+     470
+    ],
+    [
+     330,
+     420
+    ],
+    [
+     300,
+     330
+    ],
+    [
+     420,
+     220
+    ],
+    [
+     560,
+     180
+    ],
+    [
+     700,
+     160
+    ]
+   ],
+   "untilFriends": 3,
+   "policy": "party",
+   "note": "making friends again",
+   "skipIfFriends": 3
+  },
+  {
+   "key": "KeyH",
+   "note": "home (H)",
+   "skipIfFriends": 3
+  },
+  {
+   "key": "ArrowRight",
+   "skipIfFriends": 3
+  },
+  {
+   "key": "Enter",
+   "after": 1500,
+   "skipIfFriends": 3
+  },
+  {
+   "expect": {
+    "area": "village"
+   },
+   "skipIfFriends": 3
+  },
+  {
+   "path": [
+    [
+     700,
+     300
+    ],
+    [
+     900,
+     320
+    ],
+    [
+     935,
+     300
+    ]
+   ],
+   "note": "Captain Reef"
+  },
+  {
+   "talk": true
+  },
+  {
+   "say": true
+  },
+  {
+   "expect": {
+    "eastOpen": true
+   }
+  }
+ ]
 }

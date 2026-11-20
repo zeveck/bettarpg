@@ -66,8 +66,9 @@ async (page) => {
         const btns = await page.evaluate(() => window.__game.buttons().filter((x) => /Party/.test(x.label)));
         const lit = btns.length && !btns[0].dim;
         if (b.scripted === 'stump') { if (lit) { await pick('Digit3'); continue; } await pick('Digit1'); continue; }
-        if (lit && mp >= 5 && (ehpFrac <= 0.55 || b.hp <= 14)) { await pick('Digit3'); continue; }
-        if (mp - 3 >= 5) { await pick('Digit2', 'Digit1'); continue; }
+        // wear the fish down with bites (keeping MP for the party), then Party!
+        if (lit && mp >= 5 && ehpFrac <= 0.6) { await pick('Digit3'); continue; }
+        if (!lit && mp >= 3) { await pick('Digit2', 'Digit1'); continue; }
         await pick('Digit1');
         continue;
       }
@@ -112,6 +113,7 @@ async (page) => {
   try {
     for (const step of route.steps) {
       if (!step.battle) justFought = false;
+      if (step.skipIfFriends && (await st()).friendsTotal >= step.skipIfFriends) continue;
       if (step.title) {
         // from the title, as a player: New Game (confirm if a save exists), Swim to Village
         await page.evaluate(() => localStorage.removeItem('bettarpg-save'));
@@ -124,8 +126,23 @@ async (page) => {
       if (step.seed !== undefined) await page.evaluate((n) => window.__game.seed(n), step.seed);
       if (step.set) await page.evaluate((o) => window.__game.set(o), step.set);
       if (step.go) { await go(step.go[0], step.go[1], step.tol, step.policy); if (step.note) await log(step.note); }
-      if (step.path) { for (const [x, y] of step.path) await go(x, y, step.tol, step.policy); if (step.note) await log(step.note); }
-      if (step.talk) { await press('Space'); await sleep(250); }
+      if (step.path) {
+        for (const [x, y] of step.path) {
+          // a befriending loop: stop visiting fish once you have enough friends
+          if (step.untilFriends && (await st()).friendsTotal >= step.untilFriends) break;
+          await go(x, y, step.tol, step.policy);
+        }
+        if (step.note) await log(step.note);
+      }
+      if (step.talk) {
+        // talk, and try again if nothing answered (as a player would)
+        for (let tries = 0; tries < 3; tries++) {
+          await press('Space');
+          let answered = false;
+          for (let i = 0; i < 12; i++) { const s = await st(); if (s.dialog || s.busy || s.menus.length) { answered = true; break; } await sleep(100); }
+          if (answered) break;
+        }
+      }
       if (step.choose !== undefined) {
         for (let i = 0; i < 40; i++) { const s = await st(); if (s.dialog) { const b = await page.evaluate(() => window.__game.buttons().filter((x) => x.y > 0)); if (b.some((x) => x.focus)) break; await press('Space'); await sleep(150); } else break; }
         for (let i = 0; i < step.choose; i++) { await press('ArrowDown'); await sleep(80); }

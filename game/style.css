@@ -131,7 +131,7 @@ body.inbattle #hint { align-items: flex-start; padding-top: calc(78px + var(--sa
 .dlgbox { display: flex; gap: 12px; width: min(820px, 100%); padding: 8px 14px 10px 8px; min-height: 104px; position: relative; }
 .dlgtext { flex: 1; min-width: 0; }
 .dname { color: var(--gold); margin-bottom: 2px; }
-.dline { line-height: 1.3; min-height: 2.6em; }
+.dline { line-height: 1.3; min-height: 2.6em; text-wrap: pretty; }
 .choices { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 .dnext { position: absolute; right: 12px; bottom: 6px; color: var(--gold); animation: blink 0.8s infinite steps(2); }
 @keyframes blink { 50% { opacity: 0; } }
@@ -263,3 +263,4 @@ body.short.garfight .meter span { width: 14px; height: 18px; }
 body.short [data-screen=credits] .credits { max-height: 70%; padding: 6px 12px; font-size: 0.85em; }
 body.short #creditsBody { grid-template-columns: 1fr 1fr 1fr; }
 body.short [data-screen=credits] .credits h2 { display: none; }
+#garFriends { white-space: nowrap; }

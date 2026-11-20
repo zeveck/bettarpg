@@ -915,7 +915,7 @@ function openCredits(kind) {
     $('creditsBody').innerHTML = [
       `<div style="grid-column: 1 / -1"><p>${kind === 'friend' ? 'The friendship ending: the old Gar has a village now.' : 'The fins ending: the paddies are safe.'} <span style="white-space:nowrap">${escapeHtml(s.name)} · Level&nbsp;${s.level} · Friends&nbsp;${state.friendsTotal(s)}${s.flags.garFriend ? ' + the&nbsp;Gar' : ''}</span></p></div>`,
       c('Idea and original game by', 'Rich Conlan'),
-      c('Original sprites', 'from the original Betta Fish RPG'),
+      c('Original sprites', 'from the original Betta Fish&nbsp;RPG'),
       c('Remake', 'made with gamegen (Claude)'),
       c('New art, music and sounds', 'generated, finished in code'),
       c('Font', 'Pixelify Sans (SIL&nbsp;OFL)'),

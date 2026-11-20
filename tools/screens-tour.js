@@ -64,5 +64,28 @@ async (page) => {
   await page.evaluate(() => window.__game.goToLevel(4)); await sleep(1000); await shot('murk');
   await page.evaluate(() => window.__game.goToLevel(3)); await page.evaluate(() => window.__game.set({ pos: { x: 700, y: 300 } })); await sleep(1200); await shot('highwater');
   await page.evaluate(() => window.__game.goToLevel(5)); await page.evaluate(() => window.__game.set({ pos: { x: 300, y: 430 } })); await sleep(1200); await shot('ditch');
+  for (let i = 0; i < 10; i++) { const t = await st(); if (!t.dialog && !t.busy) break; await press('Space'); }
+  // the Gar fight, a level-up win, the sub, an ending and its credits
+  const waitIdle = async () => { for (let i = 0; i < 40; i++) { const t = await st(); if (t.inBattle && !t.inBattle.busy) return; await sleep(200); } };
+  await page.evaluate(() => window.__game.goToLevel(5)); await sleep(800);
+  for (let i = 0; i < 10; i++) { const t = await st(); if (!t.dialog && !t.busy) break; await press('Space'); }
+  await page.evaluate(() => { window.__game.set({ friends: { guppy: 3, angel: 3 } }); window.__game.battle('gar', 10); });
+  await sleep(1000); await waitIdle(); await shot('gar');
+  await press('Digit3'); await sleep(3500); await waitIdle(); await shot('gar-party');
+  await page.evaluate(() => window.__game.goToLevel(2)); await sleep(500);
+  await page.evaluate(() => { window.__game.set({ level: 4, sub: true, flags: { tutorialDone: true } }); window.__game.battle('guppy', 1); });
+  await sleep(1000); await waitIdle();
+  { const b = await page.locator('#bDive').boundingBox(); await page.mouse.click(b.x + 20, b.y + 20); }
+  await sleep(1800); await waitIdle(); await shot('battle-dive');
+  await page.evaluate(() => window.__game.goToLevel(1)); await sleep(500);
+  await page.evaluate(() => { window.__game.set({ level: 2, flags: { tutorialDone: true } }); window.__game.battle('angel', 2); });
+  await sleep(1000);
+  await page.evaluate(() => { const g = window.__game; g.set({}); });
+  for (let i = 0; i < 40; i++) { const t = await st(); if (!t.inBattle || t.inBattle.waiting) break; if (!t.inBattle.busy) await press('Digit1'); await sleep(500); }
+  await sleep(1500); await shot('battle-won');
+  await press('Enter'); await sleep(1500);
+  await page.evaluate(() => window.__game.ending('friend')); await sleep(4000); await shot('ending');
+  for (let i = 0; i < 30; i++) { const t = await st(); if (t.menus.includes('credits')) break; if (t.dialog) await press('Space'); await sleep(400); }
+  await sleep(600); await shot('credits');
   return JSON.stringify(out, null, 1);
 }

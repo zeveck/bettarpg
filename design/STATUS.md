@@ -46,9 +46,9 @@ Original untouched; this is a new folder and repo with fresh history.
   - At the next --continue: read its comments first; keep the same page up to date. (2026-11-20: read, no comments.)
   - Fix in the build: bigger Gar, darker Murk backdrop, Nymph retake (design: "What the mockups taught").
 - — stopped here (--plan-only), 2026-11-19 —
-- [ ] Art, animation and audio
-- [ ] Build
-- [ ] Play-test
-- [ ] Final review
-- [ ] Polish pass
+- [x] Art, animation and audio: ~13 images/backdrops, 2 animations, 8 songs, 28 sounds; total spent ≈ $20.5 of $50 (est.)
+- [x] Build: all 6 areas, both endings, Peace; controller, Controls screen, Report a bug (hidden until published); routes in design/solutions/; sim 23/23
+- [x] Play-test (by the builder): full run title→credits, 0 console errors; my notes: title font B reads like G, small text on desktop, village/Highwater look bare
+- [x] Final review: 2 rounds (round 1: 2 must-fixes + 14 should; round 2: confirmed, 9 more small fixes); rice props added (~$0.45). Open: a player who skips the spillway pools can reach the deep Murk at L4
+- [ ] Polish pass: reviewer running
 - [ ] Wrap up

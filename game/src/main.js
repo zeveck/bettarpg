@@ -286,6 +286,7 @@ G.leaveBattle = async (scene) => {
   }
   await G.transition(async () => {
     scene.end();
+    ui.hideHint(); // a battle tip shouldn't follow you back to the map
     G.battle = null;
     G.mode = 'world';
     showWorldUI(true);
@@ -307,6 +308,7 @@ G.defeat = async (scene) => {
   await fade(true, STORY.rescued);
   const lost = state.defeatPenalty(G.s);
   scene.end();
+  ui.hideHint();
   G.battle = null;
   const [area, entry] = REST[G.s.rest] || REST.village;
   G.world.safeT = 3;

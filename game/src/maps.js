@@ -207,7 +207,7 @@ export const MAPS = {
       ['r', 0, 400, 140, 110, 4, 10],
     ],
     paths: [], buildings: [
-      { sprite: 'b_draingate', x: 0, y: 360, foot: 0.4 },
+      { sprite: 'b_draingate', x: 0, y: 360, pass: true },
     ],
     npcs: [],
     props: [

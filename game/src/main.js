@@ -979,7 +979,7 @@ function update(dt, now) {
       const p = G.world.player;
       for (const ex of G.world.def.exits || []) {
         const [x, y, w, h] = ex.rect;
-        if (p.x >= x - 6 && p.x <= x + w + 6 && p.y >= y - 6 && p.y <= y + h + 6) {
+        if (p.x >= x - 16 && p.x <= x + w + 16 && p.y >= y - 16 && p.y <= y + h + 16) {
           G.leaving = true;
           input.releaseAll();
           G.enterArea(ex.to, ex.entry).finally(() => { G.leaving = false; });

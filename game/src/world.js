@@ -86,7 +86,7 @@ export class World {
     this.buildings = (def.buildings || []).map((b) => {
       const c = img(b.sprite);
       const w = c ? c.width : 100, h = c ? c.height : 100;
-      const foot = b.arch
+      const foot = b.pass ? [] : b.arch
         ? [[b.x + 4, b.y + h - 24, 26, 22], [b.x + w - 30, b.y + h - 24, 26, 22]]
         : [[b.x + 8, b.y + h * (1 - (b.foot || 0.42)), w - 16, h * (b.foot || 0.42) - 4]];
       return { ...b, w, h, foot, base: b.y + h - 2 };

@@ -22,9 +22,13 @@ export function goalLine(s) {
   if (f.lantern) {
     const n = s.cogs.length;
     if (n >= 3) return 'Take the three cogs to the drain gate at the Murk\'s far end.';
-    return `The Lock-Keeper's lantern will light the Murk. Find those three cogs. (${n}/3)`;
+    return `The Lock-Keeper's lantern will light the Murk. Find those three cogs. (${n}/3; Murk fish are Level 6 to 8)`;
   }
   if (f.trailFound) return 'Up the spillway lies Highwater. Ask them about the shadow.';
+  if (f.stumpDone && !f.eastOpen) {
+    const n = Object.values(s.friends).reduce((a, b) => a + b, 0);
+    return `Make friends in the Shallows: Captain Reef will open the east gate when you have 3. (Friends ${Math.min(n, 3)}/3)`;
+  }
   if (f.stumpDone) {
     if (s.scales.length >= 5) return 'Take the scales to the straw bundle at the Spillway\'s foot.';
     if (s.scales.length || s.area === 'reedwater') return `Follow the strange scales uphill through Reedwater. (Scales ${s.scales.length}/5)`;
@@ -47,6 +51,10 @@ export const SPEAKERS = {
   folk1: { name: 'Dace', sprite: 'folk1' },
   folk2: { name: 'Old Loach', sprite: 'folk2' },
   folk3: { name: 'Minnow', sprite: 'folk3' },
+  folk4: { name: 'Gudgeon', sprite: 'folk2' },
+  folk5: { name: 'Rudd', sprite: 'folk1' },
+  folk6: { name: 'Little Bream', sprite: 'folk3' },
+  folk7: { name: 'Prawn the Peddler', sprite: 'pip' },
   mossy: { name: 'Mossy', sprite: 'mossy' },
   cap1: { name: 'Pebble', sprite: 'cap1' },
   cap2: { name: 'Fern', sprite: 'cap2' },
@@ -67,7 +75,8 @@ export const LINES = {
     ['gateOpen', ['The gate is open. Whatever is down there... bring our fish home.', 'The old tales say a party of five friends can soften any heart. Count your friends, {name}.']],
     ['lantern', ['The Lock-Keeper\'s lantern will light the Murk. Find those three cogs.', 'The Murk starts at the old culvert, southwest in the Shallows. Mind the deep water.']],
     ['trailFound', ['Up the spillway lies Highwater. Ask them about the shadow.', 'They see more of the terraces from up there than we ever will.']],
-    ['stumpDone', ['A scale as big as Bubble\'s head... Nothing in our paddies grows that big.', 'Captain Reef will open the reed gate east. Follow where that scale leads.']],
+    ['eastOpen', ['A scale as big as Bubble\'s head... Nothing in our paddies grows that big.', 'Captain Reef has opened the reed gate east. Follow where that scale leads.']],
+    ['stumpDone', ['A scale as big as Bubble\'s head... Nothing in our paddies grows that big.', 'Captain Reef guards the reed gate east. Make a few friends first; he wants to see you can handle yourself.']],
     ['metFinn', ['Swim to the Old Stump at the far end of the Shallows. Mossy was last seen there.', 'Be careful out there, little betta. The paddies hold many dangers.']],
   ],
   finnOpening: [
@@ -98,7 +107,7 @@ export const LINES = {
     ['highwater', ['A snail with a lantern sent you into the Murk? Keep your armor on and your friends close.']],
     ['armor3', ['Full metal armor! Now that is a proper guard\'s kit.']],
     ['armor2', ['That armor suits you. Remember: Gravel Grenade breaks a crayfish shell. Bites just bounce off.']],
-    ['stumpDone', ['A friend in a party hat... at the Old Stump? Well, you settled it. The reed gate is open. Go east.', 'Tip: catfish slip aside from a plain bite. Spells never miss.']],
+    ['eastOpen', ['The reed gate is open. Go east, and mind the reeds: fish hide in them.', 'Tip: catfish slip aside from a plain bite. Spells never miss.']],
     ['bubbleJoined', ['That angelfish at the Old Stump won\'t let anyone pass in peace. Settle it first.']],
     ['met', ['Not alone, little one. Come back with a friend.', 'Tip: watch the number over a fish. That\'s its level. Red glow means stay away.']],
     ['first', ['Halt! State your business, young betta.', 'I\'ve been keeping watch, but these mysterious abductions have me worried.', 'Three of our villagers vanished last week while foraging near the tall rice. No trace, no struggle... just gone.', 'If you\'re thinking of investigating, be very careful. Whatever\'s out there is dangerous.', 'And this reed gate stays shut. Not alone, little one. Come back with a friend.']],
@@ -106,6 +115,8 @@ export const LINES = {
   reefGateClosed: {
     alone: ['Not alone, little one. Come back with a friend.'],
     stump: ['That angelfish at the Old Stump won\'t let anyone pass in peace. Settle it first.'],
+    friends: (n) => `Reedwater fish are Level 3 to 5, and they chase. Show me you can win fish over first: three friends, then I'll open the gate. (Friends ${n}/3)`,
+    open: ['Three friends! You\'re ready. The reed gate is open: go east, and follow that scale.', 'Tip: catfish slip aside from a plain bite. Spells never miss. Rest at the inn before you go.'],
   },
   bubbleHome: [
     ['metFinn', ['Elder Finn sent you out? Go on ahead to the Old Stump! I\'ll... I\'ll catch up. Probably!']],
@@ -143,7 +154,7 @@ export const LINES = {
   whorl: [
     ['gateOpen', ['The gate\'s open. If that old outflow pipe gets a door one day... well, I know who\'d build it.']],
     ['lantern', ['Three cogs, lost in the Murk. Fixed spots, mind you; the flood just dropped them. Bring them to the drain gate.']],
-    ['first', ['Ah, a little betta from the lower paddies. You\'re asking about the shadow?', 'The spring flood jammed my drain gate (shook its three cogs right out into the Murk) and burst the old outflow pipe below it. Whatever\'s taking your fish uses that pipe. Too strong for little fins: you\'ll need the gate.', 'Here. The drain-gate key, and my glow-moss lantern. It\'ll light the Murk for you.', 'Find the gate\'s three cogs, and the gate will open. The Murk starts at the old culvert in the Shallows.']],
+    ['first', ['Ah, a little betta from the lower paddies. You\'re asking about the shadow?', 'The spring flood jammed my drain gate (shook its three cogs right out into the Murk) and burst the old outflow pipe below it. Whatever\'s taking your fish uses that pipe. Too strong for little fins: you\'ll need the gate.', 'Here. The drain-gate key, and my glow-moss lantern. It\'ll light the Murk for you.', 'Find the gate\'s three cogs, and the gate will open. The Murk starts at the old culvert in the Shallows.', 'Mind you: Murk fish are Level 6 by the culvert and 7 to 8 deeper in. Grow strong in the spillway pools first, and rest at Kelpie\'s.']],
   ],
   whorlAfter: [
     ['garFriend', ['A door in the pipe that opens from the inside! Finest work I ever did. The old fish visits every week.']],
@@ -161,6 +172,10 @@ export const LINES = {
     ['peace', ['Peace in the Paddies! Can I have a party hat too?']],
     ['first', ['You came all the way up the spillway? Lock-Keeper Whorl knows everything about the gates. He\'s in the lock house with the big wheel.']],
   ],
+  folk4: [['first', ['Welcome to Highwater, the city on the next terrace! Mind the spillway on your way down.']]],
+  folk5: [['first', ['The lanterns? Glow-moss. Whorl grows it in the lock house. Lights the whole terrace at night.']]],
+  folk6: [['first', ['Mum says the spillway pools have big cichlids. Big fish, big lessons, she says.']]],
+  folk7: [['first', ['Fresh moss! Shiny pebbles! ...Just looking? Pip\'s stall has the snacks, I only sell pretty things.']]],
   mossy: [
     ['first', ['You came! You really came!', 'It doesn\'t eat us. It brings us here and just... watches us. It hums at night. I think it\'s lonely.']],
   ],

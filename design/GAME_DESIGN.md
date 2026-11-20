@@ -130,7 +130,10 @@ bundled `controls.js`. **The defaults are exactly the tables above.**
 | Pause | Escape, P | Options (9) | **fixed** |
 
 - Menus aren't actions: they always use Enter/Space/✕ to confirm and Escape/Backspace/○ to
-  go back, plus 1–5 in battle rows, so a player can never lock themselves out.
+  go back, plus 1–5 in battle rows, so a player can never lock themselves out. Those keys and
+  buttons can't be bound to an action (Talk may keep Space and ✕).
+- Battle buttons show their 1–5 key only when the last input was the keyboard.
+- UI text and panels scale with big screens (×1 on phones, about ×1.2 at 1280×720, ×1.8 at 1920×1080).
 - Everything that names a control (hints, How to play, the battle prompts, the Talk hint)
   asks one label function, so it shows the player's current keys or buttons.
 - The Controls screen lists "Ctrl+Shift+F: report a bug" (fixed, not an action) and has
@@ -185,8 +188,8 @@ Flags are saved; nothing on the main path can be missed, used up or taken in the
 | Area | Entry needs (flag) | What blocks it before | Goal and completion trigger | Sets | Elder Finn's pointer after |
 |---|---|---|---|---|---|
 | Village | start | — | Elder Finn's opening talk | `metFinn` | "Swim to the Old Stump at the far end of the Shallows. Mossy was last seen there." |
-| Shallows | `metFinn` (the south gate opens as he finishes) | — | Reach the Old Stump: a strange scale, Bubble catches up (`bubbleJoined` is set the moment Bubble arrives), then the scripted Angelfish fight (see Opening); befriending it sets `stumpDone` | `bubbleJoined`, `hbtLearned`, `stumpDone` | "Captain Reef will open the reed gate east. Follow where that scale leads." |
-| Reedwater | `stumpDone` | Guard Captain Reef at the east reed gate: before Bubble, "Not alone, little one. Come back with a friend."; with Bubble but before `stumpDone`, "That angelfish at the Old Stump won't let anyone pass in peace. Settle it first." | Pick up all 5 scales, **in any order**; then the straw-bundle scene plays at the Spillway's foot (rules below) | `trailFound` | "Up the spillway lies Highwater. Ask them about the shadow." |
+| Shallows | `metFinn` (the south gate opens as he finishes) | — | Reach the Old Stump: a strange scale, Bubble catches up (`bubbleJoined` is set the moment Bubble arrives), then the scripted Angelfish fight (see Opening); befriending it sets `stumpDone` | `bubbleJoined`, `hbtLearned`, `stumpDone`, then `eastOpen` from Reef | "Make friends in the Shallows: Captain Reef will open the east gate when you have 3.", then "Follow the strange scales uphill through Reedwater. (Scales n/5)" |
+| Reedwater | `eastOpen` (Reef opens the gate once `stumpDone` is set and you have **3 friends**, the Old Stump's angelfish included) | Guard Captain Reef at the east reed gate: before Bubble, "Not alone, little one. Come back with a friend."; with Bubble but before `stumpDone`, "That angelfish at the Old Stump won't let anyone pass in peace. Settle it first."; after it, "Reedwater fish are Level 3 to 5, and they chase. Show me you can win fish over first: three friends... (Friends n/3)" | Pick up all 5 scales, **in any order**; then the straw-bundle scene plays at the Spillway's foot (rules below) | `trailFound` | "Up the spillway lies Highwater. Ask them about the shadow." |
 | Spillway, Highwater | `trailFound` | Fallen straw bundle across the Spillway steps | Talk to the Lock-Keeper: he gives the drain-gate key and a glow-moss lantern, and asks for the gate's 3 lost cogs | `highwater`, `lantern` | "The Lock-Keeper's lantern will light the Murk. Find those three cogs." |
 | Murk | `lantern` | The culvert in the Shallows' southwest: "Too dark to swim in there." | Pick up 3 cogs **in any order** (fixed spots, none in the edge zones), then use the drain gate at the Murk's far end | `gateOpen` | "The gate is open. Whatever is down there... bring our fish home. The old tales say a party of five friends can soften any heart." |
 | Sunken Ditch | `gateOpen` | The drain gate (with fewer than 3 cogs: "The gate needs 3 cogs (2/3).") | Resolve the Gar (defeat or befriend) | `garDefeated` or `garFriend` | Ending lines (two versions) |
@@ -223,6 +226,7 @@ Flags are saved; nothing on the main path can be missed, used up or taken in the
    red-glowing fish comes on screen, a hint: "Fish glowing red are much stronger than you:
    swim around them."
 5. **The Old Stump** (scripted, can't be skipped or broken):
+   - Bubble cheers you to full HP as it arrives, so arriving hurt can't lose the lesson.
    - You find a huge, dark, ancient-looking scale (Bubble: "That's no betta scale. It's as big
      as my head!"). Bubble swims up: "I told you I'd come!" `bubbleJoined` is set now, so
      Bubble stays with you whatever happens next.
@@ -277,6 +281,9 @@ That's why a party of friends can reach it, and why the fins ending is a little 
   Highwater's L5–6; the deep half is L7–8.
 - After a battle or fleeing, 2 seconds of safety (nearby fish swim away).
 - **Level-up** restores HP and MP to full.
+- **Catch-up EXP:** below the level an area expects (Shallows 3, Reedwater 5, Highwater 6, the Murk 7, the Ditch 8), fights there give ×1.5 EXP ("Catch-up bonus!"), so a player who follows the goal line and takes the fights in their way reaches the expected levels. The Spillway has a Cichlid in its main channel, and Reef's three-friends errand puts a few Shallows fights on the main path.
+- **The lesson** (first Attack dodged, the Bubble Blast hint) fires on your first fight, whichever fish it is, so swimming past the tutorial guppy doesn't skip it.
+- **Defeated fish** flip belly-up, fade and sink on the map instead of vanishing.
 - **Safe water:** in the village and Highwater (no fish), HP and MP refill 1 point every 2 s.
 - **Items anywhere:** the pause screen has Items, so you can eat or drink between fights.
 - **Losing:** you wake at your last rest point (the village inn, the Highwater inn, or the
@@ -332,7 +339,7 @@ Highwater has no battles).
 | Attack | — | start | 3–10 + ⌊1.5 × (L−1)⌋; 90% hit; the Catfish dodges 25% |
 | Bubble Blast | 3 MP | start | 5–12 + ⌊1.5 × (L−1)⌋; never misses |
 | Gravel Grenade | 5 MP | L4 | 8–15 + ⌊1.5 × (L−1)⌋; never misses, ignores the Catfish's dodge, breaks the Crayfish's shell |
-| **Party!** (Happy Balloon Time) | 5 MP | `hbtLearned` (Old Stump) | Befriend chance 25% + 40% × (1 − enemy HP%) + 3% per friend, max 80%. Success: the 5 MP back and +15% max HP |
+| **Party!** (Happy Balloon Time) | 5 MP | `hbtLearned` (Old Stump) | Befriend chance 25% + 40% × (1 − enemy HP%) + 3% per friend, max 80%; **×0.6 for each level the fish is above you (never below ×0.2)**, so befriending far-stronger fish is no cheap grind. Success: the 5 MP back and +15% max HP |
 | Party! (big) | 5 MP | L7 ("Your balloons got bigger!") | 35% + 50% × (1 − enemy HP%) + 5% per friend, max 95%. Edge fish: half chance |
 | Items | — | — | Kelp Snack +10 HP (3 BB), Bubble Water +8 MP (2 BB); Highwater: Seed Cake +30 HP (8 BB), Fizzy Water +15 MP (6 BB). Carry up to 9 of each. Also usable from the pause screen |
 | Dive / Surface (sub) | your turn | sub owned | Swap into or out of the Dunkleosteus Submarine |
@@ -417,6 +424,8 @@ importing `battle.js` and `config.js`) must reproduce the same table within ±3 
 | Reedwater **fight**: Catfish L4 vs L4 B (half) | win ≥ 97% (baseline) | 100% | — | 3.5 | 77% | 8.0 |
 | Reedwater **befriend**: same, 0 friends (half) | friend ≥ 45%, friend-or-win ≥ 97%, HP within 5 points of fighting, net MP ≤ fighting | 100% | 50% | 4.4 | 74% | 2.5 |
 | Reedwater **befriend**: same, 3 friends (half) | friend ≥ 55%, same HP and MP rule | 100% | 60% | 4.3 | 76% | 2.0 |
+| Befriend one level up: Catfish L5 vs L4 B, 0 friends (half) | friend ≥ 25%, friend-or-win ≥ 95% | 99.4% | 29% | 5.4 | 55% | 3.6 |
+| Befriend a red fish: Catfish L6 vs L3 B, 0 friends (full) | friend ≤ 15% (no cheap grind) | 67.6% | 11% | 5.9 | 30% | 12.1 |
 | Cichlid L5 vs L5 B (half) | win ≥ 95% | 100% | — | 4.2 | 58% | 8.0 |
 | Murk near: Cichlid L6 vs L5 B (full) | win ≥ 90%, ≥ 30% HP left | 100% | — | 4.0 | 55% | 17.9 |
 | Murk near: Crayfish L6 vs L5 B (full) | win ≥ 90%, ≥ 30% HP left | 100% | — | 4.5 | 48% | 18.0 |
@@ -744,7 +753,7 @@ extraction first. Target sizes are art pixels (width unless marked "tall").
 | UI3 | App icon and favicons | code from K1 | 512 + sizes | maskable margin | — | must |
 | UI4 | Social card, GitHub preview | code (title screen) | 1200×630, 1280×640 | no | — | must |
 | UI5 | Panels, buttons, bars, party meter | code | — | — | — | must |
-| F1 | Pixel font with arrows (e.g. Pixelify Sans, OFL), bundled with its licence; draw ← ↑ → ↓ as icons if missing | download (OFL) | — | — | — | must |
+| F1 | Pixel font with arrows (e.g. Pixelify Sans, OFL), bundled with its licence; draw ← ↑ → ↓ as icons if missing; built as two static weights with a squarer capital B (tools/make-font.py), since Pixelify's B read as G | download (OFL) | — | — | — | must |
 | M1–M6 | Music (above) | audiogen music | 5 × 75 s + 1 × 150 s mp3 | — | loop | must (M3: should) |
 | S1–S26 | Sound effects (above) | audiogen sfx | 0.3–5 s mp3 (S26 loop) | — | — | must |
 | A1 | Gar lunge (4 frames) | anim8gen | E3 size | yes | yes | *(budget 30)* |

@@ -71,7 +71,31 @@ export class World {
     this.edgeWarned = false;
     // static things
     const trng = makeRng(def.seed || 1);
-    this.tufts = bankSpots(this.terrain, Math.round((def.w * def.h) / 22000), () => trng.next()).map((q) => ({ ...q, ph: trng.next() * 6 }));
+    this.tufts = bankSpots(this.terrain, Math.round((def.w * def.h) / (def.dark ? 22000 : 9000)), () => trng.next()).map((q) => ({ ...q, ph: trng.next() * 6 }));
+    // rice planted in rows in the shallow water near the banks (a paddy, not a pond)
+    if (!def.dark && def.bank !== 'concrete') {
+      const t = this.terrain, near = (x, y, r) => [[r, 0], [-r, 0], [0, r], [0, -r]].some(([dx, dy]) => depthAt(t, x + dx, y + dy) === 0);
+      const solidsNow = this.buildingsFor ? [] : null;
+      for (let y = 40; y < def.h - 20; y += 26) {
+        for (let x = 24 + ((y / 26) % 2) * 9; x < def.w - 20; x += 18) {
+          if (depthAt(t, x, y) !== 1 || !near(x, y, 34) || near(x, y, 10)) continue;
+          if (trng.next() < 0.35) continue;
+          this.tufts.push({ x: Math.round(x), y: Math.round(y), ph: trng.next() * 6, rice: true });
+        }
+      }
+    }
+    // lily pads, pebbles and broken stems scattered in the open water
+    this.scatter = [];
+    if (def.bank !== 'concrete') {
+      const kinds = def.dark ? ['p_stem', 'p_stones'] : ['p_lily', 'p_lily', 'p_stones', 'p_stem'];
+      for (const q of waterSpots(this.terrain, Math.round((def.w * def.h) / (def.dark ? 60000 : 30000)), () => trng.next(), 1, 4)) {
+        if (depthAt(this.terrain, q.x, q.y) === 6) continue;
+        this.scatter.push({ sprite: kinds[Math.floor(trng.next() * kinds.length)], x: q.x, y: q.y });
+      }
+    }
+    // little life: tadpoles in the shallows, minnow shoals in the open
+    this.critters = def.dark ? [] : waterSpots(this.terrain, def.safe || def.safeAbove ? 10 : 7, () => trng.next(), 1, 2)
+      .map((q, i) => ({ x: q.x, y: q.y, hx: q.x, hy: q.y, ph: q.ph, kind: i % 3 === 2 ? 'minnows' : 'tadpole', a: trng.next() * 6 }));
     this.shimmer = waterSpots(this.terrain, Math.round((def.w * def.h) / 6000), () => trng.next(), 1, 3);
     this.reeds = [];
     for (const [cx, cy, rx, ry] of def.reeds || []) {
@@ -84,14 +108,14 @@ export class World {
     }
     this.fireflies = def.fireflies ? Array.from({ length: 18 }, () => ({ x: trng.next() * def.w, y: 60 + trng.next() * 380, ph: trng.next() * 6, sp: 0.5 + trng.next() })) : [];
     this.buildings = (def.buildings || []).map((b) => {
-      const c = img(b.sprite);
+      const c = b.hue != null ? recolor(b.sprite, [{ any: true, shift: b.hue, sat: b.sat ?? 1, minS: 0.2 }], 'hue' + b.hue + (b.sat || '')) : img(b.sprite);
       const w = c ? c.width : 100, h = c ? c.height : 100;
       const foot = b.pass ? [] : b.arch
         ? [[b.x + 4, b.y + h - 24, 26, 22], [b.x + w - 30, b.y + h - 24, 26, 22]]
         : [[b.x + 8, b.y + h * (1 - (b.foot || 0.42)), w - 16, h * (b.foot || 0.42) - 4]];
-      return { ...b, w, h, foot, base: b.y + h - 2 };
+      return { ...b, w, h, foot, base: b.y + h - 2, canvas: c };
     });
-    this.props = (def.props || []).map((q) => ({ ...q }));
+    this.props = (def.props || []).map((q) => ({ ...q })).concat(this.scatter.filter((q) => !this.buildings.some((b) => q.x > b.x - 10 && q.x < b.x + b.w + 10 && q.y > b.y && q.y < b.base + 12)));
     this.spawnAll();
     this.camSnap();
   }
@@ -262,6 +286,14 @@ export class World {
         if (p.moving && Math.random() < dt * 6) this.ripples.push({ x: q.x + (Math.random() - 0.5) * 10, y: q.y - 4, r: 1, life: 0.7 });
       }
       q.rustle = Math.max(0, (q.rustle || 0) - dt);
+    }
+    for (const c of this.critters) {
+      c.a += (Math.sin(this.t * 0.7 + c.ph) * 1.6) * dt;
+      const sp = c.kind === 'tadpole' ? 10 : 16;
+      let nx = c.x + Math.cos(c.a) * sp * dt, ny = c.y + Math.sin(c.a) * sp * 0.6 * dt;
+      if (!isWater(this.terrain, nx, ny) || Math.hypot(nx - c.hx, ny - c.hy) > 60) c.a += Math.PI * 0.75;
+      else { c.x = nx; c.y = ny; }
+      if (Math.hypot(c.x - p.x, c.y - p.y) < 30) { c.a = Math.atan2(c.y - p.y, c.x - p.x); }
     }
     for (const f of this.faints) f.t += dt;
     this.faints = this.faints.filter((f) => f.t < 1.6);
@@ -449,9 +481,11 @@ export class World {
     ctx.globalAlpha = 1;
     // floor things: pickups, lily pads under fish
     for (const q of this.pickups) this.drawPickup(ctx, q);
+    for (const c of this.critters) this.drawCritter(ctx, c, t);
+    if (this.def.lanterns) for (const [lx, ly] of this.def.lanterns) this.drawLanternGlow(ctx, lx, ly, t);
     // everything that stands, sorted by its base
     const list = [];
-    for (const b of this.buildings) list.push({ y: b.base, d: () => ctx.drawImage(img(b.sprite), b.x, b.y) });
+    for (const b of this.buildings) if (b.canvas) list.push({ y: b.base, d: () => ctx.drawImage(b.canvas, b.x, b.y) });
     for (const q of this.props) {
       if (q.until && s.flags[q.until]) continue;
       const c = img(q.sprite); if (!c) continue;
@@ -466,6 +500,8 @@ export class World {
     if (tuft) for (const q of this.tufts) list.push({ y: q.y, d: () => this.drawSwayRows(ctx, tuft, q.x, q.y, Math.sin(t * 1.6 + q.ph) * 1.5 + (q.rustle ? Math.sin(t * 20) * 1.5 : 0)) });
     const reed = img('p_reeds');
     if (reed) for (const q of this.reeds) list.push({ y: q.y + 6, d: () => this.drawSwayRows(ctx, reed, q.x, q.y + 6, Math.sin(t * 1.4 + q.ph) * 1.5 + (q.rustle ? Math.sin(t * 22) * 1.5 : 0)) });
+    for (const [lx, ly] of this.def.lanterns || []) list.push({ y: ly, d: () => this.drawLanternPost(ctx, lx, ly, t) });
+    for (const b of this.def.bunting || []) list.push({ y: -1e6 + 1, d: () => this.drawBunting(ctx, b, t) });
     for (const g of this.def.gates || []) if (!s.flags[g.openIf]) list.push({ y: g.rect[1] + g.rect[3], d: () => this.drawGate(ctx, g) });
     for (const n of this.npcs) list.push({ y: n.y + 10, d: () => this.drawNpc(ctx, n) });
     for (const n of this.extra) if (!n.hidden) list.push({ y: n.y + (n.sortOff || 10), d: () => (n.draw ? n.draw(ctx, n, t) : this.drawNpc(ctx, n)) });
@@ -573,6 +609,48 @@ export class World {
       ctx.globalAlpha = 0.5 + pulse * 0.5; drawFish(ctx, glow(v, '#FF3B3B'), e.x, e.y, opts); ctx.globalAlpha = 1;
     }
     drawFish(ctx, v, e.x, e.y, opts);
+  }
+  drawCritter(ctx, c, t) {
+    const x = Math.round(c.x), y = Math.round(c.y), dir = Math.cos(c.a) >= 0 ? 1 : -1;
+    if (c.kind === 'tadpole') {
+      ctx.fillStyle = '#2A1A12';
+      ctx.fillRect(x, y, 2, 2);
+      const w = Math.round(Math.sin(t * 14 + c.ph));
+      ctx.fillRect(x - dir, y + (w > 0 ? 0 : 1), 1, 1); ctx.fillRect(x - dir * 2, y + w + (w < 0 ? 1 : 0), 1, 1);
+      return;
+    }
+    ctx.fillStyle = 'rgba(207,244,255,0.75)';
+    for (let i = 0; i < 4; i++) {
+      const ox = Math.round(Math.cos(i * 1.7 + c.ph) * 6), oy = Math.round(Math.sin(i * 2.3 + c.ph + t) * 3);
+      ctx.fillRect(x + ox, y + oy, 2, 1);
+    }
+  }
+  // Highwater's lantern posts: a reed pole and a glow-moss lantern.
+  drawLanternPost(ctx, x, y, t) {
+    ctx.fillStyle = '#2A1A12'; ctx.fillRect(x - 1, y - 26, 3, 26);
+    ctx.fillStyle = '#8E6C42'; ctx.fillRect(x, y - 26, 1, 26);
+    ctx.fillStyle = '#2A1A12'; ctx.fillRect(x - 3, y - 34, 7, 9);
+    const k = (Math.sin(t * 2 + x) + 1) / 2;
+    ctx.fillStyle = k > 0.5 ? '#FFF1B0' : '#F7C948'; ctx.fillRect(x - 2, y - 33, 5, 7);
+    ctx.fillStyle = '#C9A24A'; ctx.fillRect(x - 2, y - 33, 5, 1);
+  }
+  drawLanternGlow(ctx, x, y, t) {
+    ctx.save();
+    ctx.globalAlpha = 0.10 + Math.sin(t * 2 + x) * 0.03;
+    ctx.fillStyle = '#FFF1B0';
+    ctx.beginPath(); ctx.arc(x, y - 30, 16, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  // A string of little flags between two points.
+  drawBunting(ctx, [x1, y1, x2, y2], t) {
+    const n = Math.round(Math.hypot(x2 - x1, y2 - y1) / 10);
+    const cols = ['#FF4FA3', '#F7C948', '#9FD8E0', '#7ED957', '#E5401F'];
+    for (let i = 0; i <= n; i++) {
+      const k = i / n, sag = Math.sin(k * Math.PI) * 10;
+      const x = Math.round(x1 + (x2 - x1) * k), y = Math.round(y1 + (y2 - y1) * k + sag + Math.sin(t * 2 + i) * 0.5);
+      ctx.fillStyle = '#2A1A12'; ctx.fillRect(x, y, 4, 1);
+      if (i % 1 === 0 && i < n) { ctx.fillStyle = cols[i % cols.length]; ctx.fillRect(x + 1, y + 1, 3, 2); ctx.fillRect(x + 2, y + 3, 1, 1); }
+    }
   }
   // A defeated fish: flips belly-up, fades and sinks, then it's gone.
   drawFaint(ctx, f) {

@@ -111,11 +111,14 @@ export const AREA_NAMES = {
   highwater: 'The Spillway and Highwater', murk: 'The Murk', ditch: 'The Sunken Ditch',
 };
 // Flags the story would have set on arriving in area n, and the expected level.
+// Below the level an area expects, fights there give x1.5 EXP ("Catch-up bonus!").
+export const CATCH_UP = { shallows: 3, reedwater: 5, highwater: 6, murk: 7, ditch: 8, mult: 1.5 };
+export const REEF_FRIENDS = 3;
 export const AREA_START = {
   village: { flags: [], level: 1 },
   shallows: { flags: ['metFinn'], level: 1 },
-  reedwater: { flags: ['metFinn', 'bubbleJoined', 'hbtLearned', 'stumpDone'], level: 3 },
-  highwater: { flags: ['metFinn', 'bubbleJoined', 'hbtLearned', 'stumpDone', 'trailFound'], level: 5 },
-  murk: { flags: ['metFinn', 'bubbleJoined', 'hbtLearned', 'stumpDone', 'trailFound', 'highwater', 'lantern'], level: 6 },
-  ditch: { flags: ['metFinn', 'bubbleJoined', 'hbtLearned', 'stumpDone', 'trailFound', 'highwater', 'lantern', 'gateOpen'], level: 8 },
+  reedwater: { flags: ['metFinn', 'bubbleJoined', 'hbtLearned', 'stumpDone', 'eastOpen'], level: 3 },
+  highwater: { flags: ['metFinn', 'bubbleJoined', 'hbtLearned', 'stumpDone', 'eastOpen', 'trailFound'], level: 5 },
+  murk: { flags: ['metFinn', 'bubbleJoined', 'hbtLearned', 'stumpDone', 'eastOpen', 'trailFound', 'highwater', 'lantern'], level: 6 },
+  ditch: { flags: ['metFinn', 'bubbleJoined', 'hbtLearned', 'stumpDone', 'eastOpen', 'trailFound', 'highwater', 'lantern', 'gateOpen'], level: 8 },
 };

@@ -220,3 +220,6 @@ body.short .pausebody .menu.col .btn { min-height: 48px; padding: 4px 6px; font-
 body.short .goal { margin-bottom: 5px; font-size: 0.95em; }
 body.short .friends { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
 body.short .friend canvas { width: 40px; height: 40px; }
+
+/* UI scale: text and panels grow with big screens (set in main.js resize as --ui) */
+#hud, #topbtns, #banner, #toasts, #hint, #prompt, #battleui, #dialog, .screen { zoom: var(--ui, 1); }

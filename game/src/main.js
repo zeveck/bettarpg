@@ -1,6 +1,6 @@
 // main.js: boot, scaling, the fixed-step loop, the modes (title, create,
 // world, battle, ending), every menu screen, saving, and the debug hook.
-import { PLAYER, ITEMS, ITEM_ORDER, ITEM_MAX, SUB_PRICE, INN_PRICE, AREAS, AREA_NAMES, AREA_START, REGULAR_KINDS,
+import { CATCH_UP, PLAYER, ITEMS, ITEM_ORDER, ITEM_MAX, SUB_PRICE, INN_PRICE, AREAS, AREA_NAMES, AREA_START, REGULAR_KINDS,
   ENEMIES, PEACE_PER_KIND, WORLD, PARTY } from './config.js';
 import { makeRng } from './battle.js';
 import * as audio from './audio.js';
@@ -66,6 +66,9 @@ function resize() {
   G.k = k;
   ctx.imageSmoothingEnabled = false;
   document.body.classList.toggle('short', ch < 500);
+  // bigger screens get bigger UI text and panels (phones stay at 1)
+  const ui = ch < 500 ? 1 : Math.max(1, Math.min(2, Math.floor(Math.min(cw / 1060, ch / 600) * 20) / 20));
+  document.documentElement.style.setProperty('--ui', ui);
   const portraitPhone = input.isTouch && ch > cw;
   $('rotate').hidden = !portraitPhone;
   // turning the phone upright just freezes the game (the loop skips updates)
@@ -236,6 +239,9 @@ G.afterBattle = async (scene, result) => {
         if (state.addItem(s, 'kelp', 1)) lines.push('Your new friend gives you a Kelp Snack!');
       }
     }
+    // catch-up: below the level this area expects, fights give x1.5 EXP
+    const want = CATCH_UP[G.world?.areaId];
+    if (want && s.level < want) { r.exp = Math.floor(r.exp * CATCH_UP.mult); lines.push('Catch-up bonus! x1.5 EXP'); }
     levels = state.addExp(s, r.exp);
     for (const L of levels) if (LEVEL_UP_LINES[L]) lines.push(LEVEL_UP_LINES[L]);
     if (scene.entity) {

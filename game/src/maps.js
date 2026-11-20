@@ -47,7 +47,7 @@ export const MAPS = {
     ],
     gates: [
       { id: 'south', rect: [478, 600, 68, 40], openIf: 'metFinn', look: 'weave' },
-      { id: 'east', rect: [1004, 246, 20, 148], openIf: 'stumpDone', look: 'reeds', talk: 'reefGate' },
+      { id: 'east', rect: [1004, 246, 20, 148], openIf: 'eastOpen', look: 'reeds', talk: 'reefGate' },
     ],
     exits: [
       { rect: [440, 632, 144, 20], to: 'shallows', entry: 'north' },
@@ -162,9 +162,15 @@ export const MAPS = {
     pathColor: 'stone',
     buildings: [
       { sprite: 'b_hwinn', x: 140, y: 62 },
+      { sprite: 'b_bubble', x: 380, y: 140, hue: -22 },
       { sprite: 'b_pip', x: 640, y: 112 },
+      { sprite: 'b_pip', x: 880, y: 112, hue: 160, sat: 0.55 },
       { sprite: 'b_lock', x: 1150, y: 92 },
+      { sprite: 'b_elder', x: 1300, y: 110, hue: -18 },
+      { sprite: 'b_bubble', x: 520, y: 128, hue: 12 },
     ],
+    lanterns: [[130, 360], [330, 360], [560, 360], [820, 360], [1050, 360], [1300, 360], [700, 440], [836, 440]],
+    bunting: [[300, 250, 640, 230], [744, 230, 880, 232], [984, 232, 1150, 236]],
     npcs: [
       { id: 'kelpie', sprite: 'kelpie', x: 360, y: 280, face: -1 },
       { id: 'pip', sprite: 'pip', x: 770, y: 262, face: -1 },
@@ -172,6 +178,10 @@ export const MAPS = {
       { id: 'folk1', sprite: 'folk1', x: 500, y: 380, face: 1 },
       { id: 'folk2', sprite: 'folk2', x: 960, y: 390, face: -1 },
       { id: 'folk3', sprite: 'folk3', x: 1340, y: 380, face: -1 },
+      { id: 'folk4', sprite: 'folk2', x: 620, y: 300, face: 1 },
+      { id: 'folk5', sprite: 'folk1', x: 1000, y: 290, face: -1 },
+      { id: 'folk6', sprite: 'folk3', x: 240, y: 400, face: 1 },
+      { id: 'folk7', sprite: 'pip', x: 940, y: 262, face: -1 },
     ],
     props: [
       { sprite: 'p_lip', x: 680, y: 780 }, { sprite: 'p_lip', x: 746, y: 780 }, { sprite: 'p_lip', x: 812, y: 780 }, { sprite: 'p_lip', x: 856, y: 780 },
@@ -185,6 +195,7 @@ export const MAPS = {
     spawns: [
       { kind: 'cich', lv: [5, 5], x: 400, y: 690 }, { kind: 'cich', lv: [5, 5], x: 1140, y: 640 },
       { kind: 'cich', lv: [5, 5], x: 480, y: 720 },
+      { kind: 'cich', lv: [5, 5], x: 760, y: 690 },
     ],
     bites: [[380, 650], [1180, 690], [768, 700]],
   },
@@ -235,7 +246,7 @@ export const MAPS = {
   },
 
   ditch: {
-    w: 1024, h: 640, music: 'murk', ambience: 'ambience_murk', battleBg: 'garpool', seed: 61, bank: 'concrete',
+    w: 1024, h: 640, music: 'murk', ambience: 'ambience_murk', battleBg: 'garpool', seed: 61, bank: 'concrete', poolEdge: true,
     shapes: [
       ['r', 40, 40, 944, 560, 3, 30],
       ['r', 450, 0, 124, 80, 3, 8],
@@ -247,6 +258,10 @@ export const MAPS = {
       { sprite: 'p_culvert', x: 985, y: 300, id: 'pipe', dark: true },
       { sprite: 'p_cage', x: 180, y: 470, id: 'cage', solid: true },
       { sprite: 'p_stem', x: 300, y: 200 }, { sprite: 'p_stones', x: 860, y: 560 },
+      { sprite: 'p_culvert', x: 60, y: 200, dark: true }, { sprite: 'p_culvert', x: 300, y: 70, dark: true },
+      { sprite: 'p_culvert', x: 780, y: 70, dark: true }, { sprite: 'p_culvert', x: 985, y: 520, dark: true },
+      { sprite: 'p_stones', x: 120, y: 580 }, { sprite: 'p_stones', x: 420, y: 590 }, { sprite: 'p_stem', x: 700, y: 590 },
+      { sprite: 'p_stem', x: 90, y: 330 }, { sprite: 'p_stones', x: 930, y: 150 },
     ],
     gates: [],
     exits: [{ rect: [450, -20, 124, 26], to: 'murk', entry: 'gate' }],

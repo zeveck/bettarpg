@@ -3,7 +3,7 @@
 // the cogs and the drain gate, the shadow in the Murk, the Gate Spring,
 // Mossy, the Gar, both endings and Peace in the Paddies.
 import { LINES, FRIEND_LINES, STORY, SPEAKERS } from './strings.js';
-import { WORLD, PLAYER, INN_PRICE, SUB_PRICE, ITEMS } from './config.js';
+import { WORLD, PLAYER, INN_PRICE, SUB_PRICE, ITEMS, REEF_FRIENDS } from './config.js';
 import { maxHp, maxMp, friendsTotal, peaceDone } from './state.js';
 import { img } from './assets.js';
 import { hatted, plain, fromCanvas, drawFish, tinted } from './sprites.js';
@@ -141,6 +141,10 @@ export function createStory(G) {
       case 'reef': {
         const first = !s.met.reef;
         s.met.reef = true;
+        if (f.stumpDone && !f.eastOpen) {
+          if (first) await G.say('reef', LINES.reef.find(([c]) => c === 'first')[1][0]);
+          return reefErrand();
+        }
         if (first) return sayAll('reef', LINES.reef.find(([c]) => c === 'first')[1].filter((l, i, a) => f.stumpDone ? i < a.length - 1 : true));
         return sayAll('reef', pick('reef'));
       }
@@ -156,7 +160,7 @@ export function createStory(G) {
         return G.openShop('pip');
       }
       case 'whorl': return whorlTalk();
-      case 'folk1': case 'folk2': case 'folk3': {
+      case 'folk1': case 'folk2': case 'folk3': case 'folk4': case 'folk5': case 'folk6': case 'folk7': {
         s.met[id] = true;
         return sayAll(id, pick(id));
       }
@@ -167,7 +171,8 @@ export function createStory(G) {
     const s = S(), f = s.flags;
     if (kind === 'reefGate') {
       if (!f.bubbleJoined) return G.say('reef', LINES.reefGateClosed.alone[0]);
-      return G.say('reef', LINES.reefGateClosed.stump[0]);
+      if (!f.stumpDone) return G.say('reef', LINES.reefGateClosed.stump[0]);
+      return reefErrand();
     }
     if (kind === 'culvertDark') return G.say('sign', STORY.culvertDark);
     if (kind === 'bundle') {
@@ -178,6 +183,18 @@ export function createStory(G) {
       if (s.cogs.length < 3) return G.say('sign', STORY.gateNeeds(s.cogs.length));
       return gateScene();
     }
+  }
+
+  // Reef opens the east gate once you have three friends.
+  async function reefErrand() {
+    const s = S(), f = s.flags, n = friendsTotal(s);
+    if (f.eastOpen) return;
+    if (n < REEF_FRIENDS) return G.say('reef', LINES.reefGateClosed.friends(n));
+    for (const l of LINES.reefGateClosed.open) await G.say('reef', l);
+    f.eastOpen = true;
+    G.sfx('shell_crack', { rate: 0.7 });
+    G.toast('The east reed gate is open!');
+    G.save();
   }
 
   async function whorlTalk() {
@@ -192,7 +209,7 @@ export function createStory(G) {
       G.sfx('item');
       G.toast('You got the drain-gate key and the glow-moss lantern!', 2600, 'i_lantern');
       G.save();
-      await G.say('whorl', lines[3]);
+      for (const l of lines.slice(3)) await G.say('whorl', l);
       return;
     }
     const after = pick('whorlAfter', LINES.whorlAfter);
@@ -368,7 +385,7 @@ export function createStory(G) {
       f.stumpDone = true; f.hbtLearned = true;
       G.save();
       await G.say('bubble', 'You did it! A friend in a party hat!');
-      await G.say('bubble', 'Let\'s go tell Captain Reef. He\'ll open the reed gate east!');
+      await G.say('bubble', 'Captain Reef guards the reed gate east. Let\'s make a couple more friends out here, then show him!');
     }
     if (e.kind === 'gar' && G.pendingEnding) {
       const ending = G.pendingEnding;

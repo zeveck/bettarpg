@@ -145,6 +145,12 @@ function render(def, W, H, gw, gh, depth, seed) {
         set(i, h < 0.05 ? path.dark : h > 0.95 ? path.light : path.base);
         continue;
       }
+      // the Ditch's pool: a concrete ledge where the deep pool meets the rest
+      if (def.poolEdge && d === 3 && [D(x + 1, y), D(x - 1, y), D(x, y + 1), D(x, y - 1), D(x + 2, y), D(x, y + 2), D(x - 2, y), D(x, y - 2)].includes(4)) {
+        const inner = [D(x + 1, y), D(x - 1, y), D(x, y + 1), D(x, y - 1)].includes(4);
+        set(i, inner ? bank.line : (x + y) % 6 === 0 ? bank.dark : bank.light);
+        continue;
+      }
       // water: checker-dither where two depths meet
       let c = DEPTH_COLORS[d];
       if ((x + y) % 2 === 0) {

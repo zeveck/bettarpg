@@ -1,0 +1,13 @@
+{
+  "area": 0, "name": "Paddy Village: from the title, create your betta and hear Elder Finn out (the south gate opens)",
+  "completes": "metFinn",
+  "policy": "fight",
+  "timeLimit": 120,
+  "steps": [
+    { "title": true },
+    { "say": true },
+    { "expect": { "metFinn": true, "area": "village" } },
+    { "path": [[400, 300], [512, 320], [512, 560], [512, 640]], "note": "through the south gate" },
+    { "expect": { "area": "shallows" } }
+  ]
+}

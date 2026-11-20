@@ -111,14 +111,14 @@ function loadOne(paths) {
 function toCanvas(im) {
   const c = document.createElement('canvas');
   c.width = im.naturalWidth || im.width; c.height = im.naturalHeight || im.height;
-  c.getContext('2d').drawImage(im, 0, 0);
+  c.getContext('2d', { willReadFrequently: true }).drawImage(im, 0, 0);
   return c;
 }
 
 function placeholder(p) {
   const c = document.createElement('canvas');
   c.width = p.w; c.height = p.h;
-  const g = c.getContext('2d');
+  const g = c.getContext('2d', { willReadFrequently: true });
   if (p.bg) {
     const gr = g.createLinearGradient(0, 0, 0, p.h);
     gr.addColorStop(0, p.c); gr.addColorStop(1, '#0E2A47');

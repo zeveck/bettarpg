@@ -9,9 +9,9 @@ const memo = (k, f) => { if (!cache.has(k)) cache.set(k, f()); return cache.get(
 export const clearSpriteCache = () => cache.clear();
 
 const mk = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
-const data = (c) => c.getContext('2d').getImageData(0, 0, c.width, c.height);
-const put = (c, d) => c.getContext('2d').putImageData(d, 0, 0);
-const copy = (c) => { const n = mk(c.width, c.height); n.getContext('2d').drawImage(c, 0, 0); return n; };
+const data = (c) => c.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, c.width, c.height);
+const put = (c, d) => c.getContext('2d', { willReadFrequently: true }).putImageData(d, 0, 0);
+const copy = (c) => { const n = mk(c.width, c.height); n.getContext('2d', { willReadFrequently: true }).drawImage(c, 0, 0); return n; };
 // A variant: a canvas plus where the base sprite's top-left sits inside it.
 const V = (canvas, ox = 0, oy = 0, bw, bh) => ({ canvas, ox, oy, bw: bw ?? canvas.width - ox, bh: bh ?? canvas.height - oy });
 
@@ -101,7 +101,7 @@ export function smallHat() {
     }
     if (x1 < 0) return null;
     const c = mk(x1 - x0 + 1, y1 - y0 + 1);
-    const src = data(hat), out = c.getContext('2d').createImageData(c.width, c.height);
+    const src = data(hat), out = c.getContext('2d', { willReadFrequently: true }).createImageData(c.width, c.height);
     for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
       if (!m[y * hat.width + x]) continue;
       const i = (y * hat.width + x) * 4, o = ((y - y0) * c.width + (x - x0)) * 4;
@@ -140,7 +140,7 @@ export function hatted(key, base = img(key)) {
     const hx = ht.x - Math.floor(hat.width / 2) + 1, hy = ht.y - hat.height + 2;
     const left = Math.min(0, hx), top = Math.min(0, hy);
     const c = mk(Math.max(base.width, hx + hat.width) - left, base.height - top);
-    const g = c.getContext('2d');
+    const g = c.getContext('2d', { willReadFrequently: true });
     g.drawImage(base, -left, -top);
     g.drawImage(hat, hx - left, hy - top);
     return V(c, -left, -top, base.width, base.height);
@@ -189,7 +189,7 @@ export function betta(stage, color = 'red', hat = false) {
 // A small crest plume in your color on the full-metal helmet (5 x 4 art px).
 function addPlume(c, plain, off, tint) {
   const t = headTop(plain, 0.38, 0.55);
-  const g = c.getContext('2d');
+  const g = c.getContext('2d', { willReadFrequently: true });
   const shape = ['.##..', '####.', '.####', '..###'];
   const dark = `rgb(${tint.map((v) => Math.round(v * 0.6)).join(',')})`;
   const lite = `rgb(${tint.map((v) => Math.min(255, Math.round(v * 1.15))).join(',')})`;
@@ -269,7 +269,7 @@ export function rim(v) {
   if (!v) return v;
   return memo(v.canvas, () => {
     const s = v.canvas, c = mk(s.width + 1, s.height + 1);
-    const g = c.getContext('2d'); g.drawImage(s, 1, 1);
+    const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(s, 1, 1);
     const d = data(c);
     const W = c.width, H = c.height;
     const out = new Uint8ClampedArray(d.data);
@@ -308,10 +308,10 @@ export function glow(v, color) {
   return memoObj(v.canvas, 'glow' + color, () => {
     const s = v.canvas, W = s.width + 4, H = s.height + 4;
     const c = mk(W, H);
-    c.getContext('2d').drawImage(s, 2, 2);
+    c.getContext('2d', { willReadFrequently: true }).drawImage(s, 2, 2);
     const d = data(c), [r, g, b] = hex(color);
     const solid = (x, y) => x >= 0 && y >= 0 && x < W && y < H && d.data[(y * W + x) * 4 + 3] >= 128;
-    const out = c.getContext('2d').createImageData(W, H);
+    const out = c.getContext('2d', { willReadFrequently: true }).createImageData(W, H);
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
       if (solid(x, y)) continue;
       let near1 = solid(x - 1, y) || solid(x + 1, y) || solid(x, y - 1) || solid(x, y + 1);
@@ -356,7 +356,7 @@ export function portrait(canvas, size = 24) {
     const c = mk(s, s);
     const sx = Math.max(0, x1 + 2 - s);
     const top = Math.max(0, Math.min(canvas.height - s, cy - Math.floor(s / 2)));
-    c.getContext('2d').drawImage(canvas, sx, top, s, s, 0, 0, s, s);
+    c.getContext('2d', { willReadFrequently: true }).drawImage(canvas, sx, top, s, s, 0, 0, s, s);
     return c;
   });
 }

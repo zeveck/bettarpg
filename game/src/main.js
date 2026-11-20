@@ -1085,7 +1085,7 @@ function stateSnapshot() {
 window.__game = {
   state: stateSnapshot,
   frames: () => G.frameLog.slice(),
-  buttons: () => [...document.querySelectorAll('button')].filter((b) => b.offsetParent !== null && !b.closest('[hidden]'))
+  buttons: () => [...document.querySelectorAll('button')].filter((b) => b.offsetParent !== null && !b.closest('[hidden]') && getComputedStyle(b).visibility !== 'hidden')
     .map((b) => { const r = b.getBoundingClientRect(); return { label: b.textContent.trim() || b.getAttribute('aria-label') || '', x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height), dim: b.classList.contains('dim'), focus: b.classList.contains('focus') }; }),
   audioState: () => audio.audioState(),
   levels: () => AREAS.length,

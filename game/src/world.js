@@ -429,7 +429,7 @@ export class World {
     for (const n of this.npcs) consider('npc', n, n.x, n.y);
     for (const n of this.extra) if (n.talk) consider('extra', n, n.x, n.y, n.talkRange || WORLD.talkRange);
     for (const f of this.friends) consider('friend', f, f.x, f.y, 26);
-    if (this.s.flags.bubbleJoined) consider('bubble', null, this.bubble.x, this.bubble.y, 22);
+    // Bubble only when nobody else is in reach (Bubble swims right beside you)
     for (const g of this.def.gates || []) {
       if (!g.talk || this.s.flags[g.openIf]) continue;
       const [x, y, w, h] = g.rect;
@@ -437,6 +437,7 @@ export class World {
       const d = Math.hypot(cx - p.x, cy - p.y);
       if (d < 26 && d < bd) { bd = d; best = { kind: 'gate', ref: g, x: x + w / 2, y: y }; }
     }
+    if (!best && this.s.flags.bubbleJoined) consider('bubble', null, this.bubble.x, this.bubble.y, 22);
     return best;
   }
 

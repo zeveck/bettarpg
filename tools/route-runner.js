@@ -137,6 +137,8 @@ async (page) => {
       }
       if (step.talk) {
         // talk, and try again if nothing answered (as a player would)
+        await clearDialogs();
+        await sleep(300);
         for (let tries = 0; tries < 3; tries++) {
           await press('Space');
           let answered = false;

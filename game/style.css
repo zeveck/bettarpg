@@ -180,8 +180,12 @@ body.inbattle #hint { align-items: flex-start; padding-top: calc(78px + var(--sa
 .setrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .setrow input[type=range] { width: 180px; accent-color: var(--gold); }
 .setrow input[type=range].focus { outline: 3px solid var(--gold); }
-.ctlgrid { display: grid; grid-template-columns: 1fr auto auto auto; gap: 4px 8px; align-items: center; }
-.ctlgrid .btn { min-height: 40px; padding: 2px 8px; }
+.controls { width: min(980px, 98vw); max-width: none; }
+.ctlgrid { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto minmax(0, 1fr) auto auto auto; gap: 4px 8px; align-items: center; }
+.ctlgrid > span { font-size: 0.9em; }
+.ctlgrid .btn { min-height: 40px; padding: 2px 6px; }
+body.short .ctlgrid .btn { min-height: 36px; }
+body.short .controls h2 { margin-bottom: 2px; }
 .note { color: var(--dim); margin: 4px 0; text-wrap: balance; }
 .howto p { line-height: 1.35; text-wrap: pretty; }
 .confirm p { text-align: center; text-wrap: balance; }

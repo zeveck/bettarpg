@@ -31,7 +31,7 @@ export const MAPS = {
       { sprite: 'b_mart', x: 438, y: 31 },
       { sprite: 'b_inn', x: 756, y: 35 },
       { sprite: 'b_bubble', x: 110, y: 420 },
-      { sprite: 'b_guard', x: 880, y: 70, foot: 0.3 },
+      { sprite: 'b_guard', x: 908, y: 62, foot: 0.3 },
       { sprite: 'b_southgate', x: 453, y: 518, arch: true },
     ],
     npcs: [

@@ -653,7 +653,7 @@ function openPause(page = null) {
   if (!inBattle) add('Save & quit to title', () => { G.save(); closePause(); quitToTitle(); });
   $('padLost').hidden = !G.padLost;
   show('pause');
-  nav.push({ id: 'pause', el: screenEl('pause'), back: () => (pausePage ? showPausePage(null) : closePause()) });
+  nav.push({ id: 'pause', el: screenEl('pause'), back: () => closePause() });
   showPausePage(page || (inBattle ? 'friends' : 'items'), !!page);
 }
 function closePause() {
@@ -713,7 +713,7 @@ function showPausePage(page, focusPage = false) {
     const gg = gc.getContext('2d'); gg.imageSmoothingEnabled = false; gg.fillStyle = '#2B7FC4'; gg.fillRect(0, 0, 48, 48);
     const gimg = s.flags.garFriend ? img('garsmallh') : img('garsmall');
     if (gimg) { if (!s.flags.garFriend) gg.globalAlpha = 0.35; gg.drawImage(gimg, Math.round((48 - gimg.width) / 2), Math.round((48 - gimg.height) / 2)); }
-    gf.append(gc, el('span', '', s.flags.garFriend ? 'The Gar<br>friend!' : '???<br>a lonely shadow'));
+    gf.append(gc, el('span', '', s.flags.garFriend ? 'The Gar<br>friend!' : '???<br>a&nbsp;lonely&nbsp;shadow'));
     grid.append(gf);
     p.append(grid);
     p.append(el('p', 'note', `Peace in the Paddies: befriend ${PEACE_PER_KIND} of each kind. Gar party: Friends ${total}/5.`));
@@ -769,7 +769,7 @@ function openControls() {
     const g = $('ctlList');
     const f = nav.focused()?.dataset?.slot;
     g.innerHTML = '';
-    g.append(el('b', '', 'Action'), el('b', '', 'Key'), el('b', '', 'Key 2'), el('b', '', 'Controller'));
+    for (let h = 0; h < 2; h++) g.append(el('b', '', 'Action'), el('b', '', 'Key'), el('b', '', 'Key 2'), el('b', '', 'Controller'));
     for (const a of input.controls.actions()) {
       g.append(el('span', '', escapeHtml(a.name) + (a.fixed ? ' <small class="note">(fixed)</small>' : '')));
       for (const slot of [0, 1]) {

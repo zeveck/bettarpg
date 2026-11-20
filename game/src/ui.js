@@ -32,11 +32,23 @@ export function makePanels() {
 export const nav = {
   stack: [],
   push(layer) {
+    const prev = this.top();
+    if (prev && prev.id !== layer.id) prev.lastFocus = this.focused(prev);
     this.stack = this.stack.filter((l) => l.id !== layer.id);
     this.stack.push(layer);
     setTimeout(() => { if (this.top() === layer && !layer.noAutoFocus) this.focusFirst(); }, 0);
   },
-  remove(id) { this.stack = this.stack.filter((l) => l.id !== id); },
+  remove(id) {
+    const wasTop = this.top()?.id === id;
+    this.stack = this.stack.filter((l) => l.id !== id);
+    // give focus back to where it was in the menu underneath
+    const t = this.top();
+    if (wasTop && t) setTimeout(() => {
+      if (this.top() !== t || this.focused(t)) return;
+      if (t.lastFocus && this.items(t).includes(t.lastFocus)) this.setFocus(t.lastFocus, false);
+      else if (!t.noAutoFocus) this.focusFirst();
+    }, 0);
+  },
   top() { return this.stack[this.stack.length - 1] || null; },
   has(id) { return this.stack.some((l) => l.id === id); },
   items(layer = this.top()) {

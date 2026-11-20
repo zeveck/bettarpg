@@ -43,6 +43,7 @@ async (page) => {
         await sleep(150); continue;
       }
       const b = s.inBattle;
+      if (s.menus.includes('banner') || s.menus.includes('credits') || s.dialog) { await press(s.dialog ? 'Space' : 'Enter'); await sleep(300); continue; }
       if (b.waiting) { await press('Enter'); await sleep(400); continue; }
       if (b.busy || b.over) { await sleep(120); continue; }
       if (b.turn === lastTurn) same++; else { same = 0; lastTurn = b.turn; }
@@ -90,7 +91,8 @@ async (page) => {
         await hold([]); await log(`battle ${s.inBattle.kind} L${s.inBattle.level} at ${s.player.x},${s.player.y}`); justFought = true;
         s = await battle(s.inBattle.scripted === 'stump' ? 'stump' : policy);
         await log(`after battle hp ${s.hp}/${maxHp(s.level)} L${s.level} friends ${s.friendsTotal}`);
-        if (s.area !== area0) await fail(`lost a battle (woke in ${s.area})`);
+        if (s.area !== area0 && !s.gameWon) await fail(`lost a battle (woke in ${s.area})`);
+        if (s.area !== area0) { await hold([]); return s; } // an ending took us home
         best = 1e9; bestAt = Date.now(); continue;
       }
       if (s.dialog || s.busy || s.menus.length) { await hold([]); if (s.menus.some((m) => !['dialog', 'banner', 'credits'].includes(m))) { await fail('unexpected menu ' + s.menus.join(',')); } s = await clearDialogs(); best = 1e9; bestAt = Date.now(); continue; }

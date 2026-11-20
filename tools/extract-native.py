@@ -629,7 +629,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--kept', action='store_true')
     ap.add_argument('--palette', action='store_true')
-    ap.add_argument('--src', default=os.path.join(ROOT, 'game/assets/original'))
+    ap.add_argument('--src', default=os.path.join(ROOT, 'source-art'))
     ap.add_argument('--dst', default=os.path.join(ROOT, 'game/assets/native/original'))
     ap.add_argument('--sheet')
     ap.add_argument('--targets')

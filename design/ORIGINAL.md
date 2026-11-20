@@ -47,7 +47,7 @@ Armor sprites change at L3/5/7. Befriending everything gives "PEACE IN THE PADDI
 - Smooth the early difficulty.
 - Cheat keys only in a debug mode (`?debug`), not in the public game.
 
-## Assets (all kept, copied to game/assets/original/)
+## Assets (all kept, copied to source-art/)
 
 | Asset | Keep? |
 |---|---|

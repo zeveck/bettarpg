@@ -715,7 +715,7 @@ So no single downscale works. The rules:
 
 ## Asset list
 
-Kept assets cost nothing (in `game/assets/original/`), and go through the kept-art
+Kept assets cost nothing (in `source-art/`), and go through the kept-art
 extraction first. Target sizes are art pixels (width unless marked "tall").
 
 | ID | What it is | Tool | Target size and format | Transparent | Animation | Priority |

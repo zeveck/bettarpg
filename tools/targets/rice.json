@@ -1,0 +1,6 @@
+[
+ {"name": "clump_a", "target": 24, "dim": "h", "out": ".gamegen/reextract/props/rice_a.png"},
+ {"name": "clump_b", "target": 24, "dim": "h", "out": ".gamegen/reextract/props/rice_b.png"},
+ {"name": "clump_c", "target": 24, "dim": "h", "out": ".gamegen/reextract/props/rice_c.png"},
+ {"name": "clump_d", "target": 24, "dim": "h", "out": ".gamegen/reextract/props/rice_d.png"}
+]

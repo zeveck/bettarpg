@@ -48,7 +48,7 @@ def rename(font, suffix):
             rec.string = s
 
 for wght in (400, 600):
-    f = TTFont(os.path.join(fonts, 'PixelifySans.ttf'))
+    f = TTFont(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fonts', 'PixelifySans.ttf'))
     st = instancer.instantiateVariableFont(f, {'wght': wght})
     square_b(st)
     rename(st, str(wght))

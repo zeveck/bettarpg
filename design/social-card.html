@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><style>
 @font-face { font-family: 'Pixelify Sans'; src: url('../game/fonts/PixelifySans.ttf'); }
-html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: #123a66; }
+html, body { font-variant-ligatures: none; font-feature-settings: 'liga' 0; margin: 0; width: 1200px; height: 630px; overflow: hidden; background: #123a66; }
 .bg { position: absolute; left: -48px; top: -40px; width: 1296px; height: 600px; image-rendering: pixelated; background: url('../game/assets/native/backdrops/title.png') center/cover; height: 710px; }
 .fish { position: absolute; left: 230px; top: 300px; width: 270px; image-rendering: pixelated; }
 .bub { position: absolute; left: 120px; top: 380px; width: 136px; image-rendering: pixelated; }
 .gar { position: absolute; right: 70px; top: 330px; width: 423px; image-rendering: pixelated; transform: scaleX(-1); }
 h1 { position: absolute; left: 0; right: 0; top: 70px; margin: 0; text-align: center; font: 600 120px 'Pixelify Sans'; color: #F7C948;
   text-shadow: 6px 6px 0 #2A1A12, -4px 0 0 #2A1A12, 0 -4px 0 #2A1A12, 4px 0 0 #2A1A12, 0 4px 0 #2A1A12; letter-spacing: 2px; }
+p, h1 { font-variant-ligatures: none !important; font-feature-settings: 'liga' 0 !important; }
 p { position: absolute; left: 0; right: 0; top: 215px; margin: 0; text-align: center; font: 40px 'Pixelify Sans'; color: #F4F1E6; text-shadow: 3px 3px 0 #0B1424; }
 </style></head><body>
 <div class="bg"></div>

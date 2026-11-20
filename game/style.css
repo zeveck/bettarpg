@@ -231,3 +231,35 @@ body.short .friend canvas { width: 40px; height: 40px; }
 
 /* UI scale: text and panels grow with big screens (set in main.js resize as --ui) */
 #hud, #topbtns, #banner, #toasts, #hint, #prompt, #battleui, #dialog, .screen { zoom: var(--ui, 1); }
+
+/* --- polish pass --- */
+/* even rows and buttons: a fixed icon box, fixed heights, no jump between rows */
+.item { min-height: 48px; }
+.item .ico, .row .btn .ico { width: 24px; height: 24px; object-fit: contain; flex: none; }
+.row .btn { height: 64px; min-height: 64px; overflow: hidden; }
+.row .btn .ico { width: 18px; height: 18px; }
+.row .btn small { font-size: 0.85em; }
+/* the tutorial hint: a pink pulse, never the gold of the focus outline */
+.row .btn.lit { box-shadow: 0 0 0 3px var(--pink), 0 0 14px var(--pink); animation: litpink 0.8s infinite alternate; }
+@keyframes litpink { to { box-shadow: 0 0 0 3px #FF9AD0, 0 0 22px var(--pink); } }
+/* the Dive / Up button: an arrow over a short word */
+.btn.dive { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; font-size: 0.8em; line-height: 1; }
+.btn.dive .ic { width: 14px; height: 14px; }
+/* How to play keeps one size between pages; the shop one width */
+.howto { width: min(600px, 96vw); min-height: 15em; display: flex; flex-direction: column; }
+.howto #howBody { flex: 1; }
+.shop { width: min(600px, 96vw); }
+#shopMsg { min-height: 1.2em; text-align: right; }
+/* friends cards: captions wrap inside their card */
+.friend span { min-width: 0; overflow-wrap: anywhere; }
+/* Controls: readable small print */
+.ctlgrid small, .ctlgrid .note { font-size: 0.85em; }
+/* phones: the Gar fight gets a one-line log and a compact party HUD; credits fit */
+body.short.garfight .log { min-height: calc(1.25em + 10px); }
+body.short.garfight .log div:not(:last-child) { display: none; }
+body.short.garfight #garBox { display: flex; align-items: center; gap: 10px; }
+body.short.garfight .friendsrow, body.short.garfight .meter { margin-top: 2px; }
+body.short.garfight .meter span { width: 14px; height: 18px; }
+body.short [data-screen=credits] .credits { max-height: 70%; padding: 6px 12px; font-size: 0.85em; }
+body.short #creditsBody { grid-template-columns: 1fr 1fr 1fr; }
+body.short [data-screen=credits] .credits h2 { display: none; }

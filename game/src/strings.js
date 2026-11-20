@@ -24,6 +24,8 @@ export function goalLine(s) {
     if (n >= 3) return 'Take the three cogs to the drain gate at the Murk\'s far end.';
     return `The Lock-Keeper's lantern will light the Murk. Find those three cogs. (${n}/3; Murk fish are Level 6 to 8)`;
   }
+  if (f.trailFound && f.highwater && s.level < 5) return `Grow strong in the spillway pools, then Whorl will lend you his lantern. (Level ${s.level}/5)`;
+  if (f.trailFound && f.highwater) return 'You\'re strong enough now: go back to Lock-Keeper Whorl for the lantern.';
   if (f.trailFound) return 'Up the spillway lies Highwater. Ask them about the shadow.';
   if (f.stumpDone && !f.eastOpen) {
     const n = Object.values(s.friends).reduce((a, b) => a + b, 0);

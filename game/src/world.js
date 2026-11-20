@@ -689,6 +689,7 @@ export class World {
     ctx.restore();
   }
   drawTag(ctx, e) {
+    if (!this.onScreen(e.x, e.y)) return;
     if (e.hidden) {
       // the reeds rustle where a fish hides
       for (const q of this.reeds) if (Math.hypot(q.x - e.x, q.y - e.y) < 22) q.rustle = 0.3;

@@ -3,7 +3,7 @@
 // the cogs and the drain gate, the shadow in the Murk, the Gate Spring,
 // Mossy, the Gar, both endings and Peace in the Paddies.
 import { LINES, FRIEND_LINES, STORY, SPEAKERS } from './strings.js';
-import { WORLD, PLAYER, INN_PRICE, SUB_PRICE, ITEMS, REEF_FRIENDS } from './config.js';
+import { WORLD, PLAYER, INN_PRICE, SUB_PRICE, ITEMS, REEF_FRIENDS, LANTERN_LEVEL } from './config.js';
 import { maxHp, maxMp, friendsTotal, peaceDone } from './state.js';
 import { img } from './assets.js';
 import { hatted, plain, fromCanvas, drawFish, tinted } from './sprites.js';
@@ -200,10 +200,16 @@ export function createStory(G) {
   async function whorlTalk() {
     const s = S(), f = s.flags;
     if (!f.lantern) {
-      s.met.whorl = true;
       const lines = LINES.whorl.find(([c]) => c === 'first')[1];
-      await G.say('whorl', lines[0]);
-      await G.say('whorl', lines[1]);
+      if (!s.met.whorl) { await G.say('whorl', lines[0]); await G.say('whorl', lines[1]); }
+      s.met.whorl = true;
+      f.highwater = true;
+      // the lantern only for a betta strong enough for the Murk
+      if (s.level < LANTERN_LEVEL) {
+        await G.say('whorl', `The Murk would swallow you whole at Level ${s.level}. Grow strong in the spillway pools first, then come back for the lantern. (Level ${s.level}/${LANTERN_LEVEL})`);
+        G.save();
+        return;
+      }
       await G.say('whorl', lines[2]);
       f.highwater = true; f.lantern = true;
       G.sfx('item');
@@ -345,7 +351,7 @@ export function createStory(G) {
       // the Gate Spring is your wake-up point from the moment you arrive
       f.springKnown = true; s.rest = 'spring'; G.save();
       G.toast('The Gate Spring bubbles nearby: you\'ll wake here if you fall.', 3000);
-      G.cutscene(() => G.say('bubble', 'A spring! If the old Gar beats us, we\'ll wake up right here. Swim into it for a good rest.'));
+      G.cutscene(() => G.say('bubble', 'A spring! If the old Gar beats us, we\'ll wake up right here. Swim in for a good long rest.'));
     }
     if (w.areaId === 'ditch' && !f.garDefeated && !f.garFriend) {
       const gar = w.extra.find((q) => q.id === 'gar');

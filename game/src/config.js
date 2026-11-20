@@ -114,6 +114,8 @@ export const AREA_NAMES = {
 // Below the level an area expects, fights there give x1.5 EXP ("Catch-up bonus!").
 export const CATCH_UP = { shallows: 3, reedwater: 5, highwater: 6, murk: 7, ditch: 8, mult: 1.5 };
 export const REEF_FRIENDS = 3;
+// Whorl hands over the lantern (the way into the Murk) from this level
+export const LANTERN_LEVEL = 5;
 export const AREA_START = {
   village: { flags: [], level: 1 },
   shallows: { flags: ['metFinn'], level: 1 },

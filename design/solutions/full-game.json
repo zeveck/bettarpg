@@ -740,11 +740,6 @@
    "say": true
   },
   {
-   "expect": {
-    "lantern": true
-   }
-  },
-  {
    "path": [
     [
      700,
@@ -1037,6 +1032,34 @@
   },
   {
    "say": true
+  },
+  {
+   "path": [
+    [
+     768,
+     380
+    ],
+    [
+     1000,
+     330
+    ],
+    [
+     1110,
+     290
+    ]
+   ],
+   "note": "Whorl again (Level 5: the lantern)"
+  },
+  {
+   "talk": true
+  },
+  {
+   "say": true
+  },
+  {
+   "expect": {
+    "lantern": true
+   }
   },
   {
    "key": "KeyH"

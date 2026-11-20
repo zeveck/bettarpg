@@ -62,6 +62,7 @@ export class BattleScene {
     $('eName').textContent = this.enemy.name;
     $('eLv').textContent = 'Lv ' + this.enemy.level;
     $('garBox').hidden = this.enemy.kind !== 'gar';
+    document.body.classList.toggle('garfight', this.enemy.kind === 'gar');
     $('bDive').hidden = !this.G.s.subOwned;
     $('bDive').onclick = (e) => { e.stopPropagation(); this.choose('dive'); };
     this.updateHud(true);
@@ -78,6 +79,7 @@ export class BattleScene {
   }
 
   end() {
+    document.body.classList.remove('garfight');
     $('battleui').hidden = true;
     nav.remove('battle');
   }
@@ -153,7 +155,13 @@ export class BattleScene {
     const it = [...row.children];
     const keep = it.find((b) => b.dataset.key === prevFocus);
     if (nav.top()?.id === 'battle') nav.setFocus(focus ? (it.find((b) => b.dataset.key === this.lit) || it[0]) : keep || it[0], false);
-    $('bDive').textContent = this.battle.p.dived ? 'Surface' : 'Dive';
+    const up = this.battle.p.dived;
+    const diveKey = up ? 'up' : 'dive';
+    if ($('bDive').dataset.k !== diveKey) {
+      $('bDive').dataset.k = diveKey;
+      $('bDive').innerHTML = `<svg viewBox="0 0 7 7" class="ic"><path d="${up ? 'M3 0h1v1h1v1h1v1h1v1H5v3H2V4H0V3h1V2h1V1h1z' : 'M2 0h3v3h2v1H6v1H5v1H4v1H3V6H2V5H1V4H0V3h2z'}"/></svg><span>${up ? 'Up' : 'Dive'}</span>`;
+      $('bDive').setAttribute('aria-label', up ? 'Surface' : 'Dive');
+    }
   }
 
   async choose(key) {
@@ -413,7 +421,7 @@ export class BattleScene {
     $('bMp').style.width = (100 * p.mp / p.mpMax) + '%';
     $('bMpT').textContent = `${p.mp}/${p.mpMax}`;
     $('eHp').style.width = (100 * Math.max(0, e.hp) / e.hpMax) + '%';
-    if (e.kind === 'gar') $('garFriends').textContent = `Friends ${this.G.friendsTotal()}/${PARTY.garFriendsNeeded}`;
+    if (e.kind === 'gar') { const n = this.G.friendsTotal(); $('garFriends').textContent = n >= PARTY.garFriendsNeeded ? `Friends ${n} (ready)` : `Friends ${n}/${PARTY.garFriendsNeeded}`; }
   }
 
   // ---------- finish ----------
@@ -461,7 +469,9 @@ export class BattleScene {
       this.G.vibrate(300, 0.4);
       this.fx.golden(p.x, p.y, 40, 2);
       this.log(`Level up! Now level ${L}! HP and MP restored.`);
-      this.battle.p.level = L;
+      const bp = this.battle.p;
+      bp.level = L; bp.hpMax = PLAYER.maxHp(L); bp.mpMax = PLAYER.maxMp(L); bp.hp = bp.hpMax; bp.mp = bp.mpMax;
+      this.updateHud(true);
       if ([3, 5, 7].includes(L)) {
         await this.wait(400);
         this.flash.player = 10;
@@ -542,7 +552,9 @@ export class BattleScene {
     const bgk = (BG[this.bgKey] || BG.shallows).find((k) => hasReal(k)) || BG[this.bgKey]?.[0] || 'bg_shallows';
     const bg = img(bgk);
     if (bg) {
-      const bx = Math.round((v.W - 864) / 2), by = Math.round(Math.min(0, (v.H - 400) * 0.35));
+      // anchored so the backdrop's floor meets the menu; any gap above is the top row stretched
+      const bx = Math.round((v.W - 864) / 2), by = Math.round(Math.min(0, L.bot + 12 - 400));
+      if (by > 0) ctx.drawImage(bg, 0, 0, bg.width, 1, bx, 0, 864, by);
       ctx.drawImage(bg, bx, by, 864, 400);
       if (this.bgKey !== bgk.replace('bg_', '') && this.bgKey === 'spillway' && !hasReal('bg_spillway')) { ctx.fillStyle = 'rgba(120,160,200,0.15)'; ctx.fillRect(0, 0, v.W, v.H); }
     }
@@ -563,8 +575,10 @@ export class BattleScene {
       const enter = Math.min(1, f.t * 2);
       // two staggered rows above the fighters, swimming in from the left
       const row = i % 2, col = Math.floor(i / 2);
-      const x = Math.round(36 + col * 74 + row * 37 - (1 - enter) * 260);
-      const y = Math.round(L.top + 26 + row * 26);
+      const short = document.body.classList.contains('short');
+      // on a phone they crowd in behind the fighters; on bigger screens, two rows under the HUD
+      const x = Math.round((short ? 30 + col * 56 + row * 28 : 36 + col * 74 + row * 37) - (1 - enter) * 260);
+      const y = Math.round(short ? L.py - 34 + row * 30 : L.top + 26 + row * 26);
       drawFish(ctx, R(fv), x, y + Math.round(Math.sin(t * 6 + i) * 2), { s: 2, sway: Math.sin(t * 10 + i), bob: 0 });
     });
     // Bubble

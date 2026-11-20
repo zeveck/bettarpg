@@ -162,7 +162,7 @@ export function visibleScreens() { return [...document.querySelectorAll('[data-s
 export function drawPortrait(canvas, sprite, bg = '#2B7FC4') {
   const g = canvas.getContext('2d');
   g.imageSmoothingEnabled = false;
-  g.fillStyle = bg; g.fillRect(0, 0, canvas.width, canvas.height);
+  g.fillStyle = bg === '#2B7FC4' ? '#1D3049' : bg; g.fillRect(0, 0, canvas.width, canvas.height);
   if (!sprite) return;
   const p = portrait(sprite, 24);
   if (!p) return;
@@ -278,12 +278,14 @@ export function dialogTap() { if (dlg && !(dlg.done && dlg.choices)) dlg.advance
 
 // Fill text templates with the player's current controls.
 export function withKeys(text) {
-  return escapeHtml(text)
-    .replace('{swim}', label('move'))
-    .replace('{talk}', label('talk'))
-    .replace('{home}', label('home'))
-    .replace('{items}', label('items'))
-    .replace('{pause}', label('pause'));
+  // a label that starts a sentence starts with a capital; one inside a sentence doesn't
+  const sub = (s, key, html) => s.replace(new RegExp('(^|[.!?] )?\\{' + key + '\\}', 'g'), (m, start) => {
+    const h = !start && m.startsWith('{') && s.indexOf(m) > 0 ? html.replace(/^The /, 'the ') : html;
+    return (start || '') + h;
+  });
+  let s = escapeHtml(text);
+  for (const [k, a] of [['swim', 'move'], ['talk', 'talk'], ['home', 'home'], ['items', 'items'], ['pause', 'pause']]) s = sub(s, k, label(a));
+  return s;
 }
 
 // Fade to a word and back.

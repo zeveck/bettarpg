@@ -170,8 +170,9 @@ export const input = {
 
   padType() {
     const id = this.padId || '';
-    if (/054c|dualsense|dualshock|playstation|wireless controller/i.test(id)) return 'ps';
+    if (/045e|xbox|xinput/i.test(id)) return 'xbox';
     if (/057e|pro controller|joy-con/i.test(id)) return 'nintendo';
+    if (/054c|dualsense|dualshock|playstation|wireless controller/i.test(id)) return 'ps';
     return 'xbox';
   },
   padStandard() {
@@ -224,7 +225,7 @@ export function label(action, device = input.device) {
     return p.length ? padCap(p[0]) : '';
   }
   if (device === 'touch') {
-    return { move: 'Drag on the left side', talk: 'Tap Talk', items: 'Pause, then Items', home: 'the Home button', pause: 'the Pause button', mute: 'the speaker button' }[action] || '';
+    return { move: 'Drag on the left side of the screen', talk: 'The Talk button', items: 'Pause, then Items', home: 'The Home button', pause: 'The Pause button', mute: 'The speaker button' }[action] || '';
   }
   if (action === 'move') {
     const k = ['up', 'left', 'down', 'right'].map((a) => input.controls.keys(a)[0]);

@@ -136,7 +136,7 @@ export function hatted(key, base = img(key)) {
     }
     const hat = smallHat() || img('partyhat');
     if (!hat) return V(base);
-    const ht = headTop(base);
+    const ht = key === 'garboss' ? headTop(base, 0.8, 0.93) : headTop(base);
     const hx = ht.x - Math.floor(hat.width / 2) + 1, hy = ht.y - hat.height + 2;
     const left = Math.min(0, hx), top = Math.min(0, hy);
     const c = mk(Math.max(base.width, hx + hat.width) - left, base.height - top);

@@ -80,7 +80,7 @@ G.cssToLogicalX = (x) => ((x - cssRect.left) * G.view.W) / cssRect.width;
 G.sfx = (name, opts) => audio.play(name, opts);
 G.friendsTotal = () => state.friendsTotal(G.s);
 G.friendKinds = () => REGULAR_KINDS.filter((k) => G.s.friends[k] > 0);
-G.playerCanvas = () => betta(PLAYER.armorStage(G.s.level), G.s.color, false)?.canvas;
+G.playerCanvas = () => betta(PLAYER.armorStage(G.s.level), G.s.color, !!G.s.wearHat)?.canvas;
 G.busy = () => G.busyCount > 0;
 G.player = () => G.world.player;
 G.world = null;
@@ -272,6 +272,17 @@ G.leaveBattle = async (scene) => {
   if (scene.left) return; // never twice for one battle
   scene.left = true;
   const result = scene.battle.over;
+  // Peace in the Paddies: its banner over the battle, before the world shows again
+  if (result === 'friend' && !G.s.flags.peace && state.peaceDone(G.s)) await G.story.checkPeace();
+  if (G.pendingEnding) {
+    // the last battle fades straight into the ending: no world in between
+    await fade(true);
+    scene.end(); G.battle = null; G.mode = 'world'; showWorldUI(false);
+    G.world.safeT = WORLD.safeAfterBattle;
+    G.save();
+    await G.story.afterBattle(result, scene);
+    return;
+  }
   await G.transition(async () => {
     scene.end();
     G.battle = null;
@@ -307,7 +318,7 @@ G.defeat = async (scene) => {
 
 // ---------- the ending ----------
 G.playEnding = async (kind) => {
-  await fade(true, '');
+  if (!$('fade').classList.contains('on')) await fade(true, '');
   G.mode = 'ending';
   showWorldUI(false);
   G.ending = { kind, t: 0, fx: new Particles() };
@@ -413,6 +424,10 @@ async function interact() {
   if (Math.abs(it.x - p.x) > 4) p.face = it.x > p.x ? 1 : -1;
   if (it.ref && 'face' in it.ref && it.kind !== 'gate') it.ref.face = p.x > it.ref.x ? 1 : -1;
   p.vx = 0; p.vy = 0;
+  if (it.ref && it.kind !== 'gate') {
+    const d = Math.hypot(p.x - it.x, p.y - it.y);
+    if (d < 26) { const k = (26 - d) / (d || 1); const nx = p.x + (p.x - it.x || -p.face) * k, ny = p.y + (p.y - it.y) * k; if (G.world.free(nx + p.face * 8, ny, 7)) { p.x = nx; p.y = ny; } }
+  }
   await G.cutscene(() => G.story.talk(it));
   G.save();
 }
@@ -546,7 +561,7 @@ function cleanName(v) { return v.replace(/[^A-Za-z0-9 '\-]/g, '').replace(/\s+/g
 function drawCreatePreview(dt) {
   const c = $('createPreview'); if (!c || screenEl('create').hidden) return;
   const g = c.getContext('2d'); g.imageSmoothingEnabled = false;
-  g.fillStyle = '#2B7FC4'; g.fillRect(0, 0, 120, 84);
+  g.fillStyle = '#1D3049'; g.fillRect(0, 0, 120, 84);
   const t = performance.now() / 1000;
   const v = bettaSwim([0, 1, 0, 3][Math.floor(t * 7) % 4], createColor) || betta(0, createColor);
   drawFish(g, v, 60, 42 + Math.round(Math.sin(t * 2)) * 2, { s: 2, flip: false });
@@ -638,7 +653,8 @@ G.openShop = (who) => new Promise((resolve) => {
   show('shop');
   const done = () => { hide('shop'); nav.remove('shop'); resolve(); };
   $('shopDone').onclick = (e) => { e.stopPropagation(); audio.blip('back'); done(); };
-  nav.push({ id: 'shop', el: screenEl('shop'), back: done });
+  const opened = performance.now();
+  nav.push({ id: 'shop', el: screenEl('shop'), back: done, keys: (ev) => performance.now() - opened < 300 && (ev.menu === 'confirm' || ev.action === 'talk') });
 });
 
 G.innOffer = async (inn) => {
@@ -744,10 +760,10 @@ function showPausePage(page, focusPage = false) {
     const gg = gc.getContext('2d'); gg.imageSmoothingEnabled = false; gg.fillStyle = '#2B7FC4'; gg.fillRect(0, 0, 48, 48);
     const gimg = s.flags.garFriend ? img('garsmallh') : img('garsmall');
     if (gimg) { if (!s.flags.garFriend) gg.globalAlpha = 0.35; gg.drawImage(gimg, Math.round((48 - gimg.width) / 2), Math.round((48 - gimg.height) / 2)); }
-    gf.append(gc, el('span', '', s.flags.garFriend ? 'The Gar<br>friend!' : '???<br>a&nbsp;lonely&nbsp;shadow'));
+    gf.append(gc, el('span', '', s.flags.garFriend ? 'The Gar<br>friend!' : '???<br>lonely shadow'));
     grid.append(gf);
     p.append(grid);
-    p.append(el('p', 'note', `Peace in the Paddies: befriend ${PEACE_PER_KIND} of each kind. Gar party: Friends ${total}/5.`));
+    p.append(el('p', 'note', `Peace in the Paddies: befriend ${PEACE_PER_KIND} of each kind. Gar party: ${total >= 5 ? `ready (Friends ${total})` : `Friends ${total}/5`}.`));
   } else {
     p.append(el('h3', '', escapeHtml(G.s.name)));
     p.append(el('p', 'note', `Level ${s.level} · EXP ${s.exp}/${s.level < 10 ? PLAYER.expToNext(s.level) : '-'} · ${s.bb} Betta Bites`));
@@ -816,12 +832,12 @@ function openControls() {
       for (const slot of [0, 1]) {
         const k = a.keys[slot];
         if (a.fixed) { g.append(el('span', '', k ? keyCap(k) : '')); continue; }
-        const b = button(k ? keyCap(k) : '<small>add</small>', () => startCapture('key', a.id, slot), 'btn');
+        const b = button(k ? keyCap(k) : '<small>Add</small>', () => startCapture('key', a.id, slot), 'btn');
         b.dataset.slot = a.id + 'k' + slot;
         g.append(b);
       }
       if (a.fixed) { g.append(el('span', '', a.pad.length ? padCap(a.pad[0]) : '')); continue; }
-      const pb = button(a.pad.length ? padCap(a.pad[0]) : '<small>none</small>', () => startCapture('pad', a.id, 0), 'btn');
+      const pb = button(a.pad.length ? padCap(a.pad[0]) : '<small>None</small>', () => startCapture('pad', a.id, 0), 'btn');
       pb.dataset.slot = a.id + 'p';
       g.append(pb);
     }
@@ -832,6 +848,7 @@ function openControls() {
   note.push('Menus always use Enter, Space or ✕ to choose and Esc, Backspace or ○ to go back.'.replace('✕', 'A/✕').replace('○', 'B/○'));
   if (window.gameReport?.shown()) note.push('Ctrl+Shift+F: report a bug.');
   if (input.padConnected && !input.padStandard()) note.push('Controllers work best in Chrome or Edge.');
+  if (input.isTouch) note.push('Touch controls (the stick, Talk and the on-screen buttons) stay as they are.');
   $('ctlNote').textContent = note.join(' ');
   $('ctlMsg').textContent = 'Choose a key to change it.';
   const startCapture = (kind, action, slot) => {
@@ -880,7 +897,7 @@ function openHowTo() {
     $('howBody').innerHTML = c.body.map((b) => `<p>${withKeys(b)}</p>`).join('');
     $('howPage').textContent = `${i + 1}/${HOW_TO_PLAY.length}`;
     $('howNext').textContent = i < HOW_TO_PLAY.length - 1 ? 'Next' : 'Done';
-    $('howPrev').textContent = i > 0 ? 'Previous' : 'Back';
+    $('howPrev').textContent = 'Back';
   };
   const done = () => { hide('howto'); nav.remove('howto'); };
   $('howNext').onclick = (e) => { e.stopPropagation(); audio.blip('select'); if (i < HOW_TO_PLAY.length - 1) { i++; render(); } else done(); };
@@ -896,18 +913,19 @@ function openCredits(kind) {
     const s = G.s;
     const c = (role, name) => `<div><p class="role">${role}</p><p>${name}</p></div>`;
     $('creditsBody').innerHTML = [
-      `<div style="grid-column: 1 / -1"><p>${kind === 'friend' ? 'The friendship ending: the old Gar has a village now.' : 'The fins ending: the paddies are safe.'} ${escapeHtml(s.name)} · Level ${s.level} · Friends ${state.friendsTotal(s)}${s.flags.garFriend ? ' + the Gar' : ''}</p></div>`,
+      `<div style="grid-column: 1 / -1"><p>${kind === 'friend' ? 'The friendship ending: the old Gar has a village now.' : 'The fins ending: the paddies are safe.'} <span style="white-space:nowrap">${escapeHtml(s.name)} · Level&nbsp;${s.level} · Friends&nbsp;${state.friendsTotal(s)}${s.flags.garFriend ? ' + the&nbsp;Gar' : ''}</span></p></div>`,
       c('Idea and original game by', 'Rich Conlan'),
       c('Original sprites', 'from the original Betta Fish RPG'),
       c('Remake', 'made with gamegen (Claude)'),
       c('New art, music and sounds', 'generated, finished in code'),
       c('Font', 'Pixelify Sans (SIL&nbsp;OFL)'),
-      `<div><p class="role">Thanks for playing!</p><p>${kind === 'fins' ? 'Maybe the old Gar would like a party...' : 'Party on, little fish.'}</p></div>`,
+      `<div><p class="role">Thanks for playing!</p><p>${kind === 'fins' ? 'Maybe the old Gar would like a&nbsp;party.' : 'Party on, little fish.'}</p></div>`,
     ].join('');
     show('credits');
     const done = () => { hide('credits'); nav.remove('credits'); resolve(); };
     $('creditsOk').onclick = (e) => { e.stopPropagation(); audio.blip('select'); done(); };
     nav.push({ id: 'credits', el: screenEl('credits'), back: done });
+    setTimeout(() => { screenEl('credits').querySelector('.card').scrollTop = 0; }, 40);
   });
 }
 
@@ -989,6 +1007,8 @@ function setupTouch() {
     else input.setDevice('touch');
     if (e.target === cv && G.mode === 'title' && !nav.top()) openTitle();
   }, true);
+  // a tap on the picture moves dialogue on too (endings, scenes)
+  cv.addEventListener('pointerdown', () => { if (!$('dialog').hidden) ui.dialogTap(); });
   cv.addEventListener('click', () => {
     if (G.mode === 'battle' && G.battle?.continueBtn) { ui.press(G.battle.continueBtn); return; }
     if (G.canTalkNow() && G.world.interactTarget()) interact();
@@ -1153,6 +1173,7 @@ async function boot() {
   input.init(controls);
   input.listener = onInput;
   input.onDevice = () => { promptKey = ''; updateTitlePress(); };
+  addEventListener('gamepadconnected', () => { G.padLost = false; $('padLost').hidden = true; });
   input.onPadLost = () => {
     if (G.mode !== 'world' && G.mode !== 'battle') return;
     G.padLost = true; openPause();

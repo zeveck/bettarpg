@@ -5,7 +5,7 @@
 session="$1"; shift
 here="$(cd "$(dirname "$0")" && pwd)"
 for r in "$@"; do
-  playwright-cli -s="$session" run-code "async page => { const c = await page.context().newCDPSession(page); await c.send('Network.setCacheDisabled', {cacheDisabled: true}); await page.reload(); await page.waitForTimeout(2000); }" >/dev/null 2>&1
+  playwright-cli -s="$session" run-code "async page => { const c = await page.context().newCDPSession(page); await c.send('Network.enable'); await c.send('Network.clearBrowserCache'); await c.send('Network.setCacheDisabled', {cacheDisabled: true}); await page.reload(); await page.waitForTimeout(2000); }" >/dev/null 2>&1
   start=$(date +%s)
   out="$(timeout 600 "$here/play-route.sh" "$r" "$session")"
   end=$(date +%s)

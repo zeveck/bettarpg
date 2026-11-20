@@ -552,7 +552,10 @@ export class BattleScene {
       if (f.t < 0) return;
       const fv = hatted(ENEMIES[f.kind]?.sprite || 'guppy');
       const enter = Math.min(1, f.t * 2);
-      const x = Math.round(L.px - 40 - (i % 3) * 40 - (1 - enter) * 200), y = L.py - 50 + Math.floor(i / 3) * 90 - (i % 2) * 14;
+      // two staggered rows above the fighters, swimming in from the left
+      const row = i % 2, col = Math.floor(i / 2);
+      const x = Math.round(36 + col * 74 + row * 37 - (1 - enter) * 260);
+      const y = Math.round(L.top + 26 + row * 26);
       drawFish(ctx, R(fv), x, y + Math.round(Math.sin(t * 6 + i) * 2), { s: 2, sway: Math.sin(t * 10 + i), bob: 0 });
     });
     // Bubble

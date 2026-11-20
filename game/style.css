@@ -25,6 +25,7 @@ html, body {
   touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
   font-family: 'Pixelify Sans', monospace; color: var(--ink); font-size: var(--fs);
   -webkit-tap-highlight-color: transparent;
+  font-variant-ligatures: none; font-feature-settings: 'liga' 0, 'clig' 0;
 }
 body.short { --fs: 15px; }
 #game { position: fixed; inset: 0; overflow: hidden; }
@@ -32,7 +33,7 @@ body.short { --fs: 15px; }
 .layer { position: absolute; inset: 0; pointer-events: none; }
 .layer > * { pointer-events: auto; }
 [hidden] { display: none !important; }
-button { font: inherit; color: inherit; }
+button, input { font: inherit; color: inherit; font-variant-ligatures: none; font-feature-settings: 'liga' 0, 'clig' 0; }
 
 /* panels: the 9-slice image is made in code (ui.js) and set as --panel-img */
 .panel {
@@ -211,3 +212,9 @@ body.short .menu.col .btn { min-height: 44px; }
 body.short .titlewrap { gap: 5px; }
 body.short .dlgbox { min-height: 88px; }
 body.short .portrait.big { width: 56px; height: 56px; }
+body.short .pause { width: min(820px, 98vw); }
+body.short .pausebody .menu.col { display: grid; grid-template-columns: 1fr 1fr; width: 300px; align-content: start; gap: 5px; }
+body.short .pausebody .menu.col .btn { min-height: 48px; padding: 4px 6px; font-size: 0.9em; }
+body.short .goal { margin-bottom: 5px; font-size: 0.95em; }
+body.short .friends { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+body.short .friend canvas { width: 40px; height: 40px; }

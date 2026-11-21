@@ -137,6 +137,9 @@ export const AREA_NAMES = {
 export const CATCH_UP = { shallows: 3, reedwater: 5, highwater: 6, murk: 7, ditch: 8, mult: 1.5 };
 export const REEF_FRIENDS = 3;
 export const SPILLWAY_SPRING = { x: 700, y: 836 };
+// The friends' parade: breadcrumbs every 4 px, keep 80; Bubble at crumb 6, friend i at 6 + 5i
+export const PARADE = { max: 6, order: ['guppy', 'angel', 'cat', 'nymph', 'cich', 'cray', 'snarl'], crumbPx: 4, keep: 80,
+  bubbleCrumb: 6, spacing: 5, snarlExtra: 4, garExtra: 12, idleAfter: 0.5, cityBelowY: 470, waitAt: { x: 768, y: 400 } };
 // Whorl hands over the lantern (the way into the Murk) from this level
 export const LANTERN_LEVEL = 5;
 export const AREA_START = {

@@ -1,6 +1,6 @@
 // main.js: boot, scaling, the fixed-step loop, the modes (title, create,
 // world, battle, ending), every menu screen, saving, and the debug hook.
-import { CATCH_UP, PLAYER, ITEMS, ITEM_ORDER, ITEM_MAX, SUB_PRICE, INN_PRICE, AREAS, AREA_NAMES, AREA_START, REGULAR_KINDS,
+import { maxLevel, NGPLUS, CATCH_UP, PLAYER, ITEMS, ITEM_ORDER, ITEM_MAX, SUB_PRICE, INN_PRICE, AREAS, AREA_NAMES, AREA_START, REGULAR_KINDS,
   ENEMIES, PEACE_PER_KIND, WORLD, PARTY } from './config.js';
 import { makeRng } from './battle.js';
 import * as audio from './audio.js';
@@ -129,7 +129,7 @@ G.tweenProp = (p, x, y, dur) => new Promise((r) => {
 G.save = () => {
   const s = G.s;
   if (G.world && G.mode === 'world') { s.area = G.world.areaId; s.pos = { x: Math.round(G.world.player.x), y: Math.round(G.world.player.y) }; }
-  state.store(s);
+  state.storeSlot(G.slot || 1, s);
 };
 function saveSettings() {
   state.storeSettings({ ...G.settings, ...audio.audioSettings() });
@@ -151,7 +151,7 @@ G.hintOnce = (key) => {
 };
 
 // ---------- areas ----------
-const REST = { village: ['village', 'inn'], highwater: ['highwater', 'inn'], spring: ['ditch', 'spring'] };
+const REST = { village: ['village', 'inn'], highwater: ['highwater', 'inn'], spring: ['ditch', 'spring'], steps: ['highwater', 'steps'] };
 
 G.transition = async (fn, dur = 0.32) => {
   if (G.wipe) { await fn(); return; }
@@ -211,7 +211,9 @@ G.startBattle = async ({ enemy = null, kind, level, edge = false, scripted = nul
     // the lesson (first Attack dodged, Bubble Blast hint) fires on your first fight, whichever fish it is
     scripted = enemy.stump ? 'stump' : !G.s.flags.tutorialDone && kind !== 'gar' ? 'tutorial' : null;
   }
-  const bg = kind === 'gar' ? 'garpool' : (G.world.def.battleBg || 'shallows');
+  const bg = kind === 'gar' ? 'garpool' : kind === 'snarl' ? 'spillway' : (G.world.def.battleBg || 'shallows');
+  // New Game+: the Gar remembers how the last run ended
+  if (kind === 'gar') G.garMemory = (G.s.ngPlus || 0) >= 1 ? G.s.lastEnding : null;
   input.releaseAll();
   ui.hideHint();
   await G.transition(async () => {
@@ -240,7 +242,7 @@ G.afterBattle = async (scene, result) => {
       }
     }
     // catch-up: below the level this area expects, fights give x1.5 EXP
-    const want = CATCH_UP[G.world?.areaId];
+    const want = CATCH_UP[G.world?.areaId] && CATCH_UP[G.world.areaId] + NGPLUS.bonus(s.ngPlus || 0);
     if (want && s.level < want) { r.exp = Math.floor(r.exp * CATCH_UP.mult); lines.push('Catch-up bonus! x1.5 EXP'); }
     levels = state.addExp(s, r.exp);
     for (const L of levels) if (LEVEL_UP_LINES[L]) lines.push(LEVEL_UP_LINES[L]);
@@ -255,9 +257,12 @@ G.afterBattle = async (scene, result) => {
     }
     if (scene.battle.scripted === 'tutorial') s.flags.tutorialDone = true;
     if (e.kind === 'gar') {
-      G.pendingEnding = (result === 'friend' ? !s.endingsSeen.friend : !s.endingsSeen.fins) ? (result === 'friend' ? 'friend' : 'fins') : null;
+      // an ending you haven't seen, or the first Gar result of this run (New Game+ plays it again)
+      const firstThisRun = !s.flags.garDefeated && !s.flags.garFriend;
+      G.pendingEnding = (firstThisRun || (result === 'friend' ? !s.endingsSeen.friend : !s.endingsSeen.fins)) ? (result === 'friend' ? 'friend' : 'fins') : null;
       if (result === 'friend') s.flags.garFriend = true; else s.flags.garDefeated = true;
       if (!s.ending) s.ending = result === 'friend' ? 'friend' : 'fins';
+      s.lastEnding = result === 'friend' ? 'friend' : 'fins';
     }
     G.save();
   } else if (result === 'lose') {
@@ -396,7 +401,7 @@ function updateHud() {
   if (key === hudKey) return;
   hudKey = key;
   $('hudName').textContent = s.name;
-  $('hudLv').textContent = 'Lv ' + s.level;
+  $('hudLv').textContent = 'Lv ' + s.level + ((s.ngPlus || 0) >= 1 ? '+' : '');
   const hm = PLAYER.maxHp(s.level), mm = PLAYER.maxMp(s.level);
   $('hudHp').style.width = (100 * s.hp / hm) + '%'; $('hudHpT').textContent = `${s.hp}/${hm}`;
   $('hudMp').style.width = (100 * s.mp / mm) + '%'; $('hudMpT').textContent = `${s.mp}/${mm}`;
@@ -491,16 +496,20 @@ function drawTitle(dt) {
 
 function openTitle() {
   G.mode = 'title';
-  G.titleSave = state.load();
+  const last = state.lastSlot();
+  G.titleSave = last ? state.loadSlot(last) : null;
   showWorldUI(false);
   $('battleui').hidden = true;
   const m = $('titleMenu');
   m.innerHTML = '';
-  if (G.titleSave) m.append(button('Continue', () => continueGame(), 'btn primary'));
-  m.append(button('New Game', async () => {
-    if (state.saveExists()) { if (!(await G.confirm(state.load() ? 'Start a new game? Your saved game will be replaced.' : 'Your saved game could not be read (a copy is kept). Start a new game?'))) return; }
-    openCreate();
+  // Continue: the last-played slot; New Game+ when that slot has finished an ending
+  if (G.titleSave) m.append(button('Continue', () => continueGame(last), 'btn primary'));
+  if (state.finishedGame(G.titleSave)) m.append(button('New Game+', () => openSlots('ngplus', last)));
+  m.append(button('New Game', () => {
+    // nothing saved yet: straight to Create in slot 1; otherwise choose the slot
+    if (!state.SLOTS.some((n) => state.slotExists(n))) { G.newSlot = 1; openCreate(); } else openSlots('new');
   }, 'btn' + (G.titleSave ? '' : ' primary')));
+  if (state.SLOTS.some((n) => state.slotExists(n))) m.append(button('Load', () => openSlots('load')));
   m.append(button('How to play', () => openHowTo()));
   m.append(button('Settings', () => openSettings()));
   updateTitlePress();
@@ -518,11 +527,12 @@ function updateTitlePress() {
 }
 const screenEl = ui.screenEl;
 
-async function continueGame() {
-  const s = state.load();
+async function continueGame(slot) {
+  const s = state.loadSlot(slot);
   if (!s) return;
   G.s = s;
-  hide('title'); nav.remove('title');
+  G.slot = slot;
+  for (const id of ['title', 'slots']) { hide(id); nav.remove(id); }
   G.worldRng = makeRng(Date.now() & 0xffff);
   try {
     // a position that isn't open water falls back to the area's main entry
@@ -535,6 +545,79 @@ async function continueGame() {
     G.wipe = null;
     await G.enterArea('village', 'home', { wipe: false });
   }
+}
+
+// ---------- save slots: Load, New Game, New Game+ ----------
+const firstEmptySlot = () => state.SLOTS.find((n) => !state.slotExists(n)) || null;
+const AREA_SHORT = { village: 'Paddy Village', shallows: 'The Shallows', reedwater: 'Reedwater', highwater: 'Highwater', murk: 'The Murk', ditch: 'The Sunken Ditch' };
+function whenPlayed(ms) {
+  if (!ms) return '';
+  const d = Math.round((Date.now() - ms) / 60000);
+  if (d < 1) return 'just now';
+  if (d < 60) return `${d} min ago`;
+  if (d < 60 * 24) return `${Math.round(d / 60)} h ago`;
+  return new Date(ms).toLocaleDateString();
+}
+const levelText = (lv, ng) => (ng ? `Level ${lv}+` : `Level ${lv}`);
+// mode: 'load' (Play / New Game+ / Delete), 'new' (pick a slot for a new game), 'ngplus' (pick a slot; from = source)
+function openSlots(mode, from = null) {
+  G.slotMode = mode; G.slotFrom = from;
+  $('slotsTitle').textContent = { load: 'Load', new: 'New Game: choose a slot', ngplus: 'New Game+: choose a slot' }[mode];
+  $('slotNote').textContent = mode === 'ngplus' ? 'Your finished game stays in its slot.' : '';
+  const list = $('slotList');
+  list.innerHTML = '';
+  const empty = firstEmptySlot();
+  for (const n of state.SLOTS) {
+    const info = state.slotInfo(n);
+    const row = el('div', 'slotrow');
+    const c = document.createElement('canvas'); c.width = 48; c.height = 48; c.className = 'portrait';
+    const txt = el('div', 'slotinfo');
+    if (info.empty) { drawPortrait(c, null); txt.innerHTML = `<b>Slot ${n}</b><span class="note">Empty</span>`; }
+    else if (info.unreadable) { drawPortrait(c, null); txt.innerHTML = `<b>Slot ${n}</b><span class="warn">Can't read this save</span>`; }
+    else {
+      drawPortrait(c, betta(PLAYER.armorStage(info.level), info.color, false)?.canvas);
+      const end = info.endings.length ? ` · Endings: ${info.endings.map((k) => (k === 'friend' ? 'friendship' : 'fins')).join(', ')}` : '';
+      txt.innerHTML = `<b>Slot ${n}: ${escapeHtml(info.name)}</b><span>${levelText(info.level, info.ngPlus)}${info.ngPlus ? ` · NG+&nbsp;${info.ngPlus}` : ''} · ${AREA_SHORT[info.area]} · Friends&nbsp;${info.friends}${end}</span><span class="note">${whenPlayed(info.lastPlayed)}</span>`;
+    }
+    const btns = el('div', 'slotbtns');
+    const add = (label, fn, cls = 'btn') => btns.append(button(label, fn, cls));
+    if (mode === 'load') {
+      if (!info.empty && !info.unreadable) add('Play', () => continueGame(n), 'btn primary');
+      if (info.finished) add('New Game+', () => openSlots('ngplus', n));
+      if (!info.empty) add('Delete', async () => {
+        if (await G.confirm(info.unreadable ? `Delete the unreadable save in slot ${n}?` : `Delete ${info.name}'s game (${levelText(info.level, info.ngPlus)})? This can't be undone.`)) { state.deleteSlot(n); openSlots('load'); }
+      });
+    } else if (mode === 'new') {
+      add(info.empty ? 'New game here' : 'Overwrite', async () => {
+        if (!info.empty && !(await G.confirm(info.unreadable ? `Overwrite the unreadable save in slot ${n}?` : `Overwrite ${info.name}'s game (${levelText(info.level, info.ngPlus)})?`))) return;
+        G.newSlot = n; hide('slots'); nav.remove('slots'); openCreate();
+      }, 'btn' + (n === empty ? ' primary' : ''));
+    } else {
+      // New Game+: an empty slot first; a used one asks; the finished game itself asks twice
+      const label = n === from ? 'Replace this game' : info.empty ? 'Start here' : 'Overwrite';
+      add(label, () => startNgPlus(from, n), 'btn' + (n === empty ? ' primary' : ''));
+    }
+    row.append(c, txt, btns);
+    list.append(row);
+  }
+  hide('title'); nav.remove('title');
+  show('slots');
+  const back = () => { hide('slots'); nav.remove('slots'); openTitle(); };
+  $('slotsBack').onclick = (e) => { e.stopPropagation(); audio.blip('back'); back(); };
+  nav.push({ id: 'slots', el: screenEl('slots'), back, initial: () => $('slotList').querySelector('.btn.primary') || $('slotList').querySelector('.btn') });
+}
+async function startNgPlus(from, to, { skipConfirm = false } = {}) {
+  const src = state.loadSlot(from);
+  if (!state.finishedGame(src)) return false;
+  const k = NGPLUS.bonus((src.ngPlus || 0) + 1);
+  if (!skipConfirm) {
+    const info = state.slotInfo(to);
+    if (to !== from && !info.empty && !(await G.confirm(info.unreadable ? `Overwrite the unreadable save in slot ${to}?` : `Overwrite ${info.name}'s game (${levelText(info.level, info.ngPlus)})?`))) return false;
+    if (to === from && !(await G.confirm('This replaces your finished game. Start New Game+ over it?'))) return false;
+    if (!(await G.confirm(`New Game+ ${(src.ngPlus || 0) + 1} in slot ${to}. Carries over: your level, EXP, Betta Bites, items, the submarine, your hat and endings. Starts again: the story, friends, scales, cogs and rest points. Every fish is ${k} levels tougher.`))) return false;
+  }
+  await beginStory(state.ngPlusFrom(src), to, 'slots');
+  return true;
 }
 
 // ---------- create your betta ----------
@@ -573,12 +656,20 @@ function drawCreatePreview(dt) {
 async function startNewGame() {
   let name = cleanName($('nameIn').value);
   if (!name) name = NAMES[Math.floor(Math.random() * NAMES.length)];
-  G.s = state.newSave(name, createColor);
-  nav.remove('create');
+  const slot = G.newSlot || firstEmptySlot() || 1;
+  G.newSlot = null;
+  await beginStory(state.newSave(name, createColor), slot, 'create');
+}
+// Village start, Elder Finn's opening: a new game or a New Game+.
+async function beginStory(s, slot, fromScreen) {
+  G.s = s;
+  G.slot = slot;
+  nav.remove(fromScreen);
   G.worldRng = makeRng(1001);
   G.battleRng = makeRng(2002);
   await fade(true);
-  hide('create');
+  hide(fromScreen);
+  G.save();
   await G.enterArea('village', 'start', { wipe: false, quiet: true });
   await fade(false);
   banner(AREA_NAMES.village, img('bettahome'));
@@ -810,12 +901,14 @@ function openSettings() {
   slider('Sound volume', 'sfx');
   const mute = button('', () => { audio.toggleMute(); saveSettings(); refresh(); updateMute(); });
   const vib = button('', () => { G.settings.vibration = !G.settings.vibration; saveSettings(); refresh(); if (G.settings.vibration) G.vibrate(150, 0.6); });
+  const par = button('', () => { G.settings.parade = G.settings.parade === false; saveSettings(); refresh(); G.world?.buildParade?.(); });
   const refresh = () => {
     mute.textContent = audio.audioSettings().muted ? 'Sound: off (muted)' : 'Sound: on';
     vib.textContent = G.settings.vibration ? 'Vibration: on' : 'Vibration: off';
+    par.textContent = G.settings.parade === false ? 'Parade: off' : 'Parade: on';
   };
   refresh();
-  list.append(mute, vib, button('Controls', () => openControls()));
+  list.append(mute, vib, par, button('Controls', () => openControls()));
   if (window.gameReport?.shown()) list.append(button('Report a bug', () => window.gameReport.open()));
   show('settings');
   const done = () => { hide('settings'); nav.remove('settings'); };
@@ -1106,14 +1199,18 @@ function stateSnapshot() {
     sub: s.subOwned, rest: s.rest, goal: goalLine(s), wearHat: s.wearHat,
     inBattle: b ? { kind: b.enemy.kind, level: b.enemy.level, edge: b.enemy.edge, hp: b.enemy.hp, hpMax: b.enemy.hpMax, turn: b.battle.turn,
       playerHp: b.battle.p.hp, playerMp: b.battle.p.mp, meter: b.battle.meter, partyStarted: b.battle.partyStarted, busy: b.busy, over: b.battle.over,
-      row: b.row, scripted: b.battle.scripted, dived: b.battle.p.dived, waiting: !!b.continueBtn } : null,
+      row: b.row, scripted: b.battle.scripted, dived: b.battle.p.dived, waiting: !!b.continueBtn,
+      net: b.enemy.kind === 'snarl' ? b.enemy.net : null, tangled: !!b.battle.tangled, sturn: b.battle.sturn, warned: !!b.battle.warned } : null,
     busy: G.busy(), transition: !!G.wipe || !!G.starting, dialog: !$('dialog').hidden, menus: nav.stack.map((l) => l.id),
     gameWon: G.gameWon || !!(s.flags.garDefeated || s.flags.garFriend), ending: s.ending, endingsSeen: { ...s.endingsSeen },
     enemies: w ? w.enemies.map((e) => ({ kind: e.kind, level: e.level, x: Math.round(e.x), y: Math.round(e.y), edge: !!e.edge, hidden: e.hidden })) : [],
     input: input.device, padId: input.padId || null, tick: G.tick, lastBattle: G.lastBattle || null,
+    ngPlus: s.ngPlus || 0, lastEnding: s.lastEnding || null, slot: G.slot || null, parade: w?.parade?.length || 0,
+    snarl: { done: !!s.flags.snarlDone, friend: !!s.flags.snarlFriend },
   };
 }
-window.__game = {
+// The play-test hook, only with ?debug in the address.
+if (new URLSearchParams(location.search).has('debug')) window.__game = {
   state: stateSnapshot,
   frames: () => G.frameLog.slice(),
   buttons: () => [...document.querySelectorAll('button')].filter((b) => b.offsetParent !== null && !b.closest('[hidden]') && getComputedStyle(b).visibility !== 'hidden')
@@ -1121,16 +1218,19 @@ window.__game = {
   audioState: () => audio.audioState(),
   levels: () => AREAS.length,
   areas: () => AREAS.slice(),
-  goToLevel: async (n) => {
+  goToLevel: async (n, opts = {}) => {
     const id = AREAS[n];
     if (!id) return false;
     for (const l of [...nav.stack]) { hide(l.id); }
     nav.stack = [];
     endScene();
-    for (const sc of ['title', 'create', 'pause', 'shop', 'settings', 'controls', 'howto', 'confirm', 'banner', 'credits']) hide(sc);
+    for (const sc of ['title', 'create', 'pause', 'shop', 'settings', 'controls', 'howto', 'confirm', 'banner', 'credits', 'slots']) hide(sc);
     const st = AREA_START[id];
     const s = state.newSave(G.s?.name && G.mode !== 'title' ? G.s.name : 'Tester', G.s?.color || 'red');
-    s.level = st.level; s.hp = PLAYER.maxHp(st.level); s.mp = PLAYER.maxMp(st.level);
+    // ngPlus: the New Game+ count (its bonus k lifts every fish); the start level gets + k too
+    s.ngPlus = opts.ngPlus || 0;
+    const lv = Math.min(maxLevel(s), st.level + NGPLUS.bonus(s.ngPlus));
+    s.level = lv; s.hp = PLAYER.maxHp(lv); s.mp = PLAYER.maxMp(lv);
     for (const f of st.flags) s.flags[f] = true;
     if (s.flags.metFinn) Object.assign(s.met, { finn: true });
     if (n >= 1) s.flags.tutorialDone = n > 1;
@@ -1140,16 +1240,21 @@ window.__game = {
     s.rest = n >= 5 ? 'village' : n >= 4 ? 'highwater' : 'village';
     if (n === 4) s.rest = 'highwater';
     s.hints = { swim: true, talk: true, battle: true, redGlow: true };
+    if (s.ngPlus) { s.flags.tutorialDone = true; s.endingsSeen = { fins: true }; s.ending = s.lastEnding = 'fins'; }
+    if (opts.afterSnarl && n === 3) Object.assign(s.flags, { snarlDone: true, snarlMet: true, stepsKnown: true });
     G.s = s;
+    G.slot = G.slot || 1;
     G.worldRng = makeRng(1000 * (n + 1));
     G.battleRng = makeRng(7000 * (n + 1));
-    const entry = { village: 'start', shallows: 'north', reedwater: 'west', highwater: 'south', murk: 'culvert', ditch: 'gate' }[id];
+    let entry = { village: 'start', shallows: 'north', reedwater: 'west', highwater: 'south', murk: 'culvert', ditch: 'gate' }[id];
+    if (opts.afterSnarl && n === 3) entry = { x: 768, y: 420, face: 1 };
     await G.enterArea(id, entry, { wipe: false, quiet: true });
     return true;
   },
   set: (o = {}) => {
     const s = G.s;
-    for (const k of ['level', 'hp', 'mp', 'bb', 'sub', 'color', 'name', 'rest', 'wearHat']) if (o[k] !== undefined) s[k === 'sub' ? 'subOwned' : k] = o[k];
+    for (const k of ['ngPlus', 'lastEnding', 'level', 'hp', 'mp', 'bb', 'sub', 'color', 'name', 'rest', 'wearHat']) if (o[k] !== undefined) s[k === 'sub' ? 'subOwned' : k] = o[k];
+    if (o.endingsSeen) Object.assign(s.endingsSeen, o.endingsSeen);
     if (o.level !== undefined && o.hp === undefined) s.hp = PLAYER.maxHp(s.level);
     if (o.level !== undefined && o.mp === undefined) s.mp = PLAYER.maxMp(s.level);
     if (o.items) Object.assign(s.items, o.items);
@@ -1158,6 +1263,7 @@ window.__game = {
     if (o.scales !== undefined) s.scales = Array.isArray(o.scales) ? o.scales : ['s1', 's2', 's3', 's4', 's5'].slice(0, o.scales);
     if (o.cogs !== undefined) s.cogs = Array.isArray(o.cogs) ? o.cogs : ['c1', 'c2', 'c3'].slice(0, o.cogs);
     if (o.pos && G.world) { G.world.player.x = o.pos.x; G.world.player.y = o.pos.y; G.world.camSnap(); }
+    if ((o.friends || o.flags) && G.world) G.world.buildParade();
     hudKey = '';
     return stateSnapshot();
   },
@@ -1168,6 +1274,12 @@ window.__game = {
   ending: (kind = 'friend') => { G.playEnding(kind); return true; },
   assets: () => assetReport(),
   save: () => { G.save(); return true; },
+  slots: () => state.SLOTS.map((n) => { const i = state.slotInfo(n); return { slot: n, empty: !!i.empty, unreadable: !!i.unreadable, name: i.name || null, level: i.level || null,
+    ngPlus: i.ngPlus || 0, area: i.area || null, friends: i.friends || 0, endings: i.endings || [], lastPlayed: i.lastPlayed || 0 }; }),
+  startNgPlus: (from, to) => { for (const l of [...nav.stack]) hide(l.id); nav.stack = []; endScene(); show('slots'); nav.push({ id: 'slots', el: screenEl('slots') }); return startNgPlus(from, to, { skipConfirm: true }); },
+  // tests only: write a save as the published game did, and migrate it
+  legacySave: (obj) => { for (const n of state.SLOTS) localStorage.removeItem(state.slotKey(n)); localStorage.removeItem(state.LAST_SLOT_KEY); localStorage.removeItem(state.MIGRATED_KEY);
+    localStorage.setItem(state.SAVE_KEY, typeof obj === 'string' ? obj : JSON.stringify(obj)); return state.migrate(); },
 };
 
 // ---------- boot ----------
@@ -1184,6 +1296,7 @@ async function boot() {
     $('padLost').hidden = !nav.has('pause');
     if (!nav.has('pause')) G.padLost = false;
   };
+  state.migrate();   // the published game's single save moves into slot 1 (kept as bettarpg-save-migrated)
   audio.loadSettings(state.loadSettings());
   resize();
   addEventListener('resize', resize);

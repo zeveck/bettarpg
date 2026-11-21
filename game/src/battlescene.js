@@ -3,7 +3,7 @@
 // (lunges, bubbles, gravel, hit flash + hit pause + shake, numbers, confetti,
 // the party hat dropping, the Gar's roar and charge).
 import { Battle, makeEnemy } from './battle.js';
-import { ENEMIES, ITEMS, ITEM_ORDER, MOVES, PLAYER, PARTY } from './config.js';
+import { ENEMIES, ITEMS, ITEM_ORDER, MOVES, PLAYER, PARTY, NGPLUS, SNARL, garFor } from './config.js';
 import { img, hasReal } from './assets.js';
 import { betta, bettaSwim, hatted, plain, fromCanvas, rim, white, glow, tinted, drawFish, garLunge } from './sprites.js';
 import { Particles, pixelText, textWidth, pixelBubble } from './fx.js';
@@ -23,8 +23,12 @@ export class BattleScene {
     this.entity = entity;
     this.bgKey = bg;
     this.rimOn = bg === 'murk' || bg === 'garpool';
-    this.enemy = makeEnemy(kind, level, edge);
-    this.battle = new Battle({
+    // New Game+: every enemy is k levels tougher; the Gar remembers the last ending
+    const k = NGPLUS.bonus(s.ngPlus || 0), carried = (s.ngPlus || 0) >= 1;
+    this.enemy = makeEnemy(kind, level, edge, { k, gar: garFor(k, s.lastEnding, carried) });
+    this.enemyScale = kind === 'snarl' ? 3 : 2;   // the mini-boss looms at x3 (whole multiples only)
+    const garLine = carried && s.lastEnding === 'fins' ? '...YOU. AGAIN.' : carried && s.lastEnding === 'friend' ? '...FRIEND? WHY... FIGHT?' : null;
+    this.battle = new Battle({ garLine,
       player: { name: s.name, level: s.level, hp: s.hp, mp: s.mp, items: { ...s.items }, subOwned: s.subOwned, dived: false,
         friends: G.friendsTotal() },
       enemy: this.enemy, bubble: !!s.flags.bubbleJoined, hbtLearned: !!s.flags.hbtLearned, scripted, rng: G.battleRng,
@@ -59,9 +63,10 @@ export class BattleScene {
     ui.hidden = false;
     $('bLog').innerHTML = '';
     $('bLog').onclick = () => { if (this.continueBtn) press(this.continueBtn); else $('bLog').classList.toggle('open'); };
-    $('eName').textContent = this.enemy.name;
+    $('eName').textContent = this.enemy.kind === 'snarl' ? SNARL.title : this.enemy.name;
     $('eLv').textContent = 'Lv ' + this.enemy.level;
     $('garBox').hidden = this.enemy.kind !== 'gar';
+    this.updateKnots();
     document.body.classList.toggle('garfight', this.enemy.kind === 'gar');
     $('bDive').hidden = !this.G.s.subOwned;
     $('bDive').onclick = (e) => { e.stopPropagation(); this.choose('dive'); };
@@ -127,7 +132,7 @@ export class BattleScene {
     const learned = b.hbtLearned || b.stumpLit;
     return [
       { key: 'attack', label: 'Attack', small: '', can: { ok: true } },
-      { key: 'spells', label: 'Spells', small: '', can: { ok: true } },
+      { key: 'spells', label: 'Spells', small: '', can: b.tangled ? can('bubbleBlast') : { ok: true } },
       { key: 'party', label: learned ? 'Party!' : 'Party! ?', small: party.free ? 'free' : learned ? '5 MP' : '', can: party },
       { key: 'items', label: 'Items', small: '', can: { ok: true } },
       { key: 'flee', label: 'Swim Away', small: '', can: can('flee') },
@@ -137,7 +142,7 @@ export class BattleScene {
   buildRow(focus = false) {
     if (this.over) return; // the result row (Continue) stays put
     const defs = this.rowDefs();
-    const key = this.row + '|' + defs.map((d) => d.key + d.label + d.small + d.can.ok).join(',') + '|' + this.busy + '|' + this.lit + '|' + input.device;
+    const key = this.row + '|' + this.battle.tangled + '|' + defs.map((d) => d.key + d.label + d.small + d.can.ok).join(',') + '|' + this.busy + '|' + this.lit + '|' + input.device;
     if (key === this.lastRowKey) return;
     const prevFocus = nav.focused()?.dataset?.key;
     this.lastRowKey = key;
@@ -155,6 +160,7 @@ export class BattleScene {
     const it = [...row.children];
     const keep = it.find((b) => b.dataset.key === prevFocus);
     if (nav.top()?.id === 'battle') nav.setFocus(focus ? (it.find((b) => b.dataset.key === this.lit) || it[0]) : keep || it[0], false);
+    $('bDive').classList.toggle('dim', !!this.battle.tangled);
     const up = this.battle.p.dived;
     const diveKey = up ? 'up' : 'dive';
     if ($('bDive').dataset.k !== diveKey) {
@@ -167,6 +173,7 @@ export class BattleScene {
   async choose(key) {
     if (this.over && key !== 'continue') return;
     if (this.busy) return;
+    if (key === 'spells' && this.battle.tangled) { audio.blip('buzz'); this.log(this.battle.can('bubbleBlast').why); return; }
     if (key === 'spells' || key === 'items') { this.row = key; this.buildRow(true); return; }
     if (key === 'back') { this.row = 'main'; this.buildRow(true); return; }
     const r = this.battle.act(key);
@@ -176,6 +183,7 @@ export class BattleScene {
       return;
     }
     if (key === 'party' && this.lit === 'party') this.lit = null;
+    if (!this.battle.bubble) this.tangleShow = false;   // no Bubble to nibble it: it slips off after your turn
     this.busy = true;
     this.row = 'main';
     this.buildRow();
@@ -296,7 +304,13 @@ export class BattleScene {
         break;
       }
       case 'befriend': await this.befriendAnim(); break;
-      case 'bubbleDizzyEnd': this.dizzy = false; break;
+      case 'bubbleDizzyEnd': this.dizzy = false; this.bubbleNetted = false; break;
+      case 'bubbleNet': this.dizzy = true; this.bubbleNetted = true; this.flash.bubble = 3; await this.wait(450); break;
+      case 'tangle': this.tangleShow = true; audio.play('hurt', { vol: 0.5, rate: 1.3 }); await this.wait(450); break;
+      case 'untangle': this.tangleShow = false; this.fx.sparks(this.pos('player').x, this.pos('player').y, 14, '#C8B88A', 2, 60); await this.wait(350); break;
+      case 'netWarn': this.netWarn = true; audio.play('gar_charge', { rate: 1.5, vol: 0.6 }); await this.wait(450); break;
+      case 'knots': this.updateKnots(); break;
+      case 'netRip': this.updateKnots(); { const p = this.pos('enemy'); this.fx.sparks(p.x, p.y, 26, '#C8B88A', 2, 110); } await this.wait(350); break;
       case 'hint': this.log(ev.text, 'say'); this.lit = 'spells'; this.buildRow(); await this.wait(500); break;
       case 'hbt': this.lit = 'party'; this.G.s.flags.hbtLearned = true; this.buildRow(); break;
       case 'end': break;
@@ -342,6 +356,16 @@ export class BattleScene {
       await this.tween(0.12, (k) => { this.lunge.bubble = k * 1.2; });
       this.flash.bubble = 3; this.dizzy = true;
       await this.tween(0.2, (k) => { this.lunge.bubble = 1.2 * (1 - k); });
+      return;
+    }
+    if (who === 'enemy' && ev.kind === 'net') {
+      this.netWarn = false;
+      const p = this.pos('player');
+      this.netFly = { k: 0, tx: p.x, ty: p.y };
+      await this.tween(0.05, (k) => { this.netFly.k = k / 3; });
+      await this.tween(0.05, (k) => { this.netFly.k = (1 + k) / 3; });
+      await this.tween(0.05, (k) => { this.netFly.k = (2 + k) / 3; });
+      this.netFly = null;
       return;
     }
     if (who === 'enemy' && ev.kind === 'special') {
@@ -397,6 +421,14 @@ export class BattleScene {
     await this.wait(500);
   }
 
+  updateKnots() {
+    const box = $('netPips');
+    const n = this.enemy.kind === 'snarl' ? Math.max(0, this.enemy.net || 0) : -1;
+    box.hidden = n < 0;
+    if (n < 0) return;
+    box.innerHTML = n > 0 ? '<span class="note">Net</span>' + Array.from({ length: 4 }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('') : '<span class="note">Net ripped</span>';
+  }
+
   updateMeter(change) {
     const m = $('garMeter');
     const n = this.battle.meter;
@@ -415,7 +447,7 @@ export class BattleScene {
     if (!force && key === this.hudKey) return;
     this.hudKey = key;
     $('bName').textContent = this.G.s.name;
-    $('bLv').textContent = 'Lv ' + p.level;
+    $('bLv').textContent = 'Lv ' + p.level + ((this.G.s.ngPlus || 0) >= 1 ? '+' : '');
     $('bHp').style.width = (100 * p.hp / p.hpMax) + '%';
     $('bHpT').textContent = `${p.hp}/${p.hpMax}`;
     $('bMp').style.width = (100 * p.mp / p.mpMax) + '%';
@@ -489,10 +521,12 @@ export class BattleScene {
     const bot = this.G.cssToLogicalY($('battleui').querySelector('.bottom').getBoundingClientRect().top);
     let fy = Math.round((top + bot) / 2) + 6;
     if (this.bgKey === 'garpool') fy = Math.max(fy, Math.round(v.H / 2 + 10));
-    const gar = this.enemy.kind === 'gar';
-    const W = v.W;
-    return { px: Math.round(W * (gar ? 0.27 : 0.33)), py: fy, bx: Math.round(W * (gar ? 0.12 : 0.16)), by: fy + 16,
-      ex: Math.round(W * (gar ? 0.69 : 0.72)), ey: fy + (gar ? 4 : 0), top, bot };
+    const gar = this.enemy.kind === 'gar', snarl = this.enemy.kind === 'snarl';
+    const W = v.W, big = gar || snarl;
+    // the Snarl (x3) keeps its feet on the usual enemy baseline
+    const ey = snarl ? fy + 26 - Math.round(34 * 3 / 2) : fy + (gar ? 4 : 0);
+    return { px: Math.round(W * (big ? 0.27 : 0.33)), py: fy, bx: Math.round(W * (big ? 0.12 : 0.16)), by: fy + 16,
+      ex: Math.round(W * (big ? 0.69 : 0.72)), ey, top, bot };
   }
 
   enemySpriteV(hat) {
@@ -503,6 +537,7 @@ export class BattleScene {
       if (this.lungeFrame >= 0) { const f = garLunge(this.lungeFrame); if (f) return f; }
       return fromCanvas(base);
     }
+    if (e.kind === 'snarl') return hat ? hatted('snarl_free', img('snarl_free')) : plain('snarl');
     const key = ENEMIES[e.kind].sprite;
     let v = hat ? hatted(key) : plain(key);
     if (e.edge && v) v = tinted(v, '#7B3FD0', 0.35);
@@ -587,7 +622,7 @@ export class BattleScene {
       const bxx = L.bx + Math.round(this.lunge.bubble * 40);
       const flashB = this.flash.bubble > 0;
       drawFish(ctx, flashB ? white(bv) : bv, bxx, L.by, { s: 2, sway: Math.sin(t * 6) * 1, bob: Math.round(Math.sin(t * 2.3)) * 2 });
-      if (this.dizzy) for (let i = 0; i < 3; i++) {
+      if (this.dizzy && !this.bubbleNetted) for (let i = 0; i < 3; i++) {
         const a = t * 4 + i * 2.1;
         const x = Math.round(bxx + Math.cos(a) * 18), y = Math.round(L.by - 36 + Math.sin(a) * 5);
         ctx.fillStyle = '#F7C948'; ctx.fillRect(x - 1, y - 3, 2, 6); ctx.fillRect(x - 3, y - 1, 6, 2);
@@ -599,6 +634,7 @@ export class BattleScene {
     drawFish(ctx, this.flash.player > 0 && Math.floor(this.flash.player) % 2 === 0 ? white(pv) : pv, pxx, L.py,
       { s: 2, sway: this.battle.p.dived ? 0 : Math.sin(t * 6) * 1, bob: Math.round(Math.sin(t * 2)) * 2 });
     // enemy
+    const ES = this.enemyScale;
     if (!this.hidden.enemy) {
       let ev = this.enemySpriteV(this.befriended);
       ev = R(ev);
@@ -608,24 +644,33 @@ export class BattleScene {
         const k = Math.min(1, this.faint / 1.4);
         const y = L.ey + Math.round(k * 24);
         ctx.save(); ctx.translate(0, y * 2); ctx.scale(1, -1);
-        drawFish(ctx, ev, exx, y, { s: 2, flip: true, alpha: Math.max(0, 1 - k) });
+        drawFish(ctx, ev, exx, y, { s: ES, flip: true, alpha: Math.max(0, 1 - k) });
         ctx.restore();
       } else {
-      const opts = { s: 2, flip: true, sway: Math.sin(t * 6) * 1, bob: Math.round(Math.sin(t * 1.8)) * 2 };
+      const opts = { s: ES, flip: true, sway: Math.sin(t * 6) * 1, bob: Math.round(Math.sin(t * 1.8)) * 2 };
       if (this.charging) { ctx.globalAlpha = 0.5 + 0.5 * Math.sin(t * 10); drawFish(ctx, glow(ev, '#F7C948'), exx, L.ey, opts); ctx.globalAlpha = 1; }
       if (this.enemy.edge) { ctx.globalAlpha = 0.5 + 0.5 * Math.sin(t * 3); drawFish(ctx, glow(ev, '#B57BFF'), exx, L.ey, opts); ctx.globalAlpha = 1; }
+      if (this.netWarn) { opts.bob += Math.round(Math.sin(t * 40)) ; }
       drawFish(ctx, this.flash.enemy > 0 ? white(ev) : ev, exx, L.ey, opts);
       if (this.hatDrop) {
         const hd = this.hatDrop, hv = hd.hv;
         // same placement as the hatted sprite, mirrored like the fish
-        const bxp = Math.round(exx - (hv.bw * 2) / 2), byp = Math.round(L.ey - (hv.bh * 2) / 2 + opts.bob);
+        const bxp = Math.round(exx - (hv.bw * ES) / 2), byp = Math.round(L.ey - (hv.bh * ES) / 2 + opts.bob);
         ctx.save();
-        ctx.translate(bxp * 2 + hv.bw * 2, 0); ctx.scale(-1, 1);
-        ctx.drawImage(hd.c, bxp - hv.ox * 2, byp - hv.oy * 2 + Math.round(hd.y), hd.c.width * 2, hd.c.height * 2);
+        ctx.translate(bxp * 2 + hv.bw * ES, 0); ctx.scale(-1, 1);
+        ctx.drawImage(hd.c, bxp - hv.ox * ES, byp - hv.oy * ES + Math.round(hd.y), hd.c.width * ES, hd.c.height * ES);
         ctx.restore();
       }
       }
     }
+    // the Snarl's net: flying, on you (Tangled), or on Bubble
+    if (this.netFly) {
+      const f = this.netFly, k = Math.min(1, f.k);
+      const x = Math.round(L.ex + (f.tx - L.ex) * k), y = Math.round(L.ey + (f.ty - L.ey) * k - Math.sin(k * Math.PI) * 30);
+      drawNet(ctx, x - 22, y - 16, 44, 32);
+    }
+    if (this.battle.tangled || this.tangleShow) drawNet(ctx, pxx - 46, L.py - 36, 92, 70);
+    if (this.dizzy && this.bubbleNetted) drawNet(ctx, L.bx - 34, L.by - 28, 68, 56);
     // a sad balloon that pops
     if (this.sadBalloon && !this.sadBalloon.popped) {
       const b = this.sadBalloon;
@@ -648,6 +693,18 @@ export class BattleScene {
     ctx.restore();
     if (this.dim > 0) { ctx.fillStyle = `rgba(2,6,14,${0.45 * Math.min(1, this.dim)})`; ctx.fillRect(0, 0, v.W, v.H); }
   }
+}
+
+// The fishing net, drawn in code: a 1-px mesh in the net's colour.
+function drawNet(ctx, x, y, w, h) {
+  x = Math.round(x); y = Math.round(y);
+  ctx.save();
+  ctx.fillStyle = 'rgba(200,184,138,0.9)';
+  for (let i = 0; i <= w; i += 6) ctx.fillRect(x + i, y, 1, h);
+  for (let j = 0; j <= h; j += 6) ctx.fillRect(x, y + j, w, 1);
+  ctx.fillStyle = '#6B4E2E';
+  for (let i = 0; i <= w; i += 6) for (let j = 0; j <= h; j += 6) ctx.fillRect(x + i, y + j, 1, 1);
+  ctx.restore();
 }
 
 let balloonCache = {};

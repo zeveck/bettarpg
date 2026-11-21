@@ -3,7 +3,7 @@
 // the cogs and the drain gate, the shadow in the Murk, the Gate Spring,
 // Mossy, the Gar, both endings and Peace in the Paddies.
 import { LINES, FRIEND_LINES, STORY, SPEAKERS } from './strings.js';
-import { WORLD, PLAYER, INN_PRICE, SUB_PRICE, ITEMS, REEF_FRIENDS, LANTERN_LEVEL } from './config.js';
+import { WORLD, PLAYER, INN_PRICE, SUB_PRICE, ITEMS, REEF_FRIENDS, LANTERN_LEVEL, SNARL, SPILLWAY_SPRING, NGPLUS } from './config.js';
 import { maxHp, maxMp, friendsTotal, peaceDone } from './state.js';
 import { img } from './assets.js';
 import { hatted, plain, fromCanvas, drawFish, tinted } from './sprites.js';
@@ -24,6 +24,8 @@ export function createStory(G) {
       case 'lowHp': return s.hp < maxHp(s) * 0.35;
       case 'sub': return s.subOwned;
       case 'highwater': return !!f.highwater;
+      case 'garMemFins': return !!f.gateOpen && (s.ngPlus || 0) >= 1 && s.lastEnding === 'fins';
+      case 'garMemFriend': return !!f.gateOpen && (s.ngPlus || 0) >= 1 && s.lastEnding === 'friend';
       case 'armor3': return s.level >= 7;
       case 'armor2': return s.level >= 5;
       case 'firstFriend': return friendsTotal(s) >= 1;
@@ -41,12 +43,44 @@ export function createStory(G) {
     .replace(/\{friends\}/g, String(friendsTotal(S())));
   const sayAll = async (who, lines) => { for (const l of lines) await G.say(who, fill(l)); };
 
+  const K = () => NGPLUS.bonus(S().ngPlus || 0);
   // ---------- creatures the story places ----------
+  // The Snarl at the top of the Spillway steps; after it: the torn net and the Snarl in the east pool.
+  function placeSnarl(w) {
+    const f = S().flags;
+    w.extra = w.extra.filter((q) => !['snarl', 'snarlFree', 'tornNet'].includes(q.id));
+    if (!f.snarlDone) {
+      w.extra.push({ id: 'snarl', x: SNARL.pos.x, y: SNARL.pos.y, face: -1, t: 0, sortOff: 10, armed: true, draw: drawSnarl });
+    } else {
+      w.extra.push({ id: 'tornNet', x: SNARL.netPos.x, y: SNARL.netPos.y, t: 0, sortOff: -60, draw: (ctx, n) => { const c = img('torn_net'); if (c) ctx.drawImage(c, Math.round(n.x - c.width / 2), Math.round(n.y - c.height / 2)); } });
+      w.extra.push({ id: 'snarlFree', x: SNARL.freePos.x, y: SNARL.freePos.y, face: -1, t: 0, sortOff: 0, talk: true, talkRange: 46,
+        hat: !!f.snarlFriend, draw: drawSnarlFree });
+    }
+  }
+  function drawSnarl(ctx, n, t) {
+    // slow claw sway and net bob
+    drawFish(ctx, plain('snarl'), n.x, n.y + Math.round(Math.sin(t * 1.3) * 1), { flip: false, sway: Math.sin(t * 1.1) * 1.2, swayLen: 0.35 });
+  }
+  function drawSnarlFree(ctx, n, t) {
+    if (n.hidden) return;
+    const v = n.hat ? hatted('snarl_free', img('snarl_free')) : plain('snarl_free');
+    drawFish(ctx, v, n.x + Math.sin(t * 0.5) * 4, n.y + Math.round(Math.sin(t * 1.2)), { flip: false, sway: Math.sin(t * (n.hat ? 2.4 : 1.2)) * 1, swayLen: 0.3 });
+  }
+  // Mossy in the cage; in New Game+ it remembers how the last run ended
+  function mossyLines() {
+    const s = S(), l = [...LINES.mossy[0][1]];
+    if ((s.ngPlus || 0) >= 1 && s.lastEnding) l.splice(1, 0, s.lastEnding === 'fins' ? 'You again! It\'s angrier than ever, be careful!' : 'It kept asking for you, you know.');
+    return l;
+  }
   function populate(w) {
     const s = S(), f = s.flags;
+    if (w.areaId === 'highwater') {
+      placeSnarl(w);
+      w.extra.push({ id: 'stepsSpring', x: SPILLWAY_SPRING.x, y: SPILLWAY_SPRING.y, t: 0, draw: drawSpring, always: true, sortOff: -40 });
+    }
     if (w.areaId === 'shallows' && f.bubbleJoined && !f.stumpDone) {
       // the angelfish waits at the Old Stump
-      w.enemies.push(w.makeEnemy({ kind: 'angel', level: 2, x: 1330, y: 720, id: 'stumpAngel', stump: true, still: true }));
+      w.enemies.push(w.makeEnemy({ kind: 'angel', level: 2 + K(), x: 1330, y: 720, id: 'stumpAngel', stump: true, still: true }));
     }
     if (w.areaId === 'ditch') {
       const resolved = f.garDefeated || f.garFriend;
@@ -83,7 +117,7 @@ export function createStory(G) {
     drawFish(ctx, v, n.x + Math.sin(t * 0.4) * 10, n.y + Math.sin(t * 0.9) * 2, { flip: n.face < 0, sway: Math.sin(t * (sulk ? 1.5 : 3)) * 1.5, swayLen: 0.3 });
   }
   function drawSpring(ctx, n, t) {
-    if (!F().gateOpen) return;
+    if (!n.always && !F().gateOpen) return;
     ctx.save();
     ctx.globalAlpha = 0.18 + Math.sin(t * 2) * 0.06;
     ctx.fillStyle = '#9FD8E0';
@@ -107,6 +141,7 @@ export function createStory(G) {
     const n = it.ref, id = n.id;
     if (it.kind === 'extra') {
       if (id === 'gar') return garTalk();
+      if (id === 'snarlFree') return G.say('snarl', f.snarlFriend ? 'Thanks for getting that net off me. My shell feels ten years younger!' : 'Hmph. You win, little fish. The steps are yours.');
       if (id.startsWith('party')) {
         const l = FRIEND_LINES[n.partyKind] || ['Party!'];
         return G.say({ name: 'Friend', sprite: G.spriteCanvas(n.sprite) }, l[0]);
@@ -114,7 +149,7 @@ export function createStory(G) {
       if (id === 'mossy') {
         if (f.garDefeated || f.garFriend) return G.say('mossy', 'Home at last! Thank you for coming to find us, ' + s.name + '.');
         f.mossyTalked = true;
-        return sayAll('mossy', s.met.mossy ? [LINES.mossy[0][1][1]] : LINES.mossy[0][1]).then(() => { s.met.mossy = true; });
+        return sayAll('mossy', s.met.mossy ? [LINES.mossy[0][1][1]] : mossyLines()).then(() => { s.met.mossy = true; });
       }
       if (id.startsWith('cap')) {
         if (f.garDefeated || f.garFriend) return G.say(id, 'Home sweet paddy! Thank you!');
@@ -169,6 +204,18 @@ export function createStory(G) {
 
   async function gateTalk(kind) {
     const s = S(), f = s.flags;
+    if (kind === 'snarl') {
+      const w = G.world, sn = w.extra.find((q) => q.id === 'snarl');
+      if (!sn || f.snarlDone || sn.armed === false || w.safeT > 0) return;
+      sn.armed = false;
+      if (!f.snarlMet) {
+        f.snarlMet = true;
+        await G.say('bubble', 'That crab\'s all tangled up... and cross about it.');
+        await G.say('snarl', 'GET OFF MY STEPS! Can\'t a crab sulk in peace?!');
+      }
+      G.startBattle({ kind: 'snarl', level: SNARL.level + K() });
+      return;
+    }
     if (kind === 'reefGate') {
       if (!f.bubbleJoined) return G.say('reef', LINES.reefGateClosed.alone[0]);
       if (!f.stumpDone) return G.say('reef', LINES.reefGateClosed.stump[0]);
@@ -205,8 +252,8 @@ export function createStory(G) {
       s.met.whorl = true;
       f.highwater = true;
       // the lantern only for a betta strong enough for the Murk
-      if (s.level < LANTERN_LEVEL) {
-        await G.say('whorl', `The Murk would swallow you whole at Level ${s.level}. Grow strong in the spillway pools first, then come back for the lantern. (Level ${s.level}/${LANTERN_LEVEL})`);
+      if (s.level < LANTERN_LEVEL + K()) {
+        await G.say('whorl', `The Murk would swallow you whole at Level ${s.level}. Grow strong in the spillway pools first, then come back for the lantern. (Level ${s.level}/${LANTERN_LEVEL + K()})`);
         G.save();
         return;
       }
@@ -268,7 +315,7 @@ export function createStory(G) {
       if (s.hp < maxHp(s)) { s.hp = maxHp(s); G.sfx('inn', { vol: 0.6 }); G.toast('Bubble cheers you on: HP restored!'); }
       await G.say('bubble', STORY.stumpScale);
       // the angelfish charges in
-      const e = w.makeEnemy({ kind: 'angel', level: 2, x: p.x + 200, y: p.y - 30, id: 'stumpAngel', stump: true, still: true });
+      const e = w.makeEnemy({ kind: 'angel', level: 2 + K(), x: p.x + 200, y: p.y - 30, id: 'stumpAngel', stump: true, still: true });
       w.enemies.push(e);
       G.sfx('notice');
       await G.moveEntity(e, p.x + 26, p.y, 150);
@@ -323,6 +370,13 @@ export function createStory(G) {
     });
   }
 
+  async function stepsRest() {
+    const s = S();
+    s.hp = maxHp(s); s.mp = maxMp(s); s.rest = 'steps';
+    G.sfx('inn');
+    G.toast('The Spillway Spring fills you with fresh water. You\'ll wake here if you fall.', 2600);
+    G.save();
+  }
   async function springRest() {
     const s = S();
     s.hp = maxHp(s); s.mp = maxMp(s); s.rest = 'spring';
@@ -347,6 +401,18 @@ export function createStory(G) {
     }
     if (w.areaId === 'murk' && !f.shadowSeen && p.x < w.def.deepBelowX) shadowScene(w);
     if (w.areaId === 'ditch' && f.gateOpen && springCool <= 0 && Math.hypot(p.x - 640, p.y - 110) < 30) { springCool = 4; springRest(); }
+    if (w.areaId === 'highwater') {
+      if (f.trailFound && springCool <= 0 && Math.hypot(p.x - SPILLWAY_SPRING.x, p.y - SPILLWAY_SPRING.y) < 30) { springCool = 4; stepsRest(); }
+      if (f.trailFound && !f.snarlDone && !f.stepsKnown) {
+        // the Spillway Spring is your wake-up point while the Snarl holds the steps
+        f.stepsKnown = true; s.rest = 'steps'; G.save();
+        G.toast('The Spillway Spring bubbles nearby: you\'ll wake here if you fall.', 3000);
+        G.cutscene(() => G.say('bubble', 'A spring! If that crab beats us, we\'ll wake up right here.'));
+      }
+      // after fleeing or losing, the Snarl waits until you swim 120 px away and come back
+      const sn = w.extra.find((q) => q.id === 'snarl');
+      if (sn && sn.armed === false && Math.hypot(p.x - sn.x, p.y - sn.y) > 120) sn.armed = true;
+    }
     if (w.areaId === 'ditch' && f.gateOpen && s.rest !== 'spring' && !f.springKnown) {
       // the Gate Spring is your wake-up point from the moment you arrive
       f.springKnown = true; s.rest = 'spring'; G.save();
@@ -362,7 +428,7 @@ export function createStory(G) {
         gar.armed = false;
         if (!f.mossyTalked) {
           f.mossyTalked = true;
-          G.cutscene(async () => { await sayAll('mossy', LINES.mossy[0][1]); s.met.mossy = true; }).then(() => G.startBattle({ kind: 'gar', level: 10 }));
+          G.cutscene(async () => { await sayAll('mossy', mossyLines()); s.met.mossy = true; }).then(() => G.startBattle({ kind: 'gar', level: 10 }));
         } else G.startBattle({ kind: 'gar', level: 10 });
       }
     }
@@ -399,6 +465,13 @@ export function createStory(G) {
       await G.say('bubble', 'You did it! A friend in a party hat!');
       await G.say('bubble', 'Captain Reef guards the reed gate east. Let\'s make a couple more friends out here, then show him!');
       await G.say('bubble', 'Tip: bite a fish down first, then throw the party. It works much better!');
+    }
+    if (e.kind === 'snarl' && (result === 'win' || result === 'friend')) {
+      f.snarlDone = true;
+      if (result === 'friend') { f.snarlFriend = true; s.friends.snarl = 1; }
+      G.save();
+      placeSnarl(G.world);
+      G.world.buildParade();
     }
     if (e.kind === 'gar' && G.pendingEnding) {
       const ending = G.pendingEnding;

@@ -387,7 +387,8 @@ export class Battle {
     if (this.dizzy) {
       this.dizzy = false;
       this.push({ t: 'bubbleDizzyEnd' });
-      this.log(this.e.kind === 'snarl' ? 'Bubble wriggles out of the net.' : 'Bubble shakes off the dizziness.');
+      this.log(this.bubbleNetted ? 'Bubble wriggles out of the net.' : 'Bubble shakes off the dizziness.');
+      this.bubbleNetted = false;
       return;
     }
     if (this.freeing && this.wasTangled) {
@@ -516,6 +517,7 @@ export class Battle {
       this.push({ t: 'sfx', name: 'net_throw' });
       if (this.bubble && r.chance(BUBBLE.drawChance)) {
         this.dizzy = true;
+        this.bubbleNetted = true;
         this.push({ t: 'bubbleNet' });
         this.log('The net lands on Bubble! Bubble\'s all tangled up...');
       } else if (p.dived) {

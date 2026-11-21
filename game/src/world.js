@@ -2,7 +2,7 @@
 // friends, pickups, props and buildings; swimming, collisions, chasing,
 // the camera, and drawing it all at x1 (one art pixel = one logical pixel).
 import { MAPS } from './maps.js';
-import { WORLD, ENEMIES, EDGE, REGULAR_KINDS, AREA_NAMES } from './config.js';
+import { WORLD, ENEMIES, EDGE, REGULAR_KINDS, AREA_NAMES, NGPLUS, PARADE } from './config.js';
 import { buildTerrain, isWater, depthAt, bankSpots, waterSpots } from './terrain.js';
 import { img, hasReal } from './assets.js';
 import { betta, bettaSwim, hatted, plain, fromCanvas, recolor, glow, tinted, drawFish, white } from './sprites.js';
@@ -144,7 +144,8 @@ export class World {
     this.enemies = [];
     let id = 0;
     for (const sp of def.spawns || []) {
-      const level = sp.edge ? EDGE.level : rng.int(sp.lv[0], sp.lv[1]);
+      // New Game+: every fish is k levels tougher
+      const level = (sp.edge ? EDGE.level : rng.int(sp.lv[0], sp.lv[1])) + NGPLUS.bonus(s.ngPlus || 0);
       this.enemies.push(this.makeEnemy({ ...sp, level, id: `${this.areaId}-${id++}` }));
     }
     if (def.tutorial && !s.flags.tutorialDone) {
@@ -166,6 +167,72 @@ export class World {
     });
     this.extra = []; // story-placed creatures (Mossy, captives, the Gar, party guests)
     this.G.story?.populate?.(this);
+    this.buildParade();
+  }
+
+  // ---------- the friends' parade (village and Highwater's city only) ----------
+  buildParade() {
+    const s = this.s, f = s.flags, p = this.player;
+    this.parade = [];
+    this.paradeTrail = [{ x: p.x, y: p.y }];
+    this.paradeIdle = 0;
+    const free = this.extra?.find((q) => q.id === 'snarlFree');
+    if (free) free.hidden = false;
+    if (this.G.settings?.parade === false || !['village', 'highwater'].includes(this.areaId)) return;
+    const party = this.areaId === 'village' && (f.peace || this.G.endingParty);   // they're at the square party
+    const kinds = [];
+    if (!party) {
+      const shown = {};
+      let more = true;
+      while (kinds.length < PARADE.max && more) {
+        more = false;
+        for (const k of PARADE.order) {
+          if (kinds.length >= PARADE.max) break;
+          if ((shown[k] || 0) < (s.friends[k] || 0)) { shown[k] = (shown[k] || 0) + 1; kinds.push(k); more = true; }
+        }
+      }
+    }
+    // the Gar trails last in the village after the friendship ending and Peace in the Paddies
+    if (this.areaId === 'village' && f.garFriend && f.peace) kinds.push('gar');
+    const rng = makeRng(this.areaId === 'village' ? 4242 : 4343);
+    let gap = PARADE.bubbleCrumb;
+    kinds.forEach((k, i) => {
+      gap += PARADE.spacing + (k === 'snarl' ? PARADE.snarlExtra : k === 'gar' ? PARADE.garExtra : 0);
+      const a = rng.next() * Math.PI * 2, r = 14 + rng.next() * 26;
+      this.parade.push({ kind: k, crumb: gap, x: p.x - p.face * gap * PARADE.crumbPx, y: p.y + 4, face: p.face, t: i * 0.7,
+        spot: { dx: Math.cos(a) * r, dy: Math.sin(a) * r * 0.6 }, wait: { dx: (rng.next() - 0.5) * 80, dy: (rng.next() - 0.5) * 40 } });
+    });
+    // while the friend Snarl swims in the Highwater parade, its east-pool spot is empty
+    if (free && kinds.includes('snarl')) free.hidden = true;
+  }
+  updateParade(dt) {
+    if (!this.parade?.length) return;
+    const p = this.player, tr = this.paradeTrail;
+    const last = tr[tr.length - 1];
+    if (Math.hypot(last.x - p.x, last.y - p.y) >= PARADE.crumbPx) { tr.push({ x: p.x, y: p.y }); if (tr.length > PARADE.keep) tr.shift(); }
+    this.paradeIdle = p.moving ? 0 : this.paradeIdle + dt;
+    const waiting = this.areaId === 'highwater' && p.y >= PARADE.cityBelowY;   // they wait at the top of the steps
+    for (const m of this.parade) {
+      m.t += dt;
+      let tx, ty;
+      if (waiting) { tx = PARADE.waitAt.x + m.wait.dx; ty = PARADE.waitAt.y + m.wait.dy; }
+      else if (this.paradeIdle > PARADE.idleAfter) { tx = p.x + m.spot.dx; ty = p.y + m.spot.dy; }
+      else {
+        const c = tr[tr.length - 1 - m.crumb];
+        if (c) { tx = c.x; ty = c.y; } else { const o = tr[0]; tx = o.x - p.face * (m.crumb - tr.length) * PARADE.crumbPx; ty = o.y; }
+      }
+      const dx = tx - m.x, dy = ty - m.y, d = Math.hypot(dx, dy);
+      if (d > 400) { m.x = tx; m.y = ty; continue; }
+      const k = Math.min(1, dt * (waiting ? 2 : 5));
+      m.x += dx * k; m.y += dy * k;
+      m.moving = d > 3;
+      if (Math.abs(dx) > 2) m.face = dx > 0 ? 1 : -1;
+    }
+  }
+  drawParadeMember(ctx, m) {
+    const v = m.kind === 'gar' ? hatted('garboss', img('garboss')) : m.kind === 'snarl' ? hatted('snarl_free', img('snarl_free')) : hatted(m.kind);
+    if (!v) return;
+    drawFish(ctx, v, m.x, m.y, { flip: m.face < 0, sway: Math.sin(m.t * (m.moving ? 12 : 5)) * 1, bob: Math.round(Math.sin(m.t * 2.2)) * (m.moving ? 1 : 2) });
   }
 
   makeEnemy(o) {
@@ -261,6 +328,7 @@ export class World {
     if (p.moving && p.bubT <= 0) { p.bubT = 0.22; this.fx.bubbles(p.x - p.face * 18, p.y - 2, 1, { r: [1, 1], up: 14 }); }
     // Bubble follows
     if (s.flags.bubbleJoined) this.updateBubble(dt);
+    this.updateParade(dt);
     // safe water: HP and MP refill 1 point every 2 s
     if (this.inSafeWater()) {
       this.regenT = (this.regenT || 0) + dt;
@@ -532,6 +600,8 @@ export class World {
     for (const f of this.friends) list.push({ y: f.y + 8, d: () => drawFish(ctx, hatted(f.kind), f.x, f.y, { flip: f.face < 0, sway: Math.sin(f.t * 5) * 1, bob: Math.round(Math.sin(f.t * 2)) }) });
     for (const e of this.enemies) if (!e.hidden || !this.def.reeds) list.push({ y: e.y + 8, d: () => this.drawEnemy(ctx, e) });
     for (const f of this.faints) list.push({ y: f.y + 8, d: () => this.drawFaint(ctx, f) });
+    // the parade: drawn behind villagers and buildings' fronts, never solid, never a talk target
+    for (const m of this.parade || []) list.push({ y: m.y - 6, d: () => this.drawParadeMember(ctx, m) });
     if (s.flags.bubbleJoined) list.push({ y: this.bubble.y + 8, d: () => this.drawBubble(ctx) });
     list.push({ y: this.player.y + 9, d: () => this.drawPlayer(ctx) });
     list.sort((a, b) => a.y - b.y);

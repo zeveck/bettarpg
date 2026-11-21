@@ -1,3 +1,4 @@
+import { NGPLUS, LANTERN_LEVEL } from './config.js';
 // strings.js: every line of dialogue and story text. NPC lines are picked by
 // world flags (dialogue.js): the first matching set, top to bottom, wins.
 // The original game's lines are kept as each villager's first-meeting lines.
@@ -17,14 +18,16 @@ export const COLOR_NAMES = { red: 'Red', blue: 'Blue', purple: 'Purple', green: 
 // Goal lines: Finn's pointers, with the scale and cog overrides.
 export function goalLine(s) {
   const f = s.flags;
+  const k = NGPLUS.bonus(s.ngPlus || 0), lan = LANTERN_LEVEL + k;
   if (f.garDefeated || f.garFriend) return 'The paddies are safe. Make friends, brave the edge zones, or visit the old Gar.';
   if (f.gateOpen) return 'The gate is open. Whatever is down there... bring our fish home. The old tales say a party of five friends can soften any heart.';
   if (f.lantern) {
     const n = s.cogs.length;
     if (n >= 3) return 'Take the three cogs to the drain gate at the Murk\'s far end.';
-    return `The Lock-Keeper's lantern will light the Murk. Find those three cogs. (${n}/3; Murk fish are Level 6 to 8)`;
+    return `The Lock-Keeper's lantern will light the Murk. Find those three cogs. (${n}/3; Murk fish are Level ${6 + k} to ${8 + k})`;
   }
-  if (f.trailFound && f.highwater && s.level < 5) return `Grow strong in the spillway pools, then Whorl will lend you his lantern. (Level ${s.level}/5)`;
+  if (f.trailFound && !f.snarlDone) return 'Get past the Snarl at the top of the Spillway.';
+  if (f.trailFound && f.highwater && s.level < lan) return `Grow strong in the spillway pools, then Whorl will lend you his lantern. (Level ${s.level}/${lan})`;
   if (f.trailFound && f.highwater) return 'You\'re strong enough now: go back to Lock-Keeper Whorl for the lantern.';
   if (f.trailFound) return 'Up the spillway lies Highwater. Ask them about the shadow.';
   if (f.stumpDone && !f.eastOpen) {
@@ -58,6 +61,7 @@ export const SPEAKERS = {
   folk6: { name: 'Little Bream', sprite: 'folk3' },
   folk7: { name: 'Prawn the Peddler', sprite: 'pip' },
   mossy: { name: 'Mossy', sprite: 'mossy' },
+  snarl: { name: 'The Snarl', sprite: 'snarl' },
   cap1: { name: 'Pebble', sprite: 'cap1' },
   cap2: { name: 'Fern', sprite: 'cap2' },
   cap3: { name: 'Little Guppy', sprite: 'cap3' },
@@ -74,6 +78,8 @@ export const LINES = {
     ['garDefeated', ['A hundred years shut under our paddies, alone. I still think about that old fish.', 'Maybe someday someone will visit it. Maybe someone with a party hat.']],
     ['peace', ['Peace in the Paddies! In all my years I never saw so many hats.', 'The young ones say you can befriend anything. I believe them.']],
     ['lowHp', ['You look hurt! Seaweed\'s inn is just there. Rest first, then be brave.']],
+    ['garMemFins', ['It\'s back, and it remembers your fins. It\'ll hit harder this time.', 'Bring our fish home, {name}.']],
+    ['garMemFriend', ['It remembers you, friend. Your party may reach it sooner this time.', 'Count your friends, {name}.']],
     ['gateOpen', ['The gate is open. Whatever is down there... bring our fish home.', 'The old tales say a party of five friends can soften any heart. Count your friends, {name}.']],
     ['lantern', ['The Lock-Keeper\'s lantern will light the Murk. Find those three cogs.', 'The Murk starts at the old culvert, southwest in the Shallows. Mind the deep water.']],
     ['trailFound', ['Up the spillway lies Highwater. Ask them about the shadow.', 'They see more of the terraces from up there than we ever will.']],

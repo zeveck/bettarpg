@@ -53,8 +53,9 @@ async (page) => {
       const pick = async (...keys) => { for (const k of keys) { await press(k); await sleep(140); } await sleep(250); };
       if (same > 2) { await pick('Digit1'); continue; } // something was refused: just bite
       const heal = hp <= maxHp(L) * 0.38 && (it.seedcake || it.kelp);
-      if (policy === 'flee') { await pick('Digit5'); continue; }
       if (heal) { await pick('Digit4', it.seedcake ? 'Digit2' : 'Digit1'); continue; }
+      if (b.tangled) { await pick('Digit1'); continue; } // Tangled: Attack (or the heal item above)
+      if (policy === 'flee') { await pick('Digit5'); continue; }
       if (policy === 'gar-party') {
         if (!b.partyStarted || mp >= 5) await pick('Digit3');
         else if (it.bwater) await pick('Digit4', 'Digit3');
@@ -67,6 +68,8 @@ async (page) => {
         const btns = await page.evaluate(() => window.__game.buttons().filter((x) => /Party/.test(x.label)));
         const lit = btns.length && !btns[0].dim;
         if (b.scripted === 'stump') { if (lit) { await pick('Digit3'); continue; } await pick('Digit1'); continue; }
+        // the Snarl's whole net: Gravel Grenade first (L4+, MP 10+), else bites fray it
+        if (b.kind === 'snarl' && b.net > 0) { if (L >= 4 && mp >= 10) await pick('Digit2', 'Digit2'); else await pick('Digit1'); continue; }
         // wear the fish down with bites (keeping MP for the party), then Party!
         if (lit && mp >= 5 && (ehpFrac <= 0.6 || b.level < L)) { await pick('Digit3'); continue; }
         if (!lit && mp >= 3) { await pick('Digit2', 'Digit1'); continue; }
@@ -74,7 +77,7 @@ async (page) => {
         continue;
       }
       // fight
-      if (L >= 4 && mp >= 5 && (b.kind === 'cat' || b.kind === 'cray' || b.hp > 12)) { await pick('Digit2', 'Digit2'); continue; }
+      if (L >= 4 && mp >= 5 && (b.kind === 'cat' || b.kind === 'cray' || b.net > 0 || b.hp > 12)) { await pick('Digit2', 'Digit2'); continue; }
       if (mp >= 3) { await pick('Digit2', 'Digit1'); continue; }
       await pick('Digit1');
     }
@@ -91,6 +94,7 @@ async (page) => {
         await hold([]); await log(`battle ${s.inBattle.kind} L${s.inBattle.level} at ${s.player.x},${s.player.y}`); justFought = true;
         s = await battle(s.inBattle.scripted === 'stump' ? 'stump' : policy);
         await log(`after battle hp ${s.hp}/${maxHp(s.level)} L${s.level} friends ${s.friendsTotal}`);
+        if (s.lastBattle === 'lose' && route.allowLose) { await hold([]); return s; } // a route that means to lose
         if (s.lastBattle === 'lose' || (s.area !== area0 && !s.gameWon)) await fail(`lost a battle (woke in ${s.area})`);
         if (s.area !== area0) { await hold([]); return s; } // an ending took us home
         best = 1e9; bestAt = Date.now(); continue;
@@ -118,8 +122,8 @@ async (page) => {
       if (step.onlyInArea) { if ((await st()).area !== step.onlyInArea) continue; }
       else if (step.skipIfFriends && (await st()).friendsTotal >= step.skipIfFriends) continue;
       if (step.title) {
-        // from the title, as a player: New Game (confirm if a save exists), Swim to Village
-        await page.evaluate(() => localStorage.removeItem('bettarpg-save'));
+        // from the title, as a player: New Game (no saves: straight to Create), Swim to Village
+        await page.evaluate(() => { for (const k of Object.keys(localStorage)) if (k.startsWith('bettarpg-save') || k === 'bettarpg-last-slot') localStorage.removeItem(k); });
         await page.reload(); await sleep(2500);
         await press('Enter'); await sleep(500);
         await press('Enter'); await sleep(3000);
@@ -164,6 +168,14 @@ async (page) => {
         await log(`battle done: L${s.level} hp ${s.hp}`);
       }
       if (step.wait) await sleep(step.wait);
+      // js: run code in the page (await-able); reload: reload the page; check: a condition on s (state) and g (the hook)
+      if (step.js) { await page.evaluate(async (code) => { const g = window.__game; await (new Function('g', `return (async () => { ${code} })()`))(g); }, step.js); await sleep(step.after || 300); }
+      if (step.reload) { await page.reload(); await sleep(2500); await log('reloaded'); }
+      if (step.check) {
+        const r = await page.evaluate(async (code) => { const g = window.__game; const s = g.state(); try { return await (new Function('s', 'g', `return (async () => (${code}))()`))(s, g); } catch (e) { return 'error ' + e.message; } }, step.check);
+        if (r !== true) await fail(`check failed: ${step.check} (${JSON.stringify(r)})`);
+        await log('ok ' + step.check);
+      }
       if (step.expect) {
         for (let i = 0; i < 40; i++) { const s = await st(); if (!s.transition && s.mode === 'world') break; await sleep(100); }
         await clearDialogs();

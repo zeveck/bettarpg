@@ -271,3 +271,18 @@ body.short [data-screen=credits] .credits h2 { display: none; }
 .tl-left { left: calc(10px + var(--sa-l)); }
 .tl-right { right: calc(10px + var(--sa-r)); }
 body.short .tlink { font-size: 11px; padding: 4px 3px; }
+
+/* save slots */
+.slots { width: min(760px, 96vw); }
+.slotrow { display: flex; align-items: center; gap: 10px; padding: 4px 6px; background: #0d1b30; border: 2px solid var(--line); }
+.slotinfo { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.slotinfo span { font-size: 0.9em; text-wrap: pretty; }
+.slotbtns { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.slotbtns .btn { min-height: 44px; padding: 4px 10px; }
+body.short .slotrow { gap: 6px; padding: 2px 4px; }
+body.short .slots .list { gap: 4px; }
+
+/* the Snarl's net knots */
+.netpips { display: flex; align-items: center; gap: 4px; margin-top: 3px; }
+.netpips i { width: 8px; height: 8px; border: 2px solid #6B4E2E; background: transparent; }
+.netpips i.on { background: #C8B88A; }

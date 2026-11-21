@@ -192,9 +192,10 @@ export const MAPS = {
       { sprite: 'p_lily', x: 420, y: 120 }, { sprite: 'p_lily', x: 1000, y: 160 }, { sprite: 'p_stones', x: 560, y: 200 },
       { sprite: 'p_reeds', x: 330, y: 700 }, { sprite: 'p_reeds', x: 1220, y: 620 },
     ],
-    gates: [],
+    // the Snarl holds the top of the Spillway steps: the rect spans the whole join (x 640-896)
+    gates: [{ id: 'snarl', rect: [640, 440, 256, 44], openIf: 'snarlDone', look: 'none', talk: 'snarl' }],
     exits: [{ rect: [640, 890, 256, 30], to: 'reedwater', entry: 'north' }],
-    entries: { south: { x: 768, y: 860, face: 1 }, inn: { x: 300, y: 300, face: 1 } },
+    entries: { south: { x: 768, y: 860, face: 1 }, inn: { x: 300, y: 300, face: 1 }, steps: { x: 740, y: 830, face: 1 } },
     spawns: [
       { kind: 'cich', lv: [5, 5], x: 400, y: 690 }, { kind: 'cich', lv: [5, 5], x: 1140, y: 640 },
       { kind: 'cich', lv: [5, 5], x: 480, y: 720 },

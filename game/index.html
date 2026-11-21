@@ -70,6 +70,7 @@
     <div class="panel enemybox" id="eHud">
       <div class="hudrow"><span id="eName"></span><span class="lv" id="eLv"></span></div>
       <div class="bar ehp"><i id="eHp"></i></div>
+      <div class="netpips" id="netPips" hidden></div>
       <div id="garBox" hidden>
         <div class="friendsrow"><img class="ico hat" src="assets/native/original/artifacts/partyhat.png" alt=""><span id="garFriends"></span></div>
         <div class="meter" id="garMeter" hidden></div>
@@ -106,6 +107,15 @@
     <button class="btn sq corner" id="tMute" aria-label="Mute"></button>
     <a class="tlink tl-left" href="https://synapticnoise.com/" target="_blank" rel="noopener" title="More games at synapticnoise.com">synapticnoise.com</a>
     <a class="tlink tl-right" href="https://github.com/zeveck/bettarpg" target="_blank" rel="noopener" title="Betta RPG on GitHub: how it was made">GitHub</a>
+  </section>
+
+  <section data-screen="slots" class="screen dim" hidden>
+    <div class="panel card slots">
+      <h2 id="slotsTitle">Load</h2>
+      <p class="note" id="slotNote"></p>
+      <div class="list" id="slotList"></div>
+      <div class="menu rowc"><button class="btn" id="slotsBack">Back</button></div>
+    </div>
   </section>
 
   <section data-screen="create" class="screen dim" hidden>

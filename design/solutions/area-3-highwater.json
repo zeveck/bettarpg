@@ -1,12 +1,20 @@
 {
-  "area": 3, "name": "The Spillway and Highwater: up the spillway to Lock-Keeper Whorl",
+  "area": 3, "name": "The Spillway and Highwater: the Spillway Spring, the Snarl at the top of the steps, then Lock-Keeper Whorl",
   "completes": "lantern",
   "policy": "fight",
-  "timeLimit": 200,
+  "timeLimit": 260,
   "steps": [
     { "start": 3 },
     { "seed": 303 },
-    { "path": [[768, 600], [768, 380], [1000, 330], [1110, 290]], "note": "beside Whorl" },
+    { "say": true },
+    { "check": "s.rest === 'steps' && s.flags.stepsKnown && s.goal === 'Get past the Snarl at the top of the Spillway.'" },
+    { "path": [[740, 836], [700, 836]], "tol": 6, "note": "touched the Spillway Spring" },
+    { "check": "s.rest === 'steps' && s.hp === 20 + 6 * (s.level - 1)" },
+    { "path": [[768, 600], [768, 490]], "note": "below the Snarl" },
+    { "go": [768, 420], "note": "bumped the Snarl: fought it" },
+    { "expect": { "snarlDone": true } },
+    { "check": "g.state().snarl.done && !g.state().snarl.friend" },
+    { "path": [[768, 380], [1000, 330], [1110, 290]], "note": "beside Whorl" },
     { "talk": true },
     { "say": true },
     { "expect": { "highwater": true, "lantern": true } }

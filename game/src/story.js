@@ -54,7 +54,9 @@ export function createStory(G) {
     } else {
       w.extra.push({ id: 'tornNet', x: SNARL.netPos.x, y: SNARL.netPos.y, t: 0, sortOff: -60, draw: (ctx, n) => { const c = img('torn_net'); if (c) ctx.drawImage(c, Math.round(n.x - c.width / 2), Math.round(n.y - c.height / 2)); } });
       w.extra.push({ id: 'snarlFree', x: SNARL.freePos.x, y: SNARL.freePos.y, face: -1, t: 0, sortOff: 0, talk: true, talkRange: 46,
-        hat: !!f.snarlFriend, draw: drawSnarlFree });
+        hat: !!f.snarlFriend, draw: drawSnarlFree,
+        // while the friend Snarl swims in the Highwater parade, its east-pool spot is empty
+        get hidden() { return !!w.parade?.some((m) => m.kind === 'snarl'); } });
     }
   }
   function drawSnarl(ctx, n, t) {

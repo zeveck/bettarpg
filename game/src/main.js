@@ -1207,7 +1207,7 @@ function stateSnapshot() {
     input: input.device, padId: input.padId || null, tick: G.tick, lastBattle: G.lastBattle || null,
     ngPlus: s.ngPlus || 0, lastEnding: s.lastEnding || null, slot: G.slot || null, parade: w?.parade?.length || 0,
     snarl: { done: !!s.flags.snarlDone, friend: !!s.flags.snarlFriend },
-    extras: w ? w.extra.filter((n) => !n.hidden).map((n) => n.id) : [], paradeKinds: w?.parade?.map((m) => m.kind) || [],
+    extras: w ? w.extra.filter((n) => !n.hidden).map((n) => n.id) : [], paradeKinds: w?.parade?.map((m) => m.kind) || [], paradeAt: w?.parade?.map((m) => [m.kind, Math.round(m.x), Math.round(m.y)]) || [], bubbleAt: w ? [Math.round(w.bubble.x), Math.round(w.bubble.y)] : null,
   };
 }
 // The play-test hook, only with ?debug in the address.
@@ -1265,7 +1265,7 @@ if (new URLSearchParams(location.search).has('debug')) window.__game = {
     if (o.cogs !== undefined) s.cogs = Array.isArray(o.cogs) ? o.cogs : ['c1', 'c2', 'c3'].slice(0, o.cogs);
     if (o.pos && G.world) { G.world.player.x = o.pos.x; G.world.player.y = o.pos.y; G.world.camSnap(); }
     if (o.parade !== undefined) G.settings.parade = !!o.parade;   // for this session only
-    if ((o.friends || o.flags || o.parade !== undefined) && G.world) G.world.buildParade();
+    if ((o.friends || o.flags || o.pos || o.parade !== undefined) && G.world) G.world.buildParade();
     hudKey = '';
     return stateSnapshot();
   },

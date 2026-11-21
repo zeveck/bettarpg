@@ -162,20 +162,38 @@ async (page) => {
   await p.evaluate(async () => { await window.__game.goToLevel(0); window.__game.set({ flags: { bubbleJoined: true }, friends: { guppy: 2, angel: 1, cat: 1, cich: 1, snarl: 1 }, pos: { x: 512, y: 330 } }); });
   await sleep(800);
   const swim = async (k, ms) => { await p.keyboard.down(k); await sleep(ms); await p.keyboard.up(k); };
-  await swim('ArrowRight', 900); await swim('ArrowDown', 500); await sleep(150);
+  // swimming: a spaced line behind Bubble; stopped: a loose ring
+  await p.keyboard.down('ArrowRight'); await sleep(1300);
+  await shot('parade-village');
+  await p.keyboard.up('ArrowRight'); await sleep(2200);
+  await shot('parade-village-stop');
   s = await st();
   check(s.parade === 6 && s.paradeKinds.join() === 'guppy,angel,cat,cich,snarl,guppy', `village parade of 6 in rotation (${s.paradeKinds.join()})`);
-  await shot('parade-village');
+  { const ov = s.paradeAt.concat([['bubble', ...s.bubbleAt], ['you', s.player.x, s.player.y]]);
+    check(ov.every((a, i) => ov.every((b, j) => j <= i || Math.abs(a[1] - b[1]) > 24 || Math.abs(a[2] - b[2]) > 18)), 'settled parade: no two overlap (village)'); }
   await p.evaluate(async () => { await window.__game.goToLevel(3, { afterSnarl: true }); window.__game.set({ flags: { snarlFriend: true }, friends: { guppy: 2, angel: 1, snarl: 1 }, pos: { x: 768, y: 380 } }); });
   await sleep(800);
-  await swim('ArrowLeft', 900); await swim('ArrowUp', 300); await sleep(150);
-  s = await st();
-  check(s.parade === 4 && !s.extras.includes('snarlFree'), 'Highwater parade with the Snarl (its pool spot empty)');
+  await p.keyboard.down('ArrowLeft'); await sleep(1300);
   await shot('parade-highwater');
+  await p.keyboard.up('ArrowLeft'); await sleep(2200);
+  await shot('parade-highwater-stop');
+  s = await st();
+  check(s.parade === 4 && !s.extras.includes('snarlFree'), `Highwater parade with the Snarl (its pool spot empty) (${s.parade} ${s.paradeKinds.join()} ${s.extras.join()})`);
+  // no two parade fish overlap once settled
+  const ov = s.paradeAt.concat([['bubble', ...s.bubbleAt], ['you', s.player.x, s.player.y]]);
+  check(ov.every((a, i) => ov.every((b, j) => j <= i || Math.abs(a[1] - b[1]) > 24 || Math.abs(a[2] - b[2]) > 18)), 'settled parade: no two overlap (Highwater)');
   await p.evaluate(() => window.__game.set({ pos: { x: 768, y: 700 } }));
   await sleep(2500);
   s = await st();
-  check(s.parade === 4, 'below the steps the parade waits at the top');
+  check(s.parade === 4 && s.paradeAt.every((m) => m[2] < 470), 'below the steps the parade waits at the top');
+  // the Gar trails last in the village after the friendship ending and Peace in the Paddies
+  await p.evaluate(async () => { await window.__game.goToLevel(0); window.__game.set({ flags: { bubbleJoined: true, garFriend: true, peace: true }, pos: { x: 300, y: 330 } }); });
+  await sleep(600);
+  await p.keyboard.down('ArrowRight'); await sleep(1800);
+  await shot('parade-gar');
+  await p.keyboard.up('ArrowRight');
+  s = await st();
+  check(s.paradeKinds.join() === 'gar' && s.paradeAt[0][1] < s.bubbleAt[0] - 100, 'the Gar trails last, clear of Bubble');
   out.errors = errors;
   await ctx.close();
   return JSON.stringify(out, null, 1);

@@ -176,8 +176,6 @@ export class World {
     this.parade = [];
     this.paradeTrail = [{ x: p.x, y: p.y }];
     this.paradeIdle = 0;
-    const free = this.extra?.find((q) => q.id === 'snarlFree');
-    if (free) free.hidden = false;
     if (this.G.settings?.parade === false || !['village', 'highwater'].includes(this.areaId)) return;
     const party = this.areaId === 'village' && (f.peace || this.G.endingParty);   // they're at the square party
     const kinds = [];
@@ -194,39 +192,81 @@ export class World {
     }
     // the Gar trails last in the village after the friendship ending and Peace in the Paddies
     if (this.areaId === 'village' && f.garFriend && f.peace) kinds.push('gar');
-    const rng = makeRng(this.areaId === 'village' ? 4242 : 4343);
-    let gap = PARADE.bubbleCrumb;
+    // spacing: one body length apart along your path, Bubble first (it keeps its own trail)
+    const imgOf = (k) => img(k === 'gar' ? 'garboss' : k === 'snarl' ? 'snarl_free' : k);
+    const widthOf = (k) => imgOf(k)?.width || 36;
+    let dist = PARADE.bubbleDist, prevHalf = PARADE.bubbleHalf;
     kinds.forEach((k, i) => {
-      gap += PARADE.spacing + (k === 'snarl' ? PARADE.snarlExtra : k === 'gar' ? PARADE.garExtra : 0);
-      const a = rng.next() * Math.PI * 2, r = 14 + rng.next() * 26;
-      this.parade.push({ kind: k, crumb: gap, x: p.x - p.face * gap * PARADE.crumbPx, y: p.y + 4, face: p.face, t: i * 0.7,
-        spot: { dx: Math.cos(a) * r, dy: Math.sin(a) * r * 0.6 }, wait: { dx: (rng.next() - 0.5) * 80, dy: (rng.next() - 0.5) * 40 } });
+      const w = widthOf(k);
+      dist += prevHalf + w / 2 + PARADE.gapPx + (k === 'snarl' ? PARADE.snarlExtra * PARADE.crumbPx : k === 'gar' ? PARADE.garExtra * PARADE.crumbPx : 0);
+      prevHalf = w / 2;
+      this.parade.push({ kind: k, w, h: imgOf(k)?.height || 26, dist, rel: dist - PARADE.bubbleDist, x: p.x - p.face * dist, y: p.y + 2, face: p.face, t: i * 0.7 });
     });
-    // while the friend Snarl swims in the Highwater parade, its east-pool spot is empty
-    if (free && kinds.includes('snarl')) free.hidden = true;
+    this.paradeKeep = Math.ceil((dist + 160) / PARADE.crumbPx) + 4;
+    this.layoutParadeRing();
+  }
+  // Where they settle when you stop: a loose arc around you, behind you first, then round both
+  // sides; each takes the nearest free spot so no two (nor you, nor Bubble) overlap.
+  layoutParadeRing() {
+    const placed = [{ dx: 0, dy: 0, w: 50, h: 40 }, { dx: -30, dy: 4, w: 36, h: 30 }];   // you and Bubble
+    const clear = (c) => placed.every((q) => Math.abs(q.dx - c.dx) >= (q.w + c.w) / 2 + 6 || Math.abs(q.dy - c.dy) >= (q.h + c.h) / 2 + 2);
+    for (const m of this.parade) {
+      let spot = null;
+      for (let r = 0; r < 12 && !spot; r++) {
+        const rx = PARADE.ringMin + r * 22 + m.w / 2, ry = 34 + r * 16;
+        for (let k = 0; k <= 8 && !spot; k++) {   // behind and to the sides first; further out before in front
+          for (const sgn of k ? [1, -1] : [1]) {
+            const a = Math.PI + sgn * k * (Math.PI / 12);
+            const c = { dx: Math.round(Math.cos(a) * rx), dy: Math.round(Math.sin(a) * ry), w: m.w, h: Math.min(m.h, 44) };
+            if (clear(c)) { spot = c; break; }
+          }
+        }
+      }
+      spot = spot || { dx: -PARADE.ringMin - m.w, dy: 0, w: m.w, h: m.h };
+      placed.push(spot);
+      m.ring = { dx: spot.dx, dy: spot.dy };
+    }
+  }
+  // the point `d` px back along your path
+  trailPoint(d) {
+    const tr = this.paradeTrail, p = this.player;
+    let x = p.x, y = p.y, left = d;
+    for (let i = tr.length - 1; i >= 0; i--) {
+      const q = tr[i], seg = Math.hypot(x - q.x, y - q.y);
+      if (seg >= left) { const k = left / (seg || 1); return { x: x + (q.x - x) * k, y: y + (q.y - y) * k }; }
+      left -= seg; x = q.x; y = q.y;
+    }
+    // a short path (just arrived): carry on in a straight line behind the oldest point
+    const o = tr[0], o2 = tr[1] || p;
+    let ux = o.x - o2.x, uy = o.y - o2.y; const l = Math.hypot(ux, uy);
+    if (l < 0.5) { ux = -p.face; uy = 0; } else { ux /= l; uy /= l; }
+    return { x: x + ux * left, y: y + uy * left };
   }
   updateParade(dt) {
     if (!this.parade?.length) return;
     const p = this.player, tr = this.paradeTrail;
     const last = tr[tr.length - 1];
-    if (Math.hypot(last.x - p.x, last.y - p.y) >= PARADE.crumbPx) { tr.push({ x: p.x, y: p.y }); if (tr.length > PARADE.keep) tr.shift(); }
+    if (Math.hypot(last.x - p.x, last.y - p.y) >= PARADE.crumbPx) { tr.push({ x: p.x, y: p.y }); if (tr.length > this.paradeKeep) tr.shift(); }
     this.paradeIdle = p.moving ? 0 : this.paradeIdle + dt;
     const waiting = this.areaId === 'highwater' && p.y >= PARADE.cityBelowY;   // they wait at the top of the steps
+    const idle = this.paradeIdle > PARADE.idleAfter;
+    const fside = p.face || 1;
+    // Bubble goes first: the line starts behind wherever Bubble really is (it lags when you're fast)
+    const bub = this.s.flags.bubbleJoined ? Math.hypot(this.bubble.x - p.x, this.bubble.y - p.y) + 6 : 0;
+    const base = Math.max(PARADE.bubbleDist, bub);
     for (const m of this.parade) {
       m.t += dt;
       let tx, ty;
-      if (waiting) { tx = PARADE.waitAt.x + m.wait.dx; ty = PARADE.waitAt.y + m.wait.dy; }
-      else if (this.paradeIdle > PARADE.idleAfter) { tx = p.x + m.spot.dx; ty = p.y + m.spot.dy; }
-      else {
-        const c = tr[tr.length - 1 - m.crumb];
-        if (c) { tx = c.x; ty = c.y; } else { const o = tr[0]; tx = o.x - p.face * (m.crumb - tr.length) * PARADE.crumbPx; ty = o.y; }
-      }
+      if (waiting) { tx = PARADE.waitAt.x + m.ring.dx; ty = PARADE.waitAt.y + m.ring.dy * 0.8; }
+      else if (idle) { tx = p.x + m.ring.dx * fside; ty = p.y + m.ring.dy; }
+      else { const c = this.trailPoint(base + m.rel); tx = c.x; ty = c.y; }
       const dx = tx - m.x, dy = ty - m.y, d = Math.hypot(dx, dy);
       if (d > 400) { m.x = tx; m.y = ty; continue; }
-      const k = Math.min(1, dt * (waiting ? 2 : 5));
+      const k = Math.min(1, dt * (waiting ? 2 : idle ? 3 : 9));
       m.x += dx * k; m.y += dy * k;
       m.moving = d > 3;
       if (Math.abs(dx) > 2) m.face = dx > 0 ? 1 : -1;
+      else if (idle && !m.moving) m.face = p.x > m.x ? 1 : -1;   // settled: face you
     }
   }
   drawParadeMember(ctx, m) {
@@ -514,7 +554,7 @@ export class World {
       if (d < r && d < bd + (r - WORLD.talkRange)) { bd = d; best = { kind, ref, x, y }; }
     };
     for (const n of this.npcs) consider('npc', n, n.x, n.y);
-    for (const n of this.extra) if (n.talk) consider('extra', n, n.x, n.y, n.talkRange || WORLD.talkRange);
+    for (const n of this.extra) if (n.talk && !n.hidden) consider('extra', n, n.x, n.y, n.talkRange || WORLD.talkRange);
     for (const f of this.friends) consider('friend', f, f.x, f.y, 26);
     // Bubble only when nobody else is in reach (Bubble swims right beside you)
     for (const g of this.def.gates || []) {

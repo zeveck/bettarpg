@@ -70,7 +70,7 @@
     {"path": [[740, 836], [700, 836]], "tol": 6, "note": "Spillway Spring (rest point at the steps' foot)"},
     {"path": [[768, 690], [620, 690], [420, 690], [620, 690], [768, 760], [700, 836]], "belowLevel": 4, "note": "below Level 4: grind the west side pool, rest at the Spring"},
     {"path": [[768, 600], [768, 490]], "note": "below the Snarl"},
-    {"go": [768, 420], "note": "the Snarl fought"},
+    {"go": [768, 420], "note": "the Snarl: Gravel Grenade, then Party! (a fifth friend for the Gar)", "policy": "party"},
     {"expect": {"snarlDone": true}},
     {"path": [[768, 600], [768, 380], [1000, 330], [1110, 290]], "note": "Whorl"},
     {"talk": true},

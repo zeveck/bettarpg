@@ -9,7 +9,7 @@
 //   node tools/sim-battles.mjs            (both, compared)
 //   node tools/sim-battles.mjs --no-compare
 import { Battle, makeEnemy, makeRng } from '../game/src/battle.js';
-import { PLAYER } from '../game/src/config.js';
+import { PLAYER, garFor } from '../game/src/config.js';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -27,9 +27,12 @@ function crc32(str) {
 }
 
 function fight(rng, { kind, el, L, bubble = true, kelp = 0, seed = 0, bw = 0, edge = false, mpFrac = 1,
-  sub = false, friends = 0, party = false, befriend = false, stump = false }) {
+  sub = false, friends = 0, party = false, befriend = false, stump = false, gar = null, meter0 = 0 }) {
   const hpMax = PLAYER.maxHp(L), mpMax = PLAYER.maxMp(L);
-  const enemy = makeEnemy(kind, el, edge);
+  // New Game+ rows: the Gar's row comes from garFor(k, lastEnding, carried); edge fish are Level 10 + k
+  const k = edge ? el - 10 : 0;
+  const g = gar ? { ...gar, meter0 } : (meter0 ? { ...garFor(0), meter0 } : undefined);
+  const enemy = makeEnemy(kind, el, edge, { k, gar: g });
   const b = new Battle({
     player: { name: 'Sim', level: L, hp: hpMax, mp: Math.floor(mpMax * mpFrac),
       items: { kelp, seedcake: seed, bwater: bw, fizzy: 0 }, subOwned: sub, dived: sub, friends },
@@ -44,10 +47,10 @@ function fight(rng, { kind, el, L, bubble = true, kelp = 0, seed = 0, bw = 0, ed
     const turn = b.turn + 1;
     // The policy (the design's "Simulator rules"), first that applies.
     const warned = kind === 'gar' && (b.gturn + 1) % 3 === 0 && !p.dived;
-    const lethal = warned && p.hp <= b.hitFor(30);
+    const lethal = warned && p.hp <= b.hitFor(e.special ?? 30);
     let action;
     const fightMove = () => {
-      if (p.mp >= 5 && L >= 4 && (kind === 'cat' || kind === 'cray' || e.hp > 12)) return ['gravelGrenade', 5, 15 + bonus];
+      if (p.mp >= 5 && L >= 4 && (kind === 'cat' || kind === 'cray' || e.net > 0 || e.hp > 12)) return ['gravelGrenade', 5, 15 + bonus];
       if (p.mp >= 3) return ['bubbleBlast', 3, 12 + bonus];
       return ['attack', 0, 10 + bonus];
     };
@@ -57,12 +60,14 @@ function fight(rng, { kind, el, L, bubble = true, kelp = 0, seed = 0, bw = 0, ed
       if (turn === 1 || p.mp >= 5) action = 'party';
       else if (p.items.bwater) action = 'item:bwater';
       else action = 'attack';
+    } else if (b.tangled) {
+      action = 'attack';                       // Tangled: Attack or an item only
     } else if (stump && b.stumpLit) {
       action = 'party';
     } else {
       let [m, cost, mx] = fightMove();
       if (befriend && cost && p.mp - cost < 5) [m, cost, mx] = ['attack', 0, 10 + bonus];
-      if (befriend && p.mp >= 5 && (e.hp <= e.hpMax / 2 || e.hp <= mx + nipMax)) action = 'party';
+      if (befriend && p.mp >= 5 && !(e.net > 0) && (e.hp <= e.hpMax / 2 || e.hp <= mx + nipMax)) action = 'party';
       else action = m;
     }
     const can = b.can(action);
@@ -108,6 +113,47 @@ row('Gar vs L10 B, no items (full)', 'win >= 90%', (s) => s.win >= .9, { kind: '
 row('Gar vs L8 B in the sub, no items (full)', 'win >= 90%', (s) => s.win >= .9, { kind: 'gar', el: 10, L: 8, sub: true });
 row('Gar friendship: L8 B, 5 friends, no items (full)', 'friend >= 85%', (s) => s.friend >= .85, { kind: 'gar', el: 10, L: 8, party: true, friends: 5 });
 row('Gar friendship: L8 B, 5 friends, 2 Bubble Waters (half)', 'friend >= 85%', (s) => s.friend >= .85, { kind: 'gar', el: 10, L: 8, party: true, bw: 2, friends: 5, mpFrac: .5 });
+
+// ---- Change 1: the Snarl (Level 5, top of the Spillway steps) ----
+const sn = { kind: 'snarl', el: 5 };
+row('Snarl L5 vs L4 B, 2 Kelp (full)', 'win >= 95%, 6-10 turns', (s) => s.win >= .95 && lim(6, 10)(s.turns), { L: 4, kelp: 2, ...sn });
+row('Snarl L5 vs L4 B, 2 Kelp (half)', 'win >= 90%, <= 11 turns', (s) => s.win >= .90 && s.turns <= 11, { L: 4, kelp: 2, mpFrac: .5, ...sn });
+row('Snarl L5 vs L4 B, no items (full)', 'win 65-92% (items matter)', (s) => lim(.65, .92)(s.win), { L: 4, ...sn });
+let snf = null;
+row('Snarl L5 vs L5 B, 2 Kelp (full)', 'win >= 99%, 6-10 turns (baseline for its befriend row)', (s) => { snf = s; return s.win >= .99 && lim(6, 10)(s.turns); }, { L: 5, kelp: 2, ...sn });
+row('Snarl L5 vs L5 B, 2 Kelp (half)', 'win >= 97%, 6-10 turns', (s) => s.win >= .97 && lim(6, 10)(s.turns), { L: 5, kelp: 2, mpFrac: .5, ...sn });
+row('Snarl L5 vs L3 B, 2 Kelp (full; no Grenade, bites rip the net)', 'win 50-85% (possible, not easy)', (s) => lim(.5, .85)(s.win), { L: 3, kelp: 2, ...sn });
+row('Snarl befriend: L5 vs L4 B, 3 friends, 2 Kelp (full)', 'friend >= 30%, friend-or-win >= 95%', (s) => s.friend >= .30 && s.win >= .95, { L: 4, kelp: 2, befriend: true, friends: 3, ...sn });
+row('Snarl befriend: L5 vs L4 B, 3 friends, 2 Kelp (half)', 'friend >= 28%, friend-or-win >= 85%', (s) => s.friend >= .28 && s.win >= .85, { L: 4, kelp: 2, mpFrac: .5, befriend: true, friends: 3, ...sn });
+row('Snarl befriend: L5 vs L5 B, 3 friends, 2 Kelp (full)', 'friend >= 50%, friend-or-win >= 98%, HP within 5 points of fighting, net MP <= fighting',
+  (s) => s.friend >= .5 && s.win >= .98 && s.hp >= snf.hp - .05 && s.mp <= snf.mp, { L: 5, kelp: 2, befriend: true, friends: 3, ...sn });
+row('Snarl befriend: L5 vs L5 B, 3 friends, 2 Kelp (half)', 'friend >= 50%, friend-or-win >= 97%', (s) => s.friend >= .5 && s.win >= .97, { L: 5, kelp: 2, mpFrac: .5, befriend: true, friends: 3, ...sn });
+// ---- Change 1: New Game+ (NG+1: every enemy +4 levels; the Gar from garFor) ----
+const g1 = garFor(4), g1f = garFor(4, 'fins', true), g2 = garFor(6);
+const s9 = { kind: 'snarl', el: 9 };
+row('NG+1, L8 carry: Snarl L9 vs L9 B, 2 Kelp (half)', 'win >= 95%, 6-10 turns', (s) => s.win >= .95 && lim(6, 10)(s.turns), { L: 9, kelp: 2, mpFrac: .5, ...s9 });
+row('NG+1, L8 carry: Snarl befriend L9 vs L9 B, 3 friends, 2 Kelp (half)', 'friend >= 60%, friend-or-win >= 97%', (s) => s.friend >= .6 && s.win >= .97, { L: 9, kelp: 2, mpFrac: .5, befriend: true, friends: 3, ...s9 });
+row('NG+1, L8 carry: Murk deep Cichlid L12 vs L10 B (half)', 'win >= 90%, >= 25% HP', (s) => s.win >= .9 && s.hp >= .25, { kind: 'cich', el: 12, L: 10, mpFrac: .5 });
+row('NG+1, L8 carry: Murk deep Crayfish L12 vs L10 B (half)', 'win >= 90%, >= 20% HP', (s) => s.win >= .9 && s.hp >= .20, { kind: 'cray', el: 12, L: 10, mpFrac: .5 });
+row('NG+1, L8 carry: Gar L14 vs L12 B, 3 Seed Cakes (full)', 'win >= 75%, 7-12 turns', (s) => s.win >= .75 && lim(7, 12)(s.turns), { kind: 'gar', el: 14, L: 12, seed: 3, gar: g1 });
+row('NG+1, L8 carry: Gar L14 vs L12 B, no items (full)', 'win <= 35% (items and levels matter)', (s) => s.win <= .35, { kind: 'gar', el: 14, L: 12, gar: g1 });
+row('NG+1, L8 carry: Gar L14 vs L12 B in the sub, no items (full)', 'win >= 90%', (s) => s.win >= .9, { kind: 'gar', el: 14, L: 12, sub: true, gar: g1 });
+row('NG+1, L8 carry, after fins (special 41): Gar vs L12 B, 3 Seed Cakes (full)', 'win >= 75%', (s) => s.win >= .75, { kind: 'gar', el: 14, L: 12, seed: 3, gar: g1f });
+row('NG+1, L8 carry: Gar friendship L12 B, 5 friends, no items (full)', 'friend >= 85%', (s) => s.friend >= .85, { kind: 'gar', el: 14, L: 12, party: true, friends: 5, gar: g1 });
+row('NG+1, L8 carry: Gar friendship L12 B, 5 friends, 2 Bubble Waters (half)', 'friend >= 85%', (s) => s.friend >= .85, { kind: 'gar', el: 14, L: 12, party: true, friends: 5, bw: 2, mpFrac: .5, gar: g1 });
+row('NG+1, L10 carry: Snarl L9 vs L11 B, 2 Kelp (half)', 'win >= 99%', (s) => s.win >= .99, { L: 11, kelp: 2, mpFrac: .5, ...s9 });
+row('NG+1, L10 carry: Snarl befriend L9 vs L11 B, 3 friends, 2 Kelp (half)', 'friend >= 70%', (s) => s.friend >= .7, { L: 11, kelp: 2, mpFrac: .5, befriend: true, friends: 3, ...s9 });
+row('NG+1, L10 carry: Murk deep Cichlid L12 vs L12 B (half)', 'win >= 95%, >= 35% HP', (s) => s.win >= .95 && s.hp >= .35, { kind: 'cich', el: 12, L: 12, mpFrac: .5 });
+row('NG+1, L10 carry: Murk deep Crayfish L12 vs L12 B (half)', 'win >= 95%, >= 35% HP', (s) => s.win >= .95 && s.hp >= .35, { kind: 'cray', el: 12, L: 12, mpFrac: .5 });
+row('NG+1, L10 carry: Gar L14 vs L13 B, 3 Seed Cakes (full)', 'win >= 95%, 7-12 turns', (s) => s.win >= .95 && lim(7, 12)(s.turns), { kind: 'gar', el: 14, L: 13, seed: 3, gar: g1 });
+row('NG+1, L10 carry: Gar L14 vs L14 B, no items (full)', 'win >= 90%', (s) => s.win >= .9, { kind: 'gar', el: 14, L: 14, gar: g1 });
+row('NG+1, L10 carry, after fins (special 41): Gar vs L13 B, 3 Seed Cakes (full)', 'win >= 90%', (s) => s.win >= .9, { kind: 'gar', el: 14, L: 13, seed: 3, gar: g1f });
+row('NG+1, L10 carry, after friendship (meter starts 1): L13 B, 5 friends, no items (half)', 'friend >= 85%', (s) => s.friend >= .85, { kind: 'gar', el: 14, L: 13, party: true, friends: 5, mpFrac: .5, meter0: 1, gar: g1 });
+row('NG+1 Edge Cichlid L14 vs L12 B (full)', 'win 35-70% (optional and scary)', (s) => lim(.35, .7)(s.win), { kind: 'cich', el: 14, L: 12, edge: true });
+row('NG+1 Edge Crayfish L14 vs L12 B (full)', 'win 35-70%', (s) => lim(.35, .7)(s.win), { kind: 'cray', el: 14, L: 12, edge: true });
+row('NG+2: Gar L16 vs L15 B, 3 Seed Cakes (full)', 'win >= 90%', (s) => s.win >= .9, { kind: 'gar', el: 16, L: 15, seed: 3, gar: g2 });
+row('NG+2: Gar L16 vs L15 B, no items (full)', 'win <= 85% (still needs items)', (s) => s.win <= .85, { kind: 'gar', el: 16, L: 15, gar: g2 });
+row('NG+2: Gar friendship L15 B, 5 friends, no items (full)', 'friend >= 85%', (s) => s.friend >= .85, { kind: 'gar', el: 16, L: 15, party: true, friends: 5, gar: g2 });
 
 const N = 4000;
 const out = [];

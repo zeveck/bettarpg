@@ -83,6 +83,28 @@ export const GAR = {
 
 export const ENEMY_HIT = 0.9;
 
+// Change 1: the Snarl, a net-tangled Mitten Crab at the top of the Spillway steps.
+export const SNARL = {
+  name: 'The Snarl', level: 5, baseHp: 30, lo: 3, hi: 5, growth: 1.5, hit: 0.9, exp: 90,
+  bites: (k) => 20 + 5 * k, netCut: 2, netKnots: 4, throwEvery: 3,
+  attacks: ['snaps its tangled claws!', 'swings the heavy net!', 'scuttles sideways and pinches!'],
+  pos: { x: 768, y: 462 }, freePos: { x: 1240, y: 610 }, netPos: { x: 812, y: 452 },
+};
+export const snarlHp = (level) => Math.round(SNARL.baseHp * (1 + 0.55 * level));
+export const snarlDmg = (level) => { const g = Math.floor(SNARL.growth * (level - 1)); return [SNARL.lo + g, SNARL.hi + g]; };
+export const snarlExp = (level) => Math.floor(SNARL.exp * (1 + 0.2 * level));
+
+// Change 1: New Game+. k = the level bonus every enemy gets; the cap rises to 15.
+export const NGPLUS = { bonus: (n) => (n >= 2 ? 6 : n >= 1 ? 4 : 0), cap: 15 };
+export const maxLevel = (s) => ((s?.ngPlus || 0) >= 1 ? NGPLUS.cap : PLAYER.maxLevel);
+// The Gar at bonus k, remembering the last ending (fins: special x1.1; friendship: meter starts at 1).
+export function garFor(k = 0, lastEnding = null, carried = false) {
+  let special = 30 + 2 * k;
+  if (carried && lastEnding === 'fins') special = Math.floor(special * 1.1);
+  return { hp: 230 + 20 * k, lo: 8 + k, hi: 12 + k, special, exp: 600 + 150 * k, bites: 50 + 10 * k,
+    level: 10 + k, meter0: carried && lastEnding === 'friend' ? 1 : 0 };
+}
+
 export const enemyHp = (kind, level) => Math.round(ENEMIES[kind].baseHp * (1 + 0.55 * level));
 export const enemyDmg = (kind, level) => {
   const e = ENEMIES[kind], g = Math.floor(e.growth * (level - 1));
@@ -114,6 +136,7 @@ export const AREA_NAMES = {
 // Below the level an area expects, fights there give x1.5 EXP ("Catch-up bonus!").
 export const CATCH_UP = { shallows: 3, reedwater: 5, highwater: 6, murk: 7, ditch: 8, mult: 1.5 };
 export const REEF_FRIENDS = 3;
+export const SPILLWAY_SPRING = { x: 700, y: 836 };
 // Whorl hands over the lantern (the way into the Murk) from this level
 export const LANTERN_LEVEL = 5;
 export const AREA_START = {
@@ -121,6 +144,6 @@ export const AREA_START = {
   shallows: { flags: ['metFinn'], level: 1 },
   reedwater: { flags: ['metFinn', 'bubbleJoined', 'hbtLearned', 'stumpDone', 'eastOpen'], level: 3 },
   highwater: { flags: ['metFinn', 'bubbleJoined', 'hbtLearned', 'stumpDone', 'eastOpen', 'trailFound'], level: 5 },
-  murk: { flags: ['metFinn', 'bubbleJoined', 'hbtLearned', 'stumpDone', 'eastOpen', 'trailFound', 'highwater', 'lantern'], level: 6 },
-  ditch: { flags: ['metFinn', 'bubbleJoined', 'hbtLearned', 'stumpDone', 'eastOpen', 'trailFound', 'highwater', 'lantern', 'gateOpen'], level: 8 },
+  murk: { flags: ['metFinn', 'bubbleJoined', 'hbtLearned', 'stumpDone', 'eastOpen', 'trailFound', 'snarlDone', 'highwater', 'lantern'], level: 6 },
+  ditch: { flags: ['metFinn', 'bubbleJoined', 'hbtLearned', 'stumpDone', 'eastOpen', 'trailFound', 'snarlDone', 'highwater', 'lantern', 'gateOpen'], level: 8 },
 };

@@ -1,5 +1,6 @@
 // battle.js: the battle rules, pure (no DOM, no drawing). Used by the game,
 // which animates the events it returns, and by tools/sim-battles.mjs.
+import { SNARL, snarlHp, snarlDmg, snarlExp, garFor } from './config.js';
 import { PLAYER, MOVES, PARTY, BUBBLE, ITEMS, ENEMIES, EDGE, GAR, ENEMY_HIT,
   enemyHp, enemyDmg, enemyExp } from './config.js';
 
@@ -23,18 +24,26 @@ export function makeRng(seed = 1) {
   };
 }
 
-export function makeEnemy(kind, level, edge = false) {
+// opts: { k: the New Game+ level bonus, gar: garFor(...) for the Gar }
+export function makeEnemy(kind, level, edge = false, opts = {}) {
+  const k = opts.k || 0;
   if (kind === 'gar') {
-    return { kind, name: GAR.name, level: GAR.level, hp: GAR.hp, hpMax: GAR.hp, lo: GAR.lo, hi: GAR.hi,
-      edge: false, boss: true, shell: false };
+    const g = opts.gar || garFor(k);
+    return { kind, name: GAR.name, level: g.level, hp: g.hp, hpMax: g.hp, lo: g.lo, hi: g.hi, special: g.special,
+      exp: g.exp, bites: g.bites, meter0: g.meter0 || 0, edge: false, boss: true, shell: false, k };
+  }
+  if (kind === 'snarl') {
+    const hp = snarlHp(level), [lo, hi] = snarlDmg(level);
+    return { kind, name: SNARL.name, level, hp, hpMax: hp, lo, hi, edge: false, boss: true, shell: false,
+      net: SNARL.netKnots, k };
   }
   const def = ENEMIES[kind];
-  if (edge) level = EDGE.level;
+  if (edge) level = EDGE.level + k;
   let hp = enemyHp(kind, level);
   let [lo, hi] = enemyDmg(kind, level);
   if (edge) { hp = Math.floor(hp * EDGE.mult); lo = Math.floor(lo * EDGE.mult); hi = Math.floor(hi * EDGE.mult); }
   return { kind, name: (edge ? 'Edge ' : '') + def.name, level, hp, hpMax: hp, lo, hi, edge, boss: false,
-    shell: !!def.shell };
+    shell: !!def.shell, k };
 }
 
 export function partyChance(L, enemy, friends) {
@@ -49,7 +58,8 @@ export function partyChance(L, enemy, friends) {
 const PLAYER_BIG = () => PLAYER.bigPartyLevel;
 
 export function rewardsFor(enemy, rng) {
-  if (enemy.kind === 'gar') return { exp: GAR.exp, bites: GAR.bites };
+  if (enemy.kind === 'gar') return { exp: enemy.exp ?? GAR.exp, bites: enemy.bites ?? GAR.bites };
+  if (enemy.kind === 'snarl') return { exp: snarlExp(enemy.level), bites: SNARL.bites(enemy.k || 0) };
   let exp = enemyExp(enemy.kind, enemy.level);
   let bites = rng.int(1, 5) + enemy.level * rng.int(1, 2);
   if (enemy.edge) { exp = Math.floor(exp * EDGE.rewardMult); bites = Math.floor(bites * EDGE.rewardMult); }
@@ -65,7 +75,8 @@ const fill = (s, v) => s.replace(/\{(\w+)\}/g, (m, k) => (v[k] !== undefined ? v
 //   scripted: null | 'tutorial' | 'stump'
 //   rng: makeRng(...)
 export class Battle {
-  constructor({ player, enemy, bubble = false, hbtLearned = false, scripted = null, rng = makeRng(1) }) {
+  constructor({ player, enemy, bubble = false, hbtLearned = false, scripted = null, rng = makeRng(1), garLine = null }) {
+    this.garLine = garLine;
     this.p = { ...player, items: { ...player.items } };
     this.p.hpMax = PLAYER.maxHp(this.p.level);
     this.p.mpMax = PLAYER.maxMp(this.p.level);
@@ -78,7 +89,12 @@ export class Battle {
     this.gturn = 0;         // Gar turns taken
     this.dizzy = false;
     this.healed = false;
-    this.meter = 0;
+    this.meter = enemy.meter0 || 0;
+    this.tangled = false;   // the Snarl's net is on you: your next turn is Attack or an item
+    this.freeing = false;   // ...and Bubble's action that round is nibbling it off
+    this.wasTangled = false;
+    this.sturn = 0;         // the Snarl's own turns
+    this.netSoftSaid = false;
     this.partyStarted = false;
     this.outOfFizzSaid = false;
     this.stumpLit = false;  // the Old Stump lesson has lit Party!
@@ -96,6 +112,8 @@ export class Battle {
   can(action) {
     const p = this.p, e = this.e;
     if (this.over) return { ok: false, why: '' };
+    const TANGLED = 'Tangled! Only Attack or an item this turn.';
+    if (this.tangled && !(action === 'attack' || action.startsWith('item:'))) return { ok: false, why: TANGLED, tangled: true };
     switch (action) {
       case 'attack': return { ok: true };
       case 'bubbleBlast':
@@ -108,6 +126,7 @@ export class Battle {
           return this.stumpLit ? { ok: true, free: true } : { ok: false, why: 'Bubble will show you this.' };
         }
         if (!this.hbtLearned) return { ok: false, why: 'Bubble will show you this.' };
+        if (e.kind === 'snarl' && e.net > 0) return { ok: false, why: 'It can\'t hear the party through all that net! Rip it first: Gravel Grenade, or keep biting.' };
         if (e.kind === 'gar') {
           if (p.friends < PARTY.garFriendsNeeded) return { ok: false, why: `Not enough friends for this party! (Friends ${p.friends}/${PARTY.garFriendsNeeded})` };
           if (!this.partyStarted) return { ok: true, free: true };
@@ -140,10 +159,15 @@ export class Battle {
     this.events = [];
     const e = this.e;
     if (e.kind === 'gar') {
-      this.push({ t: 'say', who: 'gar', text: '...MINE. NO MORE... ALONE.' });
+      this.push({ t: 'say', who: 'gar', text: this.garLine || '...MINE. NO MORE... ALONE.' });
       this.log(`The ${e.name} rises from the deep! (Level ${e.level})`);
     } else if (this.scripted === 'stump') {
       this.log(`A Territorial Angelfish charges in! (Level ${e.level})`);
+    } else if (e.kind === 'snarl') {
+      this.log(`The Snarl blocks the steps! (Level ${e.level})`);
+      if (this.bubble) this.push({ t: 'say', who: 'bubble', text: this.p.level >= MOVES.gravelGrenade.level
+        ? 'That net\'s too thick to bite through! A Gravel Grenade would rip it open.'
+        : 'That net\'s too thick... Keep biting at it: every hit frays it!' });
     } else {
       this.log(`A wild ${e.name} (Level ${e.level}) appears!`);
     }
@@ -157,6 +181,8 @@ export class Battle {
     if (!c.ok) return { refused: c.why || 'You can\'t do that now.' };
     this.events = [];
     this.turn++;
+    this.wasTangled = this.tangled;
+    this.tangled = false;
     const e = this.e;
     const first = !!(ENEMIES[e.kind]?.first);
     if (first) {
@@ -199,7 +225,7 @@ export class Battle {
       this.over = 'win';
       this.rewards = rewardsFor(e, this.rng);
       this.push({ t: 'sfx', name: 'enemy_defeated' });
-      this.log(`Defeated the ${e.name}!`);
+      this.log(e.kind === 'snarl' ? 'The Snarl scuttles off to sulk in the side pool.' : `Defeated the ${e.name}!`);
       this.push({ t: 'end', result: 'win', rewards: this.rewards });
     }
   }
@@ -224,8 +250,9 @@ export class Battle {
           this.log(`The ${e.name} slips aside!`);
           return;
         }
-        const d = shellCut(r.int(MOVES.attack.lo, MOVES.attack.hi) + b);
+        const d = this.netCut(shellCut(r.int(MOVES.attack.lo, MOVES.attack.hi) + b));
         this.log(`${p.name} bites the ${e.name} for ${d}!`);
+        this.fray();
         this.push({ t: 'sfx', name: 'hit' });
         this.damageEnemy(d, 'player');
         return;
@@ -234,8 +261,9 @@ export class Battle {
         p.mp -= MOVES.bubbleBlast.mp;
         this.push({ t: 'mp', amount: -MOVES.bubbleBlast.mp });
         this.push({ t: 'anim', who: 'player', kind: 'bubbles' });
-        const d = shellCut(r.int(MOVES.bubbleBlast.lo, MOVES.bubbleBlast.hi) + b);
+        const d = this.netCut(shellCut(r.int(MOVES.bubbleBlast.lo, MOVES.bubbleBlast.hi) + b));
         this.log(`${p.name} unleashes a Bubble Blast for ${d}!`);
+        this.fray();
         this.damageEnemy(d, 'player');
         return;
       }
@@ -249,13 +277,19 @@ export class Battle {
           this.push({ t: 'sfx', name: 'shell_crack' });
           this.log(`The gravel cracks the crayfish's shell!`);
         }
+        if (e.net > 0) {
+          e.net = 0;
+          this.push({ t: 'sfx', name: 'net_rip' });
+          this.push({ t: 'netRip' });
+          this.log('The gravel rips the net open!');
+        }
         this.log(`${p.name} hurls a Gravel Grenade for ${d}!`);
         this.damageEnemy(d, 'player');
         return;
       }
       case 'party': return this.party(c);
       case 'flee': {
-        const ch = e.level >= MOVES.swimAway.hardLevel ? MOVES.swimAway.hardChance : MOVES.swimAway.chance;
+        const ch = e.level >= MOVES.swimAway.hardLevel + (e.k || 0) ? MOVES.swimAway.hardChance : MOVES.swimAway.chance;
         this.push({ t: 'anim', who: 'player', kind: 'flee' });
         if (r.chance(ch)) {
           this.over = 'fled';
@@ -333,7 +367,9 @@ export class Battle {
     this.rewards = rewardsFor(e, this.rng);
     this.push({ t: 'befriend' });
     this.push({ t: 'sfx', name: 'befriend' });
-    this.log(e.kind === 'gar' ? 'The Prehistoric Gar... smiles. You made a friend!' : `You befriended the ${e.name}!`);
+    if (e.kind === 'snarl') this.push({ t: 'sfx', name: 'net_rip' });
+    this.log(e.kind === 'gar' ? 'The Prehistoric Gar... smiles. You made a friend!'
+      : e.kind === 'snarl' ? 'The net falls away... the Snarl wriggles free! You made a friend!' : `You befriended the ${e.name}!`);
     // The party cheers you up (regular fish; the Old Stump lesson and the Gar
     // are scripted moments, as in the design's simulator).
     if (this.scripted !== 'stump' && e.kind !== 'gar') {
@@ -351,7 +387,14 @@ export class Battle {
     if (this.dizzy) {
       this.dizzy = false;
       this.push({ t: 'bubbleDizzyEnd' });
-      this.log('Bubble shakes off the dizziness.');
+      this.log(this.e.kind === 'snarl' ? 'Bubble wriggles out of the net.' : 'Bubble shakes off the dizziness.');
+      return;
+    }
+    if (this.freeing && this.wasTangled) {
+      this.freeing = false;
+      this.push({ t: 'untangle' });
+      this.push({ t: 'sfx', name: 'bubble_chirp' });
+      this.log('Bubble nibbles the net off you!');
       return;
     }
     if (!this.healed && p.hp < BUBBLE.healBelow * p.hpMax) {
@@ -368,6 +411,7 @@ export class Battle {
     this.push({ t: 'anim', who: 'bubble', kind: 'lunge' });
     this.push({ t: 'sfx', name: 'bubble_chirp' });
     this.log(`Bubble nips the ${this.e.name} for ${d}!`);
+    this.fray();
     this.damageEnemy(d, 'bubble');
   }
 
@@ -402,7 +446,7 @@ export class Battle {
             this.push({ t: 'block' });
             this.log('The ancient submarine armor withstands even the Gargantuan Gar!');
           } else {
-            const d = this.hitFor(GAR.special);
+            const d = this.hitFor(e.special ?? GAR.special);
             p.hp -= d;
             this.push({ t: 'dmg', target: 'player', amount: d, big: true });
             this.log(`The GARGANTUAN GAR deals ${d} devastating damage!`);
@@ -417,7 +461,7 @@ export class Battle {
         this.push({ t: 'anim', who: 'enemy', kind: 'lunge' });
         if (!r.chance(GAR.hit)) { this.push({ t: 'miss', target: 'player' }); this.log('The Prehistoric Gar snaps and misses!'); }
         else if (!this.bubbleDraws()) {
-          const d = this.hitFor(r.int(GAR.lo, GAR.hi));
+          const d = this.hitFor(r.int(e.lo, e.hi));
           p.hp -= d;
           this.push({ t: 'dmg', target: 'player', amount: d });
           this.log(`The Prehistoric Gar ${r.pick(GAR.attacks).replace(/!$/, '')} for ${d} damage!`);
@@ -430,6 +474,7 @@ export class Battle {
       }
       return;
     }
+    if (e.kind === 'snarl') { this.snarlAct(); return; }
     const def = ENEMIES[e.kind];
     this.push({ t: 'anim', who: 'enemy', kind: 'lunge' });
     if (!r.chance(ENEMY_HIT)) { this.push({ t: 'miss', target: 'player' }); this.push({ t: 'sfx', name: 'miss' }); this.log(`The ${e.name} misses!`); return; }
@@ -442,6 +487,61 @@ export class Battle {
     if (terr) this.log('Territorial!');
     this.push({ t: 'dmg', target: 'player', amount: d });
     this.log(`The ${e.name} ${r.pick(def.attacks).replace(/!$/, '')} for ${d} damage!`);
+  }
+
+  // The Snarl's net: -2 to your Attack and Bubble Blast while it's whole.
+  netCut(d) {
+    const e = this.e;
+    if (!(e.net > 0)) return d;
+    if (!this.netSoftSaid) { this.netSoftSaid = true; this.log('The thick net softens your bite (\u22122).'); }
+    return Math.max(1, d - SNARL.netCut);
+  }
+  // A landed hit or a nip unties one of its 4 knots.
+  fray() {
+    const e = this.e;
+    if (!(e.net > 0)) return;
+    e.net--;
+    this.push({ t: 'knots', value: e.net });
+    if (e.net === SNARL.netKnots - 2) this.log('The net is fraying!');
+    if (e.net === 0) { this.push({ t: 'sfx', name: 'net_rip' }); this.push({ t: 'netRip' }); this.log('The net rips open!'); }
+  }
+
+  snarlAct() {
+    const p = this.p, e = this.e, r = this.rng;
+    this.sturn++;
+    this.warned = false;
+    if (this.sturn % SNARL.throwEvery === 0) {
+      // Net Throw: no damage, never misses
+      this.push({ t: 'anim', who: 'enemy', kind: 'net' });
+      this.push({ t: 'sfx', name: 'net_throw' });
+      if (this.bubble && r.chance(BUBBLE.drawChance)) {
+        this.dizzy = true;
+        this.push({ t: 'bubbleNet' });
+        this.log('The net lands on Bubble! Bubble\'s all tangled up...');
+      } else if (p.dived) {
+        this.push({ t: 'block' });
+        this.log('The net slides off the submarine!');
+      } else {
+        this.tangled = true;
+        this.freeing = this.bubble;
+        this.push({ t: 'tangle' });
+        this.log(`The Snarl flings its net over ${p.name}! Tangled!`);
+      }
+    } else {
+      this.push({ t: 'anim', who: 'enemy', kind: 'lunge' });
+      if (!r.chance(SNARL.hit)) { this.push({ t: 'miss', target: 'player' }); this.push({ t: 'sfx', name: 'miss' }); this.log('The Snarl misses!'); }
+      else if (!this.bubbleDraws()) {
+        const d = this.hitFor(r.int(e.lo, e.hi));
+        p.hp -= d;
+        this.push({ t: 'dmg', target: 'player', amount: d });
+        this.log(`The Snarl ${r.pick(SNARL.attacks).replace(/!$/, '')} for ${d} damage!`);
+      }
+    }
+    if ((this.sturn + 1) % SNARL.throwEvery === 0 && p.hp > 0) {
+      this.warned = true;
+      this.push({ t: 'netWarn' });
+      this.log('The Snarl gathers up its net!');
+    }
   }
 
   afterRound() {

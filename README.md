@@ -23,6 +23,8 @@ install, works on desktop and on phones, with keyboard, mouse, touch or a contro
 | **Battles.** Attack, Bubble Blast, Gravel Grenade, or **Party!**: Happy Balloon Time makes a friend instead of a fight. | **Highwater**, the city on the next terrace, where the Lock-Keeper knows what happened to the drain gate. |
 | ![The Murk](media/screenshots/murk.png) | ![The Gargantuan Gar](media/screenshots/gar.png) |
 | **The Murk.** Dark water, a borrowed lantern, three lost cogs, and Level-10 fish at the edges. | **The Gargantuan Gar.** Beat it, or bring five friends and throw it a party. |
+| ![The Snarl](media/screenshots/snarl.png) | ![Save slots](media/screenshots/load.png) |
+| **The Snarl.** A grumpy old crab tangled in a lost fishing net blocks the Spillway. It can tangle you up; rip its net with a Gravel Grenade, then fight it or free it. | **Three save slots,** and **New Game+** after either ending: keep your level and gear, the fish are tougher, and the Gar remembers how you left things. |
 
 ![The friendship ending](media/screenshots/ending.png)
 
@@ -44,8 +46,10 @@ install, works on desktop and on phones, with keyboard, mouse, touch or a contro
   account).
 
 Losing a battle is never the end: you wake at your last rest point with a few Betta Bites
-fewer. Progress saves by itself, and Continue picks up where you left off. There are two
-endings, and a reward for making friends with every kind of fish in the paddies.
+fewer. Progress saves by itself into one of three save slots; Continue picks up the latest,
+and Load shows them all. There are two endings, a reward for making friends with every kind
+of fish in the paddies, and New Game+ once you've seen an ending. In the village and
+Highwater your friends swim along behind you in a parade (Settings → Parade turns it off).
 
 ## How it was made
 
@@ -77,7 +81,24 @@ whole game from New Game to the credits):
   Gar, props, rice and item icons, all drawn to match the original sprites' pixel grid.
 - [nanogen](https://github.com/zeveck/nanogen): the title, battle and ending backdrops.
 - [anim8gen](https://github.com/zeveck/anim8gen): the betta's swim and the Gar's lunge.
-- [audiogen](https://github.com/zeveck/audiogen): eight songs and twenty-eight sound effects.
+- [audiogen](https://github.com/zeveck/audiogen): eight songs and thirty sound effects (the Snarl's net throw and net rip came later).
+
+Before it went online, the name changed:
+
+> It should still just be "Betta RPG" and not "Betta Fish RPG" on the title, etc.
+
+and the original repo was renamed to make room ("Rename and proceed with the full publish."),
+and Bubble moved out from behind the betta's tail on the social card ("The social image is
+great but it's weird Bubbles is hidden behind the main fish's tail?"). Then:
+
+> Do all three of the recommendations.
+
+added the Snarl (a fishing-net mini-boss on the Spillway), the friends' parade and New Game+,
+each reviewed, built and play-tested as a change, and
+
+> Does the game have save slotS? There should be more than just one global save
+
+added three save slots, moving any save from the first published version into slot 1.
 
 The original game's pixel art (the betta in four armor stages, the five enemies, the party
 hats, the submarine, Paddy Village and the rice tuft) is used as it was, shrunk to its
@@ -87,8 +108,8 @@ notes are in [`design/`](design/).
 ## Replaying the tests
 
 Every area and both endings have a recorded route in `design/solutions/`, the proof the game
-can be finished. Serve the `game` folder, open it in a `playwright-cli` session, then replay
-routes with real key presses:
+can be finished. Serve the `game` folder, open it with `?debug` on the address (the test
+hook only exists then) in a `playwright-cli` session, then replay routes with real key presses:
 
     tools/run-routes.sh <session> design/solutions/area-1-shallows.json
     tools/run-routes.sh <session> design/solutions/*.json

@@ -12,6 +12,7 @@
 8. "The social image is great but it's weird Bubbles is hidden behind the main fish's tail?"
 9. "Do all three of the recommendations." (the three ideas from the publish report: `/gamegen --change add a fishing-net trap mini-boss guarding the Spillway`; `/gamegen --change let befriended fish join your parade in the village and follow you around`; `/gamegen --change add a New Game+ where the fish are tougher and the Gar remembers you`)
 10. "Does the game have save slotS? There should be more than just one global save"
+11. "publish" (published Change 1 on 2026-11-21)
 
 From: https://github.com/zeveck/bettarpg (zeveck's own repo; renamed to zeveck/bettarpg-original on 2026-11-21 so the remake could take zeveck/bettarpg), remake, leeway lots.
 Original untouched; this is a new folder and repo with fresh history.
@@ -54,7 +55,7 @@ Original untouched; this is a new folder and repo with fresh history.
 - [x] Design + review: 1 round (4 must, 10 should, all fixed; sim 58/58)
 - [x] Assets: snarl, snarl_free, torn_net (~$2.25), net_throw + net_rip (~$0.48)
 - [x] Build + targeted checks + full replays: saves 21/21 (published save migrates to slot 1), sim 58/58, 13 routes + full game pass, screens at 4 sizes × 4 inputs; parade spacing fixed
-- [x] README/screenshots; art sheet + plans page: to update at the next publish (Snarl, torn net)
+- [x] README/screenshots; published 2026-11-21 (deploy 51aa650); art sheet on the plans page updated with the Snarl
 
 ## Phases
 

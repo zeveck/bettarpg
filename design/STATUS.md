@@ -9,6 +9,9 @@
 5. (at the publish question) "It should still just be "Betta RPG" and not "Betta Fish RPG" on the title, etc."
 6. "I'm debating if we should move the old repo to bettarpg-original or something so we can use bettarpg for this. It could still reference original? Not sure."
 7. "Rename and proceed with the full publish."
+8. "The social image is great but it's weird Bubbles is hidden behind the main fish's tail?"
+9. "Do all three of the recommendations." (the three ideas from the publish report: `/gamegen --change add a fishing-net trap mini-boss guarding the Spillway`; `/gamegen --change let befriended fish join your parade in the village and follow you around`; `/gamegen --change add a New Game+ where the fish are tougher and the Gar remembers you`)
+10. "Does the game have save slotS? There should be more than just one global save"
 
 From: https://github.com/zeveck/bettarpg (zeveck's own repo; renamed to zeveck/bettarpg-original on 2026-11-21 so the remake could take zeveck/bettarpg), remake, leeway lots.
 Original untouched; this is a new folder and repo with fresh history.
@@ -44,6 +47,14 @@ Original untouched; this is a new folder and repo with fresh history.
 - Plans page: card Published, design page https://synapticnoise.com/plans/betta-rpg/design/, art sheet https://synapticnoise.com/plans/betta-rpg/art/ (art sheet manifest: .gamegen/art-sheet/manifest.json)
 - Shared design on claude.ai renamed and updated (same link)
 - GitHub preview image: to upload (none set)
+
+## Change 1 (2026-11-21): mini-boss, parade, New Game+
+
+- Budget: $20 (default for a change)
+- [x] Design + review: 1 round (4 must, 10 should, all fixed; sim 58/58)
+- [x] Assets: snarl, snarl_free, torn_net (~$2.25), net_throw + net_rip (~$0.48)
+- [ ] Build + targeted checks + full replays
+- [ ] README/screenshots, art sheet
 
 ## Phases
 

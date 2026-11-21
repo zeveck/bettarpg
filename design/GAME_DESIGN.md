@@ -1078,3 +1078,389 @@ A forecast, not a promise.
 - [ ] Cheats only with `?debug`; the debug hook has state, frames, buttons, audioState,
       levels, goToLevel, set, seed and battle.
 - [ ] Installs as an app and works offline.
+
+## Change 1 (2026-11-21): the Snarl, the friends' parade, and New Game+
+
+The person asked for all three ideas from the publish report, and for save slots during the
+change. Everything else stays as it is. Refined 2026-11-21 from two reviews (player,
+builder); every number below is met by `tools/sim_design.py` (subsection 5).
+
+### 1. The Snarl, a fishing-net mini-boss guarding the Spillway
+
+**Who and where.** An old **Mitten Crab** hopelessly tangled in a lost fishing net (the
+farmers' net, swept down by the same spring flood). Grumpy, sore, and swinging the net at
+anyone who climbs the steps. It sits at the **top of the Spillway steps** (Highwater area),
+the one way up to the city, at (768, 462), drawn `boss/snarl.png` at world scale (×1, like
+every fish), with a slow claw sway and net bob in code. It's visible and doesn't chase.
+
+**The gate (solid).** Highwater's `gates` gets
+`{ id: 'snarl', rect: [640, 440, 256, 44], openIf: 'snarlDone', look: 'none', talk: 'snarl' }`.
+The channel is 256 px wide (x 640–896) where it meets the city water at y 460, so the rect
+spans the whole join: there's no way round. Bumping it runs `talk: 'snarl'`, which starts
+the fight (the first time after a short scene, below). After you flee or lose, the Snarl
+re-arms only once you've swum 120 px away and come back (the Gar's rule), so you can't be
+caught in a loop at its claws; the usual 2 s of safety also applies.
+
+**First meeting** (once, flag `snarlMet`): Bubble: "That crab's all tangled up... and cross
+about it." The Snarl: "GET OFF MY STEPS! Can't a crab sulk in peace?!" Then the battle.
+Goal line, when `trailFound && !snarlDone`: "Get past the Snarl at the top of the
+Spillway." (checked before the `highwater` lines in `goalLine`). Finn's pointer after
+`trailFound` is unchanged.
+
+**The Spillway Spring (rest point at the steps' foot).** A bubbling spring (the Gate
+Spring's look: `p_stones` with code bubbles) in the channel at (700, 836), just above the
+Reedwater entry. The first time you enter the Highwater area with `trailFound && !snarlDone`
+(flag `stepsKnown`), it becomes your wake-up point (`rest: 'steps'`), with a toast "The
+Spillway Spring bubbles nearby: you'll wake here if you fall." and Bubble: "A spring! If that
+crab beats us, we'll wake up right here." Touching it (30 px) is a free full rest and sets
+`rest: 'steps'`. New entry `steps: { x: 740, y: 830, face: 1 }`; `REST.steps =
+['highwater', 'steps']`. Resting at Kelpie's inn later sets `rest: 'highwater'` as now. So
+a lost Snarl fight wakes you one screen below it, never back in the village.
+
+**Numbers** (a new `SNARL` entry in config.js; enemy formulas as for any fish):
+
+| | Rule | Level 5 (first run) | Level 9 (NG+1) | Level 11 (NG+2+) |
+|---|---|---|---|---|
+| HP | round(30 × (1 + 0.55 × L)) | 113 | 179 | 212 |
+| Claw | 3–5 + ⌊1.5 × (L − 1)⌋, 90% hit (Cichlid-like) | 9–11 | 15–17 | 18–20 |
+| EXP | ⌊90 × (1 + 0.2 × L)⌋ (catch-up ×1.5 applies: Highwater expects 6) | 180 (270) | 252 | 288 |
+| Betta Bites | 20 + 5 × NG+ bonus level | 20 | 40 | 50 |
+
+Befriending gives the same EXP and Bites (as every fish), the 5 MP back, +15% HP, and (the
+first Snarl friend) a Kelp Snack. Fleeing: 10% (Level 5+), as now.
+
+**Its turn pattern** (`sturn` counts the Snarl's own turns; it never strikes first):
+
+- Turns 3, 6, 9…: **Net Throw** instead of a claw: no damage, never misses. It always
+  warns at the end of the round before (its turns 2, 5, 8): "The Snarl gathers up its net!"
+  (the net quivers; sound: `gar_charge` at rate 1.5, volume 0.6).
+- 20% of throws land on **Bubble**, like any attack: "The net lands on Bubble! Bubble's all
+  tangled up..." Bubble skips its next action (the dizzy rule, drawn as the net overlay on
+  Bubble instead of stars); you're free.
+- Otherwise: "The Snarl flings its net over {name}! Tangled!" (`net_throw.mp3`; a net
+  drawn in code flies from the crab to you in a 3-frame tween, 1-px mesh in the net's
+  colour, then a Tangled overlay sits on your betta).
+- **Tangled (one clear rule):** your next turn only, you can **Attack or use an item**.
+  Spells, Party!, Swim Away and Dive are dimmed; picking one says "Tangled! Only Attack or an
+  item this turn." (no turn spent). Bubble acts after you as always, and **that round
+  Bubble's action is nibbling the net off you** instead of nipping or healing: "Bubble
+  nibbles the net off you!" The overlay goes; you're free from the next turn. So a Tangle
+  costs you your spell turn and Bubble's nip, and the warning gives you a turn to cast
+  first. In the sub (NG+ only: the sub is sold after Highwater), the net slides off: "The net
+  slides off the submarine!" (no Tangle).
+- Every other turn: a claw snap like any fish (90% hit, 20% drawn by Bubble, armor
+  applies, at least 1). Lines: "snaps its tangled claws!", "swings the heavy net!",
+  "scuttles sideways and pinches!"
+
+**Net armor** (its own property `net: 2`, not the Crayfish's shell):
+
+- While the net is whole, your Attack and Bubble Blast do −2 (at least 1). Bubble's nip
+  and Gravel Grenade aren't reduced. The first reduced hit of each battle adds its own line:
+  "The thick net softens your bite (−2)." Later hits just show the smaller number.
+- **Gravel Grenade rips the net at once:** "The gravel rips the net open!" (`net_rip.mp3`,
+  a puff of mesh bits in code).
+- **Or bite it apart:** every landed Attack or Bubble Blast, and every Bubble nip, unties
+  one of **4 knots**, shown as 4 small knot pips under the Snarl's HP bar. The 2nd: "The net
+  is fraying!" The 4th: "The net rips open!" (`net_rip.mp3`). So a Level-3 betta without the
+  Grenade can still tear it and befriend it.
+- Once ripped: no armor, and Party! works. It keeps throwing the torn net (Net Throw is
+  unchanged), since it's still wrapped up in it.
+
+**Teaching the Grenade.** At the first round of every Snarl fight, Bubble says (Level 4+):
+"That net's too thick to bite through! A Gravel Grenade would rip it open." Below Level 4:
+"That net's too thick... Keep biting at it: every hit frays it!" Party! while the net is
+whole is refused with no MP or turn spent: "It can't hear the party through all that net!
+Rip it first: Gravel Grenade, or keep biting." Whorl's and the Highwater townsfolk's lines
+don't change (they're above it).
+
+**Fins or friendship.**
+- Fins: "The Snarl scuttles off to sulk in the side pool." The net tears off in the
+  scuffle. Sets `snarlDone`.
+- Friendship (Party! works normally once the net is ripped; the level-gap rule applies):
+  "The net falls away... the Snarl wriggles free! You made a friend!" (`net_rip.mp3` plays
+  as the "freed" sound, then the usual befriend sound). Sets `snarlDone`, `snarlFriend`, and
+  `friends.snarl = 1`.
+- **After, either way:** `props/torn_net.png` lies on the steps at (812, 452), drawn
+  behind you, not solid; `boss/snarl_free.png` sits in the east side pool at (1240, 610),
+  never collides, never starts a battle, and talks on the action button. Friend (in its party
+  hat, the kept hat placed on the top of its carapace; the anchor is set on a screenshot): "Thanks for
+  getting that net off me. My shell feels ten years younger!" Defeated: "Hmph. You win,
+  little fish. The steps are yours." It's never fought again. The friend Snarl counts as a
+  friend (kind `snarl`, toward the Gar's 5) but isn't one of Peace in the Paddies' 6 kinds.
+
+**No soft-lock.** Losing wakes you at the Spillway Spring with full HP and MP (−25% Bites,
+as always) and the Snarl at full HP; the Spillway's side-pool Cichlids (L5) and Reedwater
+are right there to grind, and the Spring rests you for free. Fleeing works (10%) and the
+re-arm distance means you can always swim away after a flee.
+
+**Battle screen.** Spillway backdrop (`spillway`), battle track. The Snarl is drawn **×3**
+(141×102 logical px from 47×34 native: a mini-boss should loom; whole multiples only), its
+feet on the same baseline as normal enemies, placed like the Gar (`ex` at 0.69 of the width)
+so it fits the phone's middle band. Hit flash, lunge and defeat as for regular fish. Net
+pips under its HP bar.
+
+### 2. The friends' parade
+
+- **Where:** the **village** (all of it) and **Highwater's city** (y < 470, the safe water).
+  When you swim down the Spillway steps (y ≥ 470), the parade stops at the top of the steps
+  and waits in a loose cluster around (768, 400); it rejoins when you come back up. In every
+  other area they stay home, so the world stays readable and route timings don't change.
+  During the Peace in the Paddies square party, the parade is off (they're at the party),
+  so no friend shows twice.
+- **Who and in what order** (the save keeps counts only, so "most recent" isn't knowable):
+  up to **6**, in a fixed rotation of kinds you have: guppy, angel, cat, nymph, cich, cray,
+  snarl, then round again while a kind has more friends than it has shown, until 6 or none
+  left. All in party hats. After the friendship ending **and** Peace in the Paddies, the
+  Gar trails last in the **village** parade (×1, it's 141 px long); it's still in its pool
+  when you visit the Ditch. While the friend Snarl swims in the Highwater parade, its
+  east-pool spot is empty.
+- **Trail:** the same trailing as Bubble. A breadcrumb is recorded every 4 px you move;
+  keep the last **80** (320 px of path). Bubble sits at crumb 6; friend i (1–6) at crumb
+  6 + 5i (20 px apart); the Snarl adds 4 crumbs of extra gap before it, the Gar 12. When you
+  stop for 0.5 s, each drifts to a seeded spot within 40 px of you and bobs; moving off,
+  they fall back into line.
+- They never collide, are drawn behind villagers and buildings' fronts, and are never a talk
+  target, so they never block a conversation.
+- **Pause → Settings: "Parade: on/off"** (on by default), stored in the global settings
+  (`parade: true`), not per slot.
+- No new art: the kept and new sprites with their hats.
+
+### 3. New Game+
+
+**Unlocking.** A slot whose save has `endingsSeen.fins` or `endingsSeen.friend` offers
+**New Game+** (on the slot screen and as a title button under Continue when the last slot
+qualifies). The credits' "Keep playing" stays.
+
+**Starting it (never over the finished game).** New Game+ asks **which slot** to start in
+(subsection 4): the default is an empty slot; a used one asks "Overwrite <name>'s game
+(Level n)?"; the source slot itself is offered last and needs a second confirm ("This
+replaces your finished game"). The confirm lists what carries over and what starts again
+(below). The finished game stays in its slot to Continue.
+
+**Exact lists** (the new save is `newSave(name, color)`, then):
+
+| Carries over | Resets (to `newSave` defaults) | Set |
+|---|---|---|
+| name, color, level, exp, Betta Bites, items, `subOwned`, `wearHat`, `endingsSeen`, `ending` (first ending), `lastEnding`, `hints` (control tips already shown) | all `flags` (story, `peace`, `snarlDone`, `garDefeated`, …), `friends`, `firstFriendKinds`, `scales`, `cogs`, `rest` (village), `freeRest`, `area` (village), `pos` (null), `met`, `playTime` (0) | `ngPlus = source.ngPlus + 1`; HP and MP full; `flags.tutorialDone = true` (the dodge lesson isn't repeated); `lastPlayed` now |
+
+It starts in the village at the `start` entry with Elder Finn's opening, exactly like a new
+game. Your first friend at the Old Stump is still scripted (the free cast); the Snarl and
+the Gar are back.
+
+**Tougher fish: the NG+ bonus k.** `k = 4` at NG+1, `k = 6` at NG+2 and every later NG+
+(numbers stop growing there; the counter keeps counting for the badge).
+
+- Every enemy level is its first-run level + k: spawn ranges, the Old Stump angelfish
+  (2 + k), the Snarl (5 + k), edge fish (10 + k), the Gar's shown level (10 + k). Stats come
+  from the usual formulas at the new level. NG+1: Shallows guppies L5–6, Reedwater L7–9,
+  Spillway Cichlids L9, the Snarl L9, Murk near L10, deep L11–12, edge fish L14.
+- **The Gar at bonus k:** HP 230 + 20k, bite 8–12 + k (90% hit), GARGANTUAN GAR 30 + 2k,
+  EXP 600 + 150k, Bites 50 + 10k. Turn pattern unchanged; the sub still blocks the special
+  completely.
+
+  | | HP | Bite | Special | Special after fins (×1.1, down) | EXP | Bites |
+  |---|---|---|---|---|---|---|
+  | First run | 230 | 8–12 | 30 | — | 600 | 50 |
+  | NG+1 (k 4) | 310 | 12–16 | 38 | 41 | 1200 | 90 |
+  | NG+2+ (k 6) | 350 | 14–18 | 42 | 46 | 1500 | 110 |
+
+- **Level cap 15** when `ngPlus ≥ 1` (10 otherwise). EXP to next keeps the rule (L10→11
+  516, 619, 743, 892, L14→15 1070); HP and MP keep growing (L15: 104 HP, 38 MP); armor
+  stays at Full Metal (−3); big Party! as from L7.
+- **Catch-up stays on**, with expected levels + k (NG+1: Shallows 7, Reedwater 9,
+  Highwater 10, Murk 11, Ditch 12), so a lower carry (L8) catches up instead of falling
+  behind; an L10 carry gets it less often.
+- **Level gates** use + k: the lantern at Level 5 + k (9 at NG+1; Whorl's line and the goal
+  line show "(Level n/9)").
+- **Swim Away:** 10% against fish of Level 5 + k or more, 75% below (so the Shallows and
+  most of Reedwater stay escapable, as in the first run).
+- **Red glow, party gap rule:** unchanged (they compare levels, so they already work).
+
+**The Gar remembers you** (by `lastEnding`, the most recent ending of the slot it came
+from; both endings stay reachable):
+
+| | After fins | After friendship |
+|---|---|---|
+| Gar's opening line | "...YOU. AGAIN." | "...FRIEND? WHY... FIGHT?" |
+| Its fight | the special ×1.1 (table above) | the party meter starts at 1 of 4 |
+| Finn, after `gateOpen` | "It's back, and it remembers your fins. It'll hit harder this time." | "It remembers you, friend. Your party may reach it sooner this time." |
+| Mossy, when freed | "You again! It's angrier than ever, be careful!" | "It kept asking for you, you know." |
+
+**Badge.** The HUD shows "Lv 12+" (a "+" after the level) whenever `ngPlus ≥ 1`; the slot
+screen shows "NG+ n".
+
+### 4. Save slots (asked for during this change)
+
+- **Three save slots** instead of one global save: localStorage keys `bettarpg-save-1`,
+  `-2`, `-3` (the same versioned JSON and validation), plus `bettarpg-last-slot` ("1"–"3").
+- **Title:** **Continue** loads the last-played slot (shown only if it exists and reads).
+  **Load** opens the slot screen: each slot shows the betta's portrait in its colour, name,
+  level (with "+" / "NG+ n"), area, friends, endings seen, and when it was last played
+  (`lastPlayed`); empty slots say "Empty". **Delete** on a slot, with a confirm.
+  **New Game+** on a slot that has finished an ending (subsection 3).
+- **New Game** picks a slot: an empty one goes straight to Create; a used one asks
+  "Overwrite <name>'s game (Level n)?" first.
+- **New Game+** asks which slot to start it in; the default is an empty slot, never
+  silently the finished one (subsection 3).
+- **Migration:** on first load, if no `bettarpg-save-n` exists and `bettarpg-save` does,
+  its text is copied into `bettarpg-save-1` and read back; once that slot reads, the old key
+  is renamed to **`bettarpg-save-migrated`** (kept, never deleted automatically) and
+  `bettarpg-last-slot` = "1". (Not `bettarpg-save-backup`: the published game already writes
+  that key for an unreadable save, and it must not be overwritten.) An unreadable old save
+  is moved as-is and shows as "Can't read this save" with Delete. Players of the published
+  game lose nothing.
+- Autosave writes to the current slot only (and sets `lastPlayed` and `bettarpg-last-slot`).
+  Settings and controls stay global.
+- Controller, keyboard and touch all work on the slot screen; the text fits at every size.
+
+**Save format (stays `v: 1`).** Bumping the version would make `sanitize` return null and
+wipe every published save, so new fields are optional with defaults:
+
+- `ngPlus`: int 0–99, default 0. Read **before** the level.
+- `level`: clamped 1..(`ngPlus ≥ 1` ? 15 : 10) (today 1..10, which would drop an NG+ L13).
+  `PLAYER.maxLevel` becomes `maxLevel(s)`; `addExp` uses it (the EXP-zeroing at the cap
+  stays, at the slot's cap).
+- `lastEnding`: 'fins' | 'friend' | null; default `raw.ending` if valid. Set on every
+  ending (`ending` stays the first one seen).
+- `lastPlayed`: int ms, default 0.
+- `KINDS` (state.js:33) gains `'snarl'` (count clamped 0–1); `REGULAR_KINDS` doesn't.
+- `rest`: also accepts `'steps'` (only if `trailFound`, else village).
+- New flags (`snarlMet`, `snarlDone`, `snarlFriend`, `stepsKnown`) pass the existing
+  boolean filter.
+- **Pre-change saves get `snarlDone`:** `sanitize` sets it when any of `highwater`,
+  `lantern`, `gateOpen`, `garDefeated`, `garFriend` is set, or `rest === 'highwater'`, or
+  the save's area is `murk`/`ditch`, or it's in `highwater` with `pos.y < 470`. (Whorl sets
+  `highwater` even below Level 5, story.js:206, so every save that met him is covered.) For
+  them the Snarl sits defeated in its pool, net on the steps.
+- Settings gain `parade: true` (global key, default when missing).
+- Tests: a published v1 full-game save (Gar done, `highwater` set, no new fields) loads into
+  slot 1 with `snarlDone`, `ngPlus 0`, `lastEnding` = its `ending`; an NG+1 L13 save with
+  `friends.snarl 1` round-trips unchanged; an unreadable slot shows "Can't read this save".
+
+### 5. Simulator rows (in `tools/sim_design.py`, run, all 58 targets met)
+
+The rules above are in the simulator (`kind='snarl'`, `gar=gar_ng(k)`, `meter0`). Policy
+addition: a whole net counts like a shell (Gravel Grenade first, L4+); Tangled turns use
+Attack (or an item by rule 1); Party! only once the net is ripped. Player levels in NG+ rows
+are estimates: an L8 carry reaches about L9 at the Snarl, L10 in the deep Murk and L12 at
+the Gar; an L10 carry about L11, L12 and L13–14. `sim-battles.mjs` must reproduce these
+rows within ±3 points at build time, as for the rest of the table.
+
+| Fight (start MP) | Target | Win | Friend | Turns | HP left | Net MP |
+|---|---|---|---|---|---|---|
+| Snarl L5 vs L4 B, 2 Kelp (full) | win ≥ 95%, 6–10 turns | 99.2% | — | 8.9 | 44% | 15.0 |
+| Snarl L5 vs L4 B, 2 Kelp (half) | win ≥ 90%, ≤ 11 turns | 97.5% | — | 9.8 | 40% | 8.0 |
+| Snarl L5 vs L4 B, no items (full) | win 65–92% (items matter) | 79.5% | — | 8.0 | 29% | 15.0 |
+| Snarl L5 vs L5 B, 2 Kelp (full) | win ≥ 99%, 6–10 turns | 100% | — | 6.8 | 53% | 18.0 |
+| Snarl L5 vs L5 B, 2 Kelp (half) | win ≥ 97%, 6–10 turns | 100% | — | 7.9 | 50% | 8.0 |
+| Snarl L5 vs L3 B, 2 Kelp (full; no Grenade) | win 50–85% (possible, not easy) | 74.8% | — | 11.3 | 29% | 12.0 |
+| Snarl befriend: L5 vs L4 B, 3 friends, 2 Kelp (full) | friend ≥ 30%, friend-or-win ≥ 95% | 96.7% | 35% | 8.8 | 48% | 13.2 |
+| Snarl befriend: L5 vs L4 B, 3 friends, 2 Kelp (half) | friend ≥ 28%, friend-or-win ≥ 85% | 88.6% | 35% | 10.2 | 42% | 3.0 |
+| Snarl befriend: L5 vs L5 B, 3 friends, 2 Kelp (full) | friend ≥ 50%, friend-or-win ≥ 98%, HP within 5 points of fighting, net MP ≤ fighting | 100% | 59% | 6.5 | 64% | 12.1 |
+| Snarl befriend: L5 vs L5 B, 3 friends, 2 Kelp (half) | friend ≥ 50%, friend-or-win ≥ 97% | 100% | 56% | 7.9 | 58% | 2.2 |
+| NG+1, L8 carry: Snarl L9 vs L9 B, 2 Kelp (half) | win ≥ 95%, 6–10 turns | 99.8% | — | 8.8 | 39% | 13.0 |
+| NG+1, L8 carry: Snarl befriend L9 vs L9 B, 3 friends, 2 Kelp (half) | friend ≥ 60%, friend-or-win ≥ 97% | 99.7% | 79% | 6.6 | 62% | 6.0 |
+| NG+1, L8 carry: Murk deep Cichlid L12 vs L10 B (half) | win ≥ 90%, ≥ 25% HP | 95.9% | — | 5.4 | 32% | 13.0 |
+| NG+1, L8 carry: Murk deep Crayfish L12 vs L10 B (half) | win ≥ 90%, ≥ 20% HP | 97.5% | — | 6.1 | 26% | 13.0 |
+| NG+1, L8 carry: Gar L14 vs L12 B, 3 Seed Cakes (full) | win ≥ 75%, 7–12 turns | 98.0% | — | 11.5 | 45% | 30.0 |
+| NG+1, L8 carry: Gar L14 vs L12 B, no items (full) | win ≤ 35% (items and levels matter) | 26.0% | — | 10.1 | 23% | 30.0 |
+| NG+1, L8 carry: Gar L14 vs L12 B in the sub, no items (full) | win ≥ 90% | 100% | — | 9.8 | 74% | 30.0 |
+| NG+1, L8 carry, after fins (special 41): Gar vs L12 B, 3 Seed Cakes (full) | win ≥ 75% | 94.9% | — | 11.7 | 41% | 30.0 |
+| NG+1, L8 carry: Gar friendship L12 B, 5 friends, no items (full) | friend ≥ 85% | 100% | 100% | 4.8 | 58% | 19.0 |
+| NG+1, L8 carry: Gar friendship L12 B, 5 friends, 2 Bubble Waters (half) | friend ≥ 85% | 100% | 100% | 5.6 | 51% | 19.0 |
+| NG+1, L10 carry: Snarl L9 vs L11 B, 2 Kelp (half) | win ≥ 99% | 100% | — | 7.0 | 53% | 15.0 |
+| NG+1, L10 carry: Snarl befriend L9 vs L11 B, 3 friends, 2 Kelp (half) | friend ≥ 70% | 100% | 82% | 5.6 | 75% | 10.9 |
+| NG+1, L10 carry: Murk deep Cichlid L12 vs L12 B (half) | win ≥ 95%, ≥ 35% HP | 100% | — | 4.5 | 50% | 15.0 |
+| NG+1, L10 carry: Murk deep Crayfish L12 vs L12 B (half) | win ≥ 95%, ≥ 35% HP | 99.9% | — | 5.2 | 45% | 15.0 |
+| NG+1, L10 carry: Gar L14 vs L13 B, 3 Seed Cakes (full) | win ≥ 95%, 7–12 turns | 100% | — | 10.5 | 50% | 33.0 |
+| NG+1, L10 carry: Gar L14 vs L14 B, no items (full) | win ≥ 90% | 97.5% | — | 8.6 | 31% | 35.0 |
+| NG+1, L10 carry, after fins (special 41): Gar vs L13 B, 3 Seed Cakes (full) | win ≥ 90% | 99.8% | — | 10.7 | 46% | 33.0 |
+| NG+1, L10 carry, after friendship (meter starts at 1): L13 B, 5 friends, no items (half) | friend ≥ 85% | 100% | 100% | 3.0 | 91% | 10.0 |
+| NG+1 Edge Cichlid L14 vs L12 B (full) | win 35–70% (optional and scary) | 37.9% | — | 6.2 | 26% | 29.8 |
+| NG+1 Edge Crayfish L14 vs L12 B (full) | win 35–70% | 48.2% | — | 7.0 | 15% | 30.0 |
+| NG+2: Gar L16 vs L15 B, 3 Seed Cakes (full) | win ≥ 90% | 100% | — | 10.6 | 43% | 38.0 |
+| NG+2: Gar L16 vs L15 B, no items (full) | win ≤ 85% (still needs items) | 71.1% | — | 9.1 | 25% | 38.0 |
+| NG+2: Gar friendship L15 B, 5 friends, no items (full) | friend ≥ 85% | 100% | 100% | 4.8 | 61% | 19.0 |
+
+The original 2.5×-Cichlid Snarl (170 HP) missed its own targets in the same simulator (L4
+with 2 Kelp: 45–54% win in 14–15 turns), which is why its HP is 113. The NG+ edge rows
+mirror the first run's (35–70%), so the edge zones stay the optional scare.
+
+### 6. Build notes: routes, runner, debug hook
+
+- **Config:** `SNARL` (the numbers above), `NGPLUS = { bonus: (n) => n >= 2 ? 6 : n >= 1 ? 4
+  : 0, cap: 15 }`, `garFor(k, lastEnding)`; `AREA_START.murk` and `.ditch` gain
+  `snarlDone`; `.highwater` doesn't (it starts at the Spillway's foot, before the Snarl).
+- **Routes to re-record:** `area-3-highwater.json` (start 3 → touch the Spillway Spring at
+  (700, 836) → path to (768, 490) → the Snarl fight, policy `fight` → expect `snarlDone` →
+  Whorl as before); `full-game.json`: after step 56 (arrived in Highwater, about L4) insert
+  the Spring touch and the Snarl fight (expect `snarlDone`); if the recorded run is below
+  L4 when it arrives, grind the west side pool first. Steps 64–89 then pass (768, 420) three
+  times: the gate is open and the sulking/friend Snarl sits in the east pool, not solid, so
+  they replay unchanged. Re-run every other route to confirm nothing else moved.
+- **New routes:** `snarl-friend.json` (start 3, `set({ friends: { guppy: 3 } })`, policy
+  `party`: Grenade, then Party! → expect `snarlFriend`, `friends.snarl 1`, torn net on the
+  steps, Snarl in its pool); `snarl-lose.json` (start 3, `set({ hp: 1, items: { kelp: 0, bwater: 0 } })`,
+  policy `fight`, lose → expect area highwater at the `steps` entry, `rest: 'steps'`, the
+  Snarl at full HP, and a rematch after swimming 120 px away); `ngplus.json`
+  (`set({ endingsSeen: { fins: true }, lastEnding: 'fins', level: 10 })`, save, title → New
+  Game+ → slot 2 → confirm → expect `ngPlus 1`, level 10, flags empty but `tutorialDone`,
+  rest village, slot 1 untouched; then `goToLevel(1, { ngPlus: 1 })` → expect Shallows fish
+  L5–6; then `goToLevel(5, { ngPlus: 1 })` at Level 13 with 5 friends, policy `gar-party` →
+  expect `garFriend`); `slots.json` (`legacySave(v1 full-game save)` → reload → expect slot
+  1 with `snarlDone`, `bettarpg-save-migrated` present; delete slot 2; overwrite confirm).
+- **Runner (route-runner.js 66–76):** in the `party`/`stump` policy, add before the
+  bites: **if the enemy is the Snarl and its net is whole, Gravel Grenade first** (L4+,
+  MP ≥ 10; `Digit2`, `Digit2`), else Attack (the bites fray it). Only the Snarl: the
+  Crayfish rule stays, so `peace.json` and the other recordings don't change. In every
+  policy, **when `inBattle.tangled`, Attack** (or the heal item), never a dimmed button.
+- **Debug hook additions:** `state()` gains `ngPlus`, `lastEnding`, `slot`, `parade` (count
+  shown), `snarl: { done, friend }`, and in `inBattle`: `net` (knots left, 0 = ripped),
+  `tangled`, `sturn`, `warned`; `set()` accepts `ngPlus`, `lastEnding`, `endingsSeen`,
+  `rest: 'steps'`; `goToLevel(n, { afterSnarl, ngPlus })` (`afterSnarl` for n = 3 adds
+  `snarlDone` and starts at the city's south edge (768, 420); `ngPlus` applies the bonus);
+  `slots()` lists the slot summaries (slot, name, level, ngPlus, area, friends, endings,
+  lastPlayed, unreadable); `startNgPlus(from, to)` does what the menu does;
+  `legacySave(obj)` writes `bettarpg-save` and reruns migration (tests only). All with
+  `?debug` only.
+
+### 7. Assets for this change (all made)
+
+| ID | What it is | Tool | Target size and format | Transparent | Animation | Priority |
+|---|---|---|---|---|---|---|
+| E4 | The Snarl: Mitten Crab tangled in a net (`boss/snarl.png`), and freed (`boss/snarl_free.png`, an edit of it; hat versions in code from the kept hat) | imagegen2 (betta as style ref) | 47×34 and 46×31 native; ×1 on the map, ×3 in battle | yes | code (claw sway, net bob) | must (made) |
+| T4 | Torn net prop on the Spillway steps (`props/torn_net.png`) | imagegen2 | 40×23 native, ×1 | yes | — | must (made) |
+| S27 | `net_throw.mp3`: net-throw whoosh | audiogen sfx | 0.3–1 s mp3 | — | — | must (made) |
+| S28 | `net_rip.mp3`: net rip (also the "freed" sound on befriend) | audiogen sfx | 0.3–1 s mp3 | — | — | must (made) |
+
+Drawn in code: the thrown net (3-frame tween), the Tangled overlay on the betta or Bubble
+(1-px mesh in the net's colour), the mesh-bit puff, the net knot pips, the Spillway Spring's
+bubbles. Reused: the Spillway backdrop, the battle track, `gar_charge` (warning), the
+befriend and hit sounds. Totals become 17 generated pictures + 3 Snarl images, 28 sounds.
+
+### 8. Definition of done for this change
+
+- [ ] The Snarl blocks the top of the Spillway steps (no way round), fights and befriends by
+      the rules above, and after `snarlDone` the gate is open, the torn net lies on the steps
+      and the Snarl sits in the east pool, never fought again.
+- [ ] Net Throw every 3rd Snarl turn with its warning; a Tangled turn allows only Attack or
+      an item, Bubble nibbles you free that round; a throw on Bubble skips Bubble's action.
+- [ ] Net armor −2 with its own line; the Grenade or 4 knots rip it; Party! refused (no MP,
+      no turn) while it's whole, with the line naming the Grenade.
+- [ ] Losing to the Snarl wakes you at the Spillway Spring; the Spring rests you free.
+- [ ] Every row of subsection 5 passes in `sim_design.py` and in `sim-battles.mjs` (±3).
+- [ ] The parade follows you in the village and Highwater's city only, waits at the top of
+      the steps, never blocks talking, turns off in Settings, and isn't doubled at the Peace
+      party.
+- [ ] New Game+ starts only in a chosen slot (the finished game stays to Continue), with the
+      exact carry/reset lists; NG+ enemies are + k levels, the Gar uses its NG+ row and
+      remembers the last ending; catch-up, the lantern gate and Swim Away use + k; the cap is
+      15 and the "+" badge shows.
+- [ ] Three slots with Continue/Load/Delete/overwrite confirm; a published save migrates to
+      slot 1 (kept as `bettarpg-save-migrated`), gets `snarlDone` if it's past the steps,
+      and an NG+ L13 save round-trips; an unreadable slot never crashes.
+- [ ] `area-3-highwater.json` and `full-game.json` re-recorded; `snarl-friend.json`,
+      `snarl-lose.json`, `ngplus.json` and `slots.json` pass; every other route still passes.
+- [ ] The debug hook additions work with `?debug` only.
+- [ ] The Snarl at ×3, the net overlay and the slot screen look right at 1280×720 and on the
+      844×390 phone.

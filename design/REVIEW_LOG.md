@@ -65,3 +65,23 @@ Reviewers: Player (6 + 1 nice), Builder (9 + nice; ran a battle simulator), Art 
 | Nice: sounds, Gar mock screen, hat scaling, red-glow hint, friends as entities | nice | Fixed |
 
 Decision: both must-fixes fixed and verified (simulator re-run: 23/23 targets met). Rounds limit (2) reached; design converged on the remaining points. I re-read it against the brief's checklist: every item the person asked for and everything the original aimed at is in.
+
+## Change 1 review (2026-11-21): the Snarl, parade, New Game+, save slots
+
+Reviewers: Player (6 findings, 2 must), Builder incl. art and sound (8 findings, 2 must). Findings in .gamegen/review/change1-*.md. Refiner rewrote the Change 1 section; tools/sim_design.py now meets 58/58 targets (33 new rows for the Snarl and NG+).
+
+| Finding | Severity | Outcome |
+|---|---|---|
+| Snarl HP too high (wall at L4) | must | Fixed: 113 HP at L5, Cichlid damage; L4 wins 97–99% with 2 Kelp, 6–10 turns |
+| NG+ wipes the finished save | must | Fixed: NG+ starts in a chosen slot (default empty), double confirm for the source slot |
+| Save loader drops NG+/Snarl data | must | Fixed: v:1 kept, new fields defaulted, level clamp 15 in NG+, snarl in KINDS not REGULAR_KINDS |
+| NG+ reset list incomplete (wake beside the Gar) | must | Fixed: exact carry/reset/set table |
+| Long walk back after losing to the Snarl | should | Fixed: Spillway Spring rest point at the foot of the steps |
+| Grenade never taught; can't befriend below L4 | should | Fixed: Bubble and the refusal name it; 4 hits also rip the net |
+| Tangle vs turn order | should | Fixed: one rule; Bubble nibbles the net that round instead of nipping |
+| NG+ difficulty depends on finishing level | should | Fixed: catch-up kept with expected levels +k; rows for L8 and L10 carries |
+| Snarl can be swum around; old saves; goal line; debug starts | should | Fixed: solid gate openIf snarlDone; sanitize sets snarlDone past the steps |
+| Routes and runner | should | Fixed in plan: re-record area-3 and full game, 4 new routes, runner Gravel-first vs the net |
+| Art/sound and asset rows | should | Fixed: ×3 in battle, net drawn in code, rows E4/T4/S27/S28 |
+| NG+ Gar numbers, parade order/areas/trail | should | Fixed: exact per-step numbers; kind rotation; village and Highwater city only; 80-point trail |
+| Nice: Peace party doubling; Swim Away in NG+ | nice | Fixed |

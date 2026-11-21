@@ -34,7 +34,7 @@ async (page) => {
 
   async function battle(policy) {
     let lastTurn = -1, same = 0;
-    for (let i = 0; i < 400; i++) {
+    for (let i = 0; i < 1200; i++) {
       if (Date.now() - T0 > LIMIT) await fail('time limit in battle');
       const s = await st();
       if (!s.inBattle) {
@@ -119,6 +119,7 @@ async (page) => {
   try {
     for (const step of route.steps) {
       if (!step.battle) justFought = false;
+      if (step.belowLevel && (await st()).level >= step.belowLevel) continue; // only when the run is below that level
       if (step.onlyInArea) { if ((await st()).area !== step.onlyInArea) continue; }
       else if (step.skipIfFriends && (await st()).friendsTotal >= step.skipIfFriends) continue;
       if (step.title) {
@@ -158,7 +159,42 @@ async (page) => {
         await press('Enter'); await sleep(400);
       }
       if (step.say) await clearDialogs();
-      if (step.key) { await press(step.key); await sleep(step.after || 300); }
+      if (step.key) {
+        // in the world, wait for the swim to settle first (a battle's end, a toast's dialog)
+        for (let i = 0; i < 40; i++) {
+          const q = await st();
+          if (q.mode !== 'world' || q.inBattle || q.menus.some((m) => m !== 'dialog')) break;
+          if (q.dialog) { await press('Space'); await sleep(200); continue; }
+          if (q.busy || q.transition) { await sleep(150); continue; }
+          break;
+        }
+        await press(step.key); await sleep(step.after || 300);
+        // a fish caught us just then: fight it, then press again
+        for (let i = 0; i < 2; i++) {
+          let q = await st();
+          if (!q.inBattle && !(q.transition && q.mode === 'world' && step.key === 'KeyH' && !q.menus.includes('confirm'))) break;
+          if (q.transition && !q.inBattle) { await sleep(600); q = await st(); if (!q.inBattle) break; }
+          await log(`battle ${q.inBattle.kind} during a key step`);
+          q = await battle(q.inBattle.scripted === 'stump' ? 'stump' : (step.policy || route.policy || 'fight'));
+          if (q.lastBattle === 'lose') await fail('lost a battle');
+          await press(step.key); await sleep(step.after || 300);
+        }
+      }
+      if (step.home) {
+        // Home (H) and confirm, as a player; a fish that catches us first gets fought, then try again
+        for (let tries = 0; tries < 4; tries++) {
+          let q = await clearDialogs();
+          if (q.inBattle) { await log(`battle ${q.inBattle.kind} on the way home`); q = await battle(route.policy || 'fight'); if (q.lastBattle === 'lose') await fail('lost a battle'); continue; }
+          if (q.area === 'village') break;
+          await press('KeyH'); await sleep(350);
+          q = await st();
+          if (!q.menus.includes('confirm')) { await sleep(300); continue; }
+          await press('ArrowRight'); await sleep(150); await press('Enter'); await sleep(1500);
+          for (let i = 0; i < 30; i++) { q = await st(); if (q.area === 'village' && !q.transition) break; if (q.inBattle) break; await sleep(150); }
+          if ((await st()).area === 'village') break;
+        }
+        await log('home');
+      }
       if (step.hold) { await press(step.hold, step.ms || 500); await sleep(step.after || 300); }
       if (step.battle) {
         let started = false;

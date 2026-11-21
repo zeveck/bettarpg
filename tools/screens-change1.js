@@ -143,6 +143,7 @@ async (page) => {
     if (b.row !== 'main') { await back(); continue; }
     await act('#bRow button', 'Attack');
   }
+  for (let i = 0; i < 60 && (await st()).inBattle?.busy; i++) await sleep(150);
   let b = (await st()).inBattle;
   check(!!b?.tangled, 'Tangled after a Net Throw');
   await sleep(600);

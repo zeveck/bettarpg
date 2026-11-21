@@ -85,7 +85,7 @@ export const ENEMY_HIT = 0.9;
 
 // Change 1: the Snarl, a net-tangled Mitten Crab at the top of the Spillway steps.
 export const SNARL = {
-  name: 'The Snarl', level: 5, baseHp: 30, lo: 3, hi: 5, growth: 1.5, hit: 0.9, exp: 90,
+  name: 'Snarl', title: 'The Snarl', level: 5, baseHp: 30, lo: 3, hi: 5, growth: 1.5, hit: 0.9, exp: 90,
   bites: (k) => 20 + 5 * k, netCut: 2, netKnots: 4, throwEvery: 3,
   attacks: ['snaps its tangled claws!', 'swings the heavy net!', 'scuttles sideways and pinches!'],
   pos: { x: 768, y: 462 }, freePos: { x: 1240, y: 610 }, netPos: { x: 812, y: 452 },

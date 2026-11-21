@@ -286,3 +286,8 @@ body.short .slots .list { gap: 4px; }
 .netpips { display: flex; align-items: center; gap: 4px; margin-top: 3px; }
 .netpips i { width: 8px; height: 8px; border: 2px solid #6B4E2E; background: transparent; }
 .netpips i.on { background: #C8B88A; }
+/* Change 1: more title buttons and settings rows; on phones they sit two to a row */
+body.short #titleMenu { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+body.short #setList { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+body.short #setList .setrow { grid-column: 1 / -1; }
+body.short #setList .btn { min-height: 44px; }

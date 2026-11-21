@@ -39,6 +39,10 @@ Original untouched; this is a new folder and repo with fresh history.
 
 ## Publishing
 
+- Live: https://bettarpg.synapticnoise.com (HTTPS on), repo https://github.com/zeveck/bettarpg (public); original renamed to zeveck/bettarpg-original (bettarpg.com unchanged)
+- Gallery: top of https://synapticnoise.com
+- Plans page: card Published, design page https://synapticnoise.com/plans/betta-rpg/design/, art sheet https://synapticnoise.com/plans/betta-rpg/art/ (art sheet manifest: .gamegen/art-sheet/manifest.json)
+- Shared design on claude.ai renamed and updated (same link)
 - GitHub preview image: to upload (none set)
 
 ## Phases
@@ -57,5 +61,5 @@ Original untouched; this is a new folder and repo with fresh history.
 - [x] Build: all 6 areas, both endings, Peace; controller, Controls screen, Report a bug (hidden until published); routes in design/solutions/; sim 23/23
 - [x] Play-test (by the builder): full run title→credits, 0 console errors; my notes: title font B reads like G, small text on desktop, village/Highwater look bare
 - [x] Final review: 2 rounds (round 1: 2 must-fixes + 14 should; round 2: confirmed, 9 more small fixes); rice props added (~$0.45). Open: a player who skips the spillway pools can reach the deep Murk at L4
-- [ ] Polish pass: reviewer running
-- [ ] Wrap up
+- [x] Polish pass: 10 visible fixes + 13 small ones + lantern at Level 5; verified at all four sizes
+- [x] Wrap up: renamed to Betta RPG; social card, GitHub preview, README (making-of), Pages workflow; published 2026-11-21

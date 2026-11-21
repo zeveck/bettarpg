@@ -159,6 +159,7 @@ async (page) => {
       }
       if (step.say) await clearDialogs();
       if (step.key) { await press(step.key); await sleep(step.after || 300); }
+      if (step.hold) { await press(step.hold, step.ms || 500); await sleep(step.after || 300); }
       if (step.battle) {
         let started = false;
         for (let i = 0; i < 60; i++) { const s = await st(); if (s.inBattle) { started = true; break; } await sleep(100); }
@@ -172,7 +173,13 @@ async (page) => {
       if (step.js) { await page.evaluate(async (code) => { const g = window.__game; await (new Function('g', `return (async () => { ${code} })()`))(g); }, step.js); await sleep(step.after || 300); }
       if (step.reload) { await page.reload(); await sleep(2500); await log('reloaded'); }
       if (step.check) {
-        const r = await page.evaluate(async (code) => { const g = window.__game; const s = g.state(); try { return await (new Function('s', 'g', `return (async () => (${code}))()`))(s, g); } catch (e) { return 'error ' + e.message; } }, step.check);
+        // within: keep trying for that many ms (for things that appear a moment later)
+        let r;
+        for (const t0 = Date.now(); ;) {
+          r = await page.evaluate(async (code) => { const g = window.__game; const s = g.state(); try { return await (new Function('s', 'g', `return (async () => (${code}))()`))(s, g); } catch (e) { return 'error ' + e.message; } }, step.check);
+          if (r === true || Date.now() - t0 > (step.within || 0)) break;
+          await sleep(150);
+        }
         if (r !== true) await fail(`check failed: ${step.check} (${JSON.stringify(r)})`);
         await log('ok ' + step.check);
       }

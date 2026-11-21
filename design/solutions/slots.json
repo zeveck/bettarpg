@@ -1,0 +1,32 @@
+{
+  "area": 0, "name": "Save slots: a published single save migrates to slot 1; Load, Delete and the overwrite confirm",
+  "timeLimit": 200,
+  "steps": [
+    { "start": 0 },
+    { "js": "g.legacySave({ v: 1, name: 'Wanda', color: 'blue', level: 9, exp: 120, hp: 50, mp: 20, bb: 230, items: { kelp: 2, seedcake: 1, bwater: 3, fizzy: 0 }, subOwned: true, flags: { metFinn: true, bubbleJoined: true, hbtLearned: true, stumpDone: true, eastOpen: true, trailFound: true, highwater: true, lantern: true, gateOpen: true, garFriend: true }, friends: { guppy: 3, angel: 2, cat: 1 }, firstFriendKinds: { guppy: true }, scales: ['s1', 's2', 's3', 's4', 's5'], cogs: ['c1', 'c2', 'c3'], rest: 'spring', freeRest: { village: true }, area: 'village', pos: { x: 512, y: 340 }, met: { finn: true }, hints: { swim: true }, wearHat: true, ending: 'friend', endingsSeen: { friend: true }, playTime: 3000 }); localStorage.setItem('bettarpg-save-2', JSON.stringify({ v: 1, name: 'Bob', color: 'red', level: 3 }));" },
+    { "reload": true },
+    { "check": "localStorage.getItem('bettarpg-save-migrated') !== null && localStorage.getItem('bettarpg-save') === null && g.slots()[0].name === 'Wanda' && g.slots()[0].level === 9 && g.slots()[1].name === 'Bob'" },
+    { "check": "g.buttons().map((b) => b.label).join('|').startsWith('Continue|New Game+|New Game|Load')" },
+    { "key": "ArrowDown", "after": 150 }, { "key": "ArrowDown", "after": 150 }, { "key": "ArrowDown", "after": 150 },
+    { "key": "Enter", "after": 600 },
+    { "check": "s.menus.includes('slots') && document.querySelector('#slotsTitle').textContent === 'Load' && document.querySelectorAll('#slotList .slotrow')[0].textContent.includes('Endings: friendship') && document.querySelectorAll('#slotList .slotrow')[2].textContent.includes('Empty')" },
+    { "js": "[...document.querySelectorAll('#slotList .slotrow')[1].querySelectorAll('button')].find((b) => b.textContent === 'Delete').click();", "after": 400 },
+    { "check": "s.menus.includes('confirm') && document.querySelector('#confirmText').textContent.startsWith(\"Delete Bob's game (Level 3)?\")" },
+    { "key": "ArrowRight", "after": 150 },
+    { "key": "Enter", "after": 500 },
+    { "check": "g.slots()[1].empty && document.querySelectorAll('#slotList .slotrow')[1].textContent.includes('Empty')" },
+    { "key": "Escape", "after": 500 },
+    { "check": "s.menus.includes('title')" },
+    { "js": "[...document.querySelectorAll('#titleMenu button')].find((b) => b.textContent === 'New Game').click();", "after": 600 },
+    { "check": "s.menus.includes('slots') && document.querySelector('#slotsTitle').textContent.startsWith('New Game') && document.querySelector('.screen:not([hidden]) .btn.focus').textContent === 'New game here'" },
+    { "js": "document.querySelectorAll('#slotList .slotrow')[0].querySelector('button').click();", "after": 400 },
+    { "check": "s.menus.includes('confirm') && document.querySelector('#confirmText').textContent === \"Overwrite Wanda's game (Level 9)?\"" },
+    { "key": "Enter", "after": 400 },
+    { "check": "!s.menus.includes('confirm') && s.menus.includes('slots') && g.slots()[0].name === 'Wanda'" },
+    { "key": "Escape", "after": 500 },
+    { "key": "Enter", "after": 3000 },
+    { "check": "s.mode === 'world' && s.slot === 1 && s.name === 'Wanda' && s.flags.snarlDone && s.ngPlus === 0 && s.lastEnding === 'friend' && s.level === 9 && s.bb === 230" },
+    { "js": "localStorage.setItem('bettarpg-save-3', '{broken');", "after": 100 },
+    { "check": "g.slots()[2].unreadable === true" }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "area": 3, "name": "Losing to the Snarl: wake at the Spillway Spring, then a rematch after swimming away",
+  "policy": "fight",
+  "allowLose": true,
+  "timeLimit": 240,
+  "steps": [
+    { "start": 3 },
+    { "seed": 321 },
+    { "say": true },
+    { "path": [[768, 600], [768, 490]], "note": "below the Snarl" },
+    { "set": { "hp": 1, "items": { "kelp": 0, "bwater": 0 } } },
+    { "go": [768, 420], "note": "bumped the Snarl and lost" },
+    { "wait": 1500 },
+    { "say": true },
+    { "check": "s.area === 'highwater' && s.rest === 'steps' && s.lastBattle === 'lose' && Math.hypot(s.player.x - 740, s.player.y - 830) < 12 && s.hp === 20 + 6 * (s.level - 1) && !s.flags.snarlDone" },
+    { "path": [[768, 700], [768, 560], [768, 494]], "note": "swam away and back" },
+    { "hold": "ArrowUp", "ms": 700, "after": 2500 },
+    { "check": "!!s.inBattle && s.inBattle.kind === 'snarl' && s.inBattle.hp === s.inBattle.hpMax && s.inBattle.net === 4" },
+    { "battle": "fight" },
+    { "say": true },
+    { "expect": { "snarlDone": true } }
+  ]
+}

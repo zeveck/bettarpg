@@ -1,0 +1,24 @@
+{
+  "area": 3, "name": "The Snarl befriended: Gravel Grenade rips the net, then Party!",
+  "completes": "snarlFriend",
+  "policy": "party",
+  "timeLimit": 200,
+  "steps": [
+    { "start": 3 },
+    { "seed": 311 },
+    { "set": { "friends": { "guppy": 3 } } },
+    { "say": true },
+    { "path": [[768, 640], [740, 836], [700, 836]], "tol": 6, "note": "past the side-pool fish, rested at the Spillway Spring" },
+    { "path": [[768, 600], [768, 490]], "note": "below the Snarl" },
+    { "go": [768, 420], "note": "bumped the Snarl: befriended it" },
+    { "expect": { "snarlDone": true, "snarlFriend": true } },
+    { "check": "s.friends.snarl === 1 && s.extras.includes('tornNet') && s.paradeKinds.includes('snarl') && !s.extras.includes('snarlFree')" },
+    { "set": { "parade": false } },
+    { "check": "s.extras.includes('snarlFree') && s.extras.includes('tornNet') && !s.extras.includes('snarl')" },
+    { "path": [[768, 560], [768, 650], [980, 650], [1200, 620]], "note": "by the Snarl in the east side pool" },
+    { "talk": true },
+    { "within": 4000, "check": "s.dialog && document.querySelector('#dialog').textContent.includes('ten years younger')" },
+    { "say": true },
+    { "path": [[980, 650], [768, 600], [768, 440], [768, 380]], "note": "back up past the torn net: the steps are open" }
+  ]
+}

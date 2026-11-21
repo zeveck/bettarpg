@@ -264,3 +264,10 @@ body.short [data-screen=credits] .credits { max-height: 70%; padding: 6px 12px; 
 body.short #creditsBody { grid-template-columns: 1fr 1fr 1fr; }
 body.short [data-screen=credits] .credits h2 { display: none; }
 #garFriends { white-space: nowrap; }
+
+/* title-screen links: the gallery (lower left) and the repo (lower right) */
+.tlink { position: absolute; bottom: calc(8px + var(--sa-b)); font-size: 13px; color: #a9c7da; opacity: .75; text-decoration: none; text-shadow: 1px 1px 0 #0B1424; padding: 6px 4px; z-index: 2; }
+.tlink:hover, .tlink:focus-visible { opacity: 1; text-decoration: underline; outline: none; }
+.tl-left { left: calc(10px + var(--sa-l)); }
+.tl-right { right: calc(10px + var(--sa-r)); }
+body.short .tlink { font-size: 11px; padding: 4px 3px; }

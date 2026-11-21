@@ -49,7 +49,7 @@ endings, and a reward for making friends with every kind of fish in the paddies.
 
 ## How it was made
 
-Betta RPG is a remake of [the original Betta RPG](https://github.com/zeveck/bettarpg)
+Betta RPG is a remake of [the original Betta RPG](https://github.com/zeveck/bettarpg-original)
 (2025), made by [Claude Code](https://claude.com/claude-code) with
 [gamegen](https://github.com/zeveck/gamegen), from this request:
 

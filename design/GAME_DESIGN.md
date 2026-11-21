@@ -23,7 +23,7 @@ you did.
 - Tools available: imagegen2 and anim8gen (OpenAI), nanogen (Gemini), audiogen
   (ElevenLabs, Creator plan), playwright-cli, node, python3 + Pillow (no numpy)
 - Credit: Rich Conlan
-- Remake of github.com/zeveck/bettarpg, leeway **lots**. Survey in `design/ORIGINAL.md`.
+- Remake of github.com/zeveck/bettarpg (now zeveck/bettarpg-original), leeway **lots**. Survey in `design/ORIGINAL.md`.
 - Decisions made on the player's behalf:
   - Keep the name "Betta RPG" (theirs, and their domain).
   - Free swimming on a top-down map replaces the button grid; enemies are **visible** in the

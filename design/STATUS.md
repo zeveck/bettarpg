@@ -7,8 +7,10 @@
 3. `/gamegen --plans` (approved: "yes")
 4. `/gamegen --continue --budget 50 --gamepad --controls --feedback --art-sheet --publish`
 5. (at the publish question) "It should still just be "Betta RPG" and not "Betta Fish RPG" on the title, etc."
+6. "I'm debating if we should move the old repo to bettarpg-original or something so we can use bettarpg for this. It could still reference original? Not sure."
+7. "Rename and proceed with the full publish."
 
-From: https://github.com/zeveck/bettarpg (zeveck's own repo), remake, leeway lots.
+From: https://github.com/zeveck/bettarpg (zeveck's own repo; renamed to zeveck/bettarpg-original on 2026-11-21 so the remake could take zeveck/bettarpg), remake, leeway lots.
 Original untouched; this is a new folder and repo with fresh history.
 
 ## Settings
@@ -34,6 +36,10 @@ Original untouched; this is a new folder and repo with fresh history.
 ## Plans page
 
 - Plans page: yes (approved 2026-11-20). Card at https://synapticnoise.com/plans/ (status Planned); design page https://synapticnoise.com/plans/betta-fish-rpg/; plan files in zeveck/synapticnoise plans/betta-fish-rpg/ (private repo).
+
+## Publishing
+
+- GitHub preview image: to upload (none set)
 
 ## Phases
 

@@ -9,11 +9,14 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Betta RPG">
 <meta property="og:description" content="Small fish, big paddies. Find the missing fish, with your fins or your friendship.">
-<meta property="og:image" content="social-card.jpg">
+<link rel="canonical" href="https://bettarpg.synapticnoise.com/">
+<meta property="og:url" content="https://bettarpg.synapticnoise.com/">
+<meta property="og:image" content="https://bettarpg.synapticnoise.com/social-card.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="A red betta fish swimming in front of an underwater rice-paddy village">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://bettarpg.synapticnoise.com/social-card.jpg">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -101,6 +104,8 @@
       <p class="press" id="titlePress"></p>
     </div>
     <button class="btn sq corner" id="tMute" aria-label="Mute"></button>
+    <a class="tlink tl-left" href="https://synapticnoise.com/" target="_blank" rel="noopener" title="More games at synapticnoise.com">synapticnoise.com</a>
+    <a class="tlink tl-right" href="https://github.com/zeveck/bettarpg" target="_blank" rel="noopener" title="Betta RPG on GitHub: how it was made">GitHub</a>
   </section>
 
   <section data-screen="create" class="screen dim" hidden>
@@ -190,7 +195,7 @@
   <div id="rotate" hidden><canvas id="rotateFish" width="96" height="64"></canvas><p>Turn your phone sideways</p></div>
   <div id="loading"><div class="loadbar"><i id="loadFill"></i></div></div>
 </div>
-<gh-feedback id="report" trigger="none" repo="" template="bug.yml" heading="Report a bug" types="bug,feature" theme="dark" color="#F7C948"></gh-feedback>
+<gh-feedback id="report" trigger="none" repo="zeveck/bettarpg" template="bug.yml" heading="Report a bug" types="bug,feature" theme="dark" color="#F7C948"></gh-feedback>
 <script type="module" src="vendor/gh-feedback.js"></script>
 <script type="module" src="src/main.js"></script>
 </body>

@@ -1,4 +1,4 @@
-# Betta Fish RPG
+# Betta RPG
 
 ## Requests
 
@@ -6,6 +6,7 @@
 2. (plan approval) "Proceed with the plan."
 3. `/gamegen --plans` (approved: "yes")
 4. `/gamegen --continue --budget 50 --gamepad --controls --feedback --art-sheet --publish`
+5. (at the publish question) "It should still just be "Betta RPG" and not "Betta Fish RPG" on the title, etc."
 
 From: https://github.com/zeveck/bettarpg (zeveck's own repo), remake, leeway lots.
 Original untouched; this is a new folder and repo with fresh history.

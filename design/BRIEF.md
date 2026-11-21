@@ -1,4 +1,4 @@
-# Brief: Betta Fish RPG (remake)
+# Brief: Betta RPG (remake)
 
 **In one sentence:** a little betta swims out of Paddy Village across the terraced rice
 paddies to find out why fish are vanishing, and can settle it with fins or with friendship.
@@ -9,7 +9,7 @@ Time). Small fish, big adventure.
 
 ## What they asked for
 
-- [ ] Remake *their* Betta Fish RPG, keeping their assets and ideas (`--remake`)
+- [ ] Remake *their* Betta RPG, keeping their assets and ideas (`--remake`)
 - [ ] With lots of freedom: build what it was reaching for (`--leeway lots`)
 - [ ] A reviewed plan only, no build yet (`--plan-only`)
 - [ ] Shared for comments as a page, with $10 of mock pictures (`--share-design --mockups $10`)
@@ -48,4 +48,4 @@ overworld, but original in every detail.
 ## Settings and decisions
 
 Platform both, web, medium scope, $20 budget ($10 for mockups), 2 review rounds, 2D.
-Credit: Rich Conlan. Name kept: "Betta Fish RPG" (their name and domain).
+Credit: Rich Conlan. Name kept: "Betta RPG" (their name and domain).

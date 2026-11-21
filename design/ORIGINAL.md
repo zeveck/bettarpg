@@ -1,4 +1,4 @@
-# The original: Betta Fish RPG v0.4.10
+# The original: Betta RPG v0.4.10
 
 Surveyed from github.com/zeveck/bettarpg (39 commits, July–Aug 2025; built with Claude Code,
 art by ChatGPT). Played in a browser on 2026-11-19: loads with no console errors.

@@ -1,4 +1,4 @@
-# Betta Fish RPG
+# Betta RPG
 
 *Small fish, big paddies. Find the missing fish, with your fins or your friendship.*
 
@@ -25,7 +25,7 @@ you did.
 - Credit: Rich Conlan
 - Remake of github.com/zeveck/bettarpg, leeway **lots**. Survey in `design/ORIGINAL.md`.
 - Decisions made on the player's behalf:
-  - Keep the name "Betta Fish RPG" (theirs, and their domain).
+  - Keep the name "Betta RPG" (theirs, and their domain).
   - Free swimming on a top-down map replaces the button grid; enemies are **visible** in the
     water instead of random encounters (players choose their fights; fixes the early spikes).
   - Turn-based battles stay: it's an RPG, and the original's spell set is the heart of it.
@@ -523,7 +523,7 @@ the canvas.
   village picture: `bettahome` cropped to its two domes (~88×52 art px), drawn at the
   scene's ×2 inside an oval mask with a code-drawn ring of bubbles and reeds. The player's
   betta in its current armor and color (or the base red one) swims in front; the name
-  "Betta Fish RPG" in the game font; Continue / New Game / Settings. Mute button.
+  "Betta RPG" in the game font; Continue / New Game / Settings. Mute button.
 - **Create your betta:** name field (top third of the screen; random-name button, kept),
   5 color swatches (kept colors), the betta preview swimming, "Swim to Village".
   - The name field is a real `<input>` (max 12 characters, letters, numbers, spaces, ' and

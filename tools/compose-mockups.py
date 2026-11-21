@@ -397,7 +397,7 @@ def screen_title():
     for i, (bx, by) in enumerate(((236, 226), (226, 210), (232, 194))):
         d.ellipse((bx, by, bx + 5 + i, by + 5 + i), outline=C['rim'], width=1)
     # title text
-    text(d, (40, 30), 'Betta Fish RPG', 46, fill=C['gold'], stroke=C['outline'], sw=4)
+    text(d, (40, 30), 'Betta RPG', 46, fill=C['gold'], stroke=C['outline'], sw=4)
     text(d, (44, 84), 'an underwater adventure in the rice paddies', 12, fill=C['white'], sw=1)
     # menu
     for i, s in enumerate(('Continue', 'New Game', 'Settings')):

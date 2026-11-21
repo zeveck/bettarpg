@@ -1,4 +1,4 @@
-# Betta Fish RPG
+# Betta RPG
 
 *Small fish, big paddies. Find the missing fish, with your fins or your friendship.*
 
@@ -8,7 +8,7 @@ helmet to full metal, and follow a trail of strange scales up to the city on the
 terrace and down into the dark Murk, where something very old and very lonely is waiting.
 Every fight can become a friendship, and the village remembers what you did.
 
-**[▶ Play Betta Fish RPG](https://bettafishrpg.synapticnoise.com/)** in your browser. No
+**[▶ Play Betta RPG](https://bettarpg.synapticnoise.com/)** in your browser. No
 install, works on desktop and on phones, with keyboard, mouse, touch or a controller.
 
 ![Title screen](media/screenshots/title.png)
@@ -49,7 +49,7 @@ endings, and a reward for making friends with every kind of fish in the paddies.
 
 ## How it was made
 
-Betta Fish RPG is a remake of [the original Betta Fish RPG](https://github.com/zeveck/bettarpg)
+Betta RPG is a remake of [the original Betta RPG](https://github.com/zeveck/bettarpg)
 (2025), made by [Claude Code](https://claude.com/claude-code) with
 [gamegen](https://github.com/zeveck/gamegen), from this request:
 
@@ -100,7 +100,7 @@ targets (both paths, fins and friendship), against the design's own
 
 ## Playing locally
 
-Betta Fish RPG is a plain web page with no build step. Serve the `game` folder with any
+Betta RPG is a plain web page with no build step. Serve the `game` folder with any
 static web server, for example:
 
     cd game

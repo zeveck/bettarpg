@@ -5,7 +5,7 @@
 import { Battle, makeEnemy } from './battle.js';
 import { ENEMIES, ITEMS, ITEM_ORDER, MOVES, PLAYER, PARTY, NGPLUS, SNARL, garFor } from './config.js';
 import { img, hasReal } from './assets.js';
-import { betta, bettaSwim, hatted, plain, fromCanvas, rim, white, glow, tinted, drawFish, garLunge } from './sprites.js';
+import { PLAYER_COLORS, betta, bettaSwim, hatted, plain, fromCanvas, rim, white, glow, tinted, drawFish, garLunge } from './sprites.js';
 import { Particles, pixelText, textWidth, pixelBubble } from './fx.js';
 import { $, el, button, nav, drawPortrait, press } from './ui.js';
 import * as audio from './audio.js';
@@ -50,6 +50,8 @@ export class BattleScene {
     this.lunge = { player: 0, enemy: 0, bubble: 0 };
     this.flash = { player: 0, enemy: 0, bubble: 0 };
     this.hidden = { enemy: false };
+    this.flare = 0;      // 0..1: your fins spread wide
+    this.scared = null;  // the scared-off fish swimming away: { t }
     this.lungeFrame = -1;
     this.over = false;
     this.lit = null;     // a button key to highlight
@@ -58,7 +60,11 @@ export class BattleScene {
   }
 
   // ---------- life ----------
-  async begin() {
+  // The battle's own UI, filled in and shown while the transition still covers the screen,
+  // so the fighters' first visible frame already has the HUD and menu to lay out against.
+  setup() {
+    if (this.setupDone) return;
+    this.setupDone = true;
     const ui = $('battleui');
     ui.hidden = false;
     $('bLog').innerHTML = '';
@@ -72,9 +78,14 @@ export class BattleScene {
     $('bDive').onclick = (e) => { e.stopPropagation(); this.choose('dive'); };
     this.updateHud(true);
     drawPortrait($('bPortrait'), this.G.playerCanvas());
+    this.buildRow();
+  }
+
+  async begin() {
+    this.setup();
+    const ui = $('battleui');
     nav.push({ id: 'battle', el: ui, wrap: false, initial: () => $('bRow').querySelector('.btn:not(.dim)') || $('bRow').querySelector('.btn'),
       keys: (ev) => this.onKey(ev) });
-    this.buildRow();
     await this.play(this.battle.start());
     if (this.enemy.kind === 'gar') { this.G.vibrate(400, 0.5); }
     this.busy = false;
@@ -135,7 +146,8 @@ export class BattleScene {
       { key: 'spells', label: 'Spells', small: '', can: b.tangled ? can('bubbleBlast') : { ok: true } },
       { key: 'party', label: learned ? 'Party!' : 'Party! ?', small: party.free ? 'free' : learned ? '5 MP' : '', can: party },
       { key: 'items', label: 'Items', small: '', can: { ok: true } },
-      { key: 'flee', label: 'Swim Away', small: '', can: can('flee') },
+      b.canFlare() ? { key: 'flare', label: 'Flare', small: '', can: can('flare') }
+        : { key: 'flee', label: 'Swim Away', small: '', can: can('flee') },
     ];
   }
 
@@ -344,6 +356,35 @@ export class BattleScene {
       await this.wait(500);
       return;
     }
+    if (who === 'player' && ev.kind === 'flare') {
+      // puff up: fins fan out, a shake, a ripple rolls toward the fish
+      audio.play('armor', { rate: 0.7, vol: 0.7 });
+      await this.tween(0.22, (k) => { this.flare = k; this.lunge.player = k * 0.3; });
+      this.shake = 1.2;
+      this.G.vibrate(160, 0.35);
+      const a = this.pos('player');
+      for (let i = 0; i < 3; i++) this.fx.add({ type: 'ring', x: a.x, y: a.y, life: 0.6, age: -i * 0.12, color: '#FFF1B0' });
+      this.fx.sparks(a.x, a.y - 4, 14, this.flareColor(), 2, 90);
+      await this.wait(550);
+      await this.tween(0.25, (k) => { this.flare = 1 - k; this.lunge.player = 0.3 * (1 - k); });
+      return;
+    }
+    if (who === 'enemy' && ev.kind === 'scared') {
+      audio.play('swim_away', { vol: 0.6, rate: 1.2 });
+      const b = this.pos('enemy');
+      this.fx.number(b.x, b.y - 40, '!', '#F7C948', 2);
+      this.fx.bubbles(b.x, b.y, 10, { spread: 20, r: [1, 3], up: 30 });
+      this.scared = { t: 0 };
+      await this.wait(800);
+      this.hidden.enemy = true;
+      return;
+    }
+    if (who === 'enemy' && ev.kind === 'unimpressed') {
+      const b = this.pos('enemy');
+      this.fx.number(b.x, b.y - 40, '...', '#FFFFFF', 2);
+      await this.wait(450);
+      return;
+    }
     if (who === 'player' && ev.kind === 'flee') {
       audio.play('swim_away', { vol: 0.5 });
       await this.tween(0.25, (k) => { this.lunge.player = -k * 1.5; });
@@ -517,8 +558,10 @@ export class BattleScene {
   // ---------- layout and drawing ----------
   layout() {
     const v = this.G.view;
-    const top = this.G.cssToLogicalY(Math.max($('bHud').getBoundingClientRect().bottom, $('eHud').getBoundingClientRect().bottom));
-    const bot = this.G.cssToLogicalY($('battleui').querySelector('.bottom').getBoundingClientRect().top);
+    let top = this.G.cssToLogicalY(Math.max($('bHud').getBoundingClientRect().bottom, $('eHud').getBoundingClientRect().bottom));
+    let bot = this.G.cssToLogicalY($('battleui').querySelector('.bottom').getBoundingClientRect().top);
+    // the battle UI isn't laid out yet (hidden): keep the fighters mid-screen, never at the top
+    if (!(bot > top + 40)) { top = Math.round(v.H * 0.22); bot = Math.round(v.H * 0.72); }
     let fy = Math.round((top + bot) / 2) + 6;
     if (this.bgKey === 'garpool') fy = Math.max(fy, Math.round(v.H / 2 + 10));
     const gar = this.enemy.kind === 'gar', snarl = this.enemy.kind === 'snarl';
@@ -527,6 +570,30 @@ export class BattleScene {
     const ey = snarl ? fy + 26 - Math.round(34 * 3 / 2) : fy + (gar ? 4 : 0);
     return { px: Math.round(W * (big ? 0.27 : 0.33)), py: fy, bx: Math.round(W * (big ? 0.12 : 0.16)), by: fy + 16,
       ex: Math.round(W * (big ? 0.69 : 0.72)), ey, top, bot };
+  }
+
+  flareColor() {
+    return (PLAYER_COLORS[this.G.s.color] || PLAYER_COLORS.red).swatch;
+  }
+  // Flaring: fins fanned out wide around you, in your colour, as pixel-stepped rays
+  // (dorsal above, anal fin below, the tail behind), tipped with light.
+  drawFlare(ctx, x, y, k, t) {
+    const col = this.flareColor(), n = 15;
+    ctx.save();
+    for (let i = 0; i < n; i++) {
+      // a fan from straight up, round the back, to straight down (you face right)
+      const a = -Math.PI / 2 - (i / (n - 1)) * Math.PI;
+      const len = Math.round((34 + (i % 2) * 14) * k + Math.sin(t * 18 + i) * 2 * k);
+      const r0 = 18;
+      for (let r = r0; r < r0 + len; r += 3) {
+        const px = Math.round(x - 6 + Math.cos(a) * r * 1.5), py = Math.round(y + Math.sin(a) * r);
+        const tip = r + 3 >= r0 + len;
+        ctx.globalAlpha = Math.min(1, k * 1.3) * (tip ? 1 : 0.9);
+        ctx.fillStyle = tip ? '#FFF1B0' : col;
+        ctx.fillRect(px - 3, py - 3, 6, 6);
+      }
+    }
+    ctx.restore();
   }
 
   enemySpriteV(hat) {
@@ -567,6 +634,7 @@ export class BattleScene {
     }
     this.fx.update(dt);
     if (this.faint != null) this.faint += dt;
+    if (this.scared) this.scared.t += dt;
     this.shake = Math.max(0, this.shake - dt * 10);
     this.dim = Math.max(0, this.dim - dt * 0.9);
     for (const k of ['player', 'enemy', 'bubble']) if (this.flash[k] > 0) this.flash[k] -= dt * 60 / 1;
@@ -631,15 +699,22 @@ export class BattleScene {
     // player
     const pv = R(this.playerSpriteV());
     const pxx = L.px + Math.round(this.lunge.player * 50);
-    drawFish(ctx, this.flash.player > 0 && Math.floor(this.flash.player) % 2 === 0 ? white(pv) : pv, pxx, L.py,
-      { s: 2, sway: this.battle.p.dived ? 0 : Math.sin(t * 6) * 1, bob: Math.round(Math.sin(t * 2)) * 2 });
+    if (this.flare > 0) this.drawFlare(ctx, pxx, L.py, this.flare, t);
+    const popts = { s: 2, sway: this.battle.p.dived ? 0 : Math.sin(t * 6) * 1, bob: Math.round(Math.sin(t * 2)) * 2 };
+    if (this.flare > 0 && pv) { ctx.globalAlpha = this.flare; drawFish(ctx, glow(pv, '#FFF1B0'), pxx, L.py, popts); ctx.globalAlpha = 1; }
+    drawFish(ctx, this.flash.player > 0 && Math.floor(this.flash.player) % 2 === 0 ? white(pv) : pv, pxx, L.py, popts);
     // enemy
     const ES = this.enemyScale;
     if (!this.hidden.enemy) {
       let ev = this.enemySpriteV(this.befriended);
       ev = R(ev);
       const exx = L.ex - Math.round(this.lunge.enemy * 60);
-      if (this.faint != null) {
+      if (this.scared) {
+        // flared at: a startled hop, then it turns tail and darts off to the right
+        const k = this.scared.t, hop = k < 0.2 ? -Math.round(Math.sin(k / 0.2 * Math.PI) * 8) : 0;
+        const run = Math.max(0, k - 0.25), x = exx + Math.round(run * run * 900);
+        drawFish(ctx, ev, x, L.ey + hop, { s: ES, flip: k < 0.25, sway: Math.sin(t * 24) * 2, alpha: Math.max(0, 1 - run * 1.6) });
+      } else if (this.faint != null) {
         // beaten: belly-up, fading and sinking
         const k = Math.min(1, this.faint / 1.4);
         const y = L.ey + Math.round(k * 24);

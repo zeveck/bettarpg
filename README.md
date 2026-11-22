@@ -35,7 +35,8 @@ install, works on desktop and on phones, with keyboard, mouse, touch or a contro
 - **Talk, pick up, confirm:** Space, E or Enter (✕ / A on a controller, the Talk button on a
   phone).
 - **Battle:** Attack, Spells, **Party!**, Items or Swim Away (keys 1 to 5). Party! works
-  best once a fish is worn down, and a new friend gives the same rewards as a win.
+  best once a fish is worn down, and a new friend gives the same rewards as a win. Against
+  a fish well below your level, Swim Away becomes **Flare**: spread your fins and scare it off.
 - **Items:** I. **Go home to the village:** H or Home. **Pause:** Esc or P. **Mute:** M.
 - Keys and controller buttons can be changed in Settings → Controls.
 - Plug in a PS5 controller (USB or Bluetooth) and press any button; it works best in Chrome

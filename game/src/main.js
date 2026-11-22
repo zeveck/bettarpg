@@ -220,6 +220,7 @@ G.startBattle = async ({ enemy = null, kind, level, edge = false, scripted = nul
     G.battle = new BattleScene(G, { kind, level, edge, scripted, bg, entity: enemy });
     G.mode = 'battle';
     showWorldUI(false);
+    G.battle.setup();
     audio.playMusic(kind === 'gar' ? 'gar' : 'battle');
     audio.playAmbience(null);
   });
@@ -267,7 +268,7 @@ G.afterBattle = async (scene, result) => {
     G.save();
   } else if (result === 'lose') {
     await G.defeat(scene);
-  } else if (result === 'fled') {
+  } else if (result === 'fled' || result === 'flared') {
     await G.leaveBattle(scene);
   }
   return { lines, levels };
@@ -299,6 +300,12 @@ G.leaveBattle = async (scene) => {
     audio.playMusic(G.world.def.music);
     audio.playAmbience(G.world.def.ambience);
     if (result === 'fled' && scene.entity) { scene.entity.state = 'return'; scene.entity.cool = 4; scene.entity.avoid = true; }
+    if (result === 'flared') {
+      // flared at: it bolts away from you for a while, and drops a Betta Bite where it was
+      const q = scene.entity || G.world.player;
+      G.world.pickups.push({ type: 'bite', x: q.x, y: q.y, ph: 0 });
+      if (scene.entity) { const en = scene.entity; en.state = 'return'; en.cool = 8; en.avoid = true; en.scaredT = WORLD.scaredTime; }
+    }
   });
   G.save();
   if (result === 'friend' && scene.enemy.kind !== 'gar' && scene.battle.scripted !== 'stump' && !G.s.hints.friendMade) {

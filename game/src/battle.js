@@ -46,6 +46,20 @@ export function makeEnemy(kind, level, edge = false, opts = {}) {
     shell: !!def.shell, k };
 }
 
+// Swim Away's chance against this fish.
+export function swimAwayChance(enemy) {
+  return enemy.level >= MOVES.swimAway.hardLevel + (enemy.k || 0) ? MOVES.swimAway.hardChance : MOVES.swimAway.chance;
+}
+
+// Flare's chance: 0 unless the fish is below your level (and never the bosses).
+export function flareChance(L, enemy) {
+  if (enemy.boss) return 0;
+  const gap = L - enemy.level;
+  if (gap <= 0) return 0;
+  const f = MOVES.flare;
+  return Math.min(f.max, f.base + f.perLevel * gap);
+}
+
 export function partyChance(L, enemy, friends) {
   const p = L >= PLAYER_BIG() ? PARTY.big : PARTY.small;
   const frac = 1 - enemy.hp / enemy.hpMax;
@@ -100,9 +114,17 @@ export class Battle {
     this.stumpLit = false;  // the Old Stump lesson has lit Party!
     this.tutorialDodged = false;
     this.warned = false;    // the Gar warned it will use its special next turn
-    this.over = null;       // 'win' | 'friend' | 'lose' | 'fled'
+    this.over = null;       // 'win' | 'friend' | 'lose' | 'fled' | 'flared'
     this.rewards = null;
     this.events = [];
+  }
+
+  // Swim Away becomes Flare once flaring is at least as likely to work (not in the sub, not in a
+  // scripted lesson).
+  canFlare() {
+    if (this.scripted || this.p.dived) return false;
+    const f = flareChance(this.p.level, this.e);
+    return f > 0 && f >= swimAwayChance(this.e);
   }
 
   get armor() { return this.p.dived ? PLAYER.subArmor : PLAYER.armor(this.p.level); }
@@ -137,6 +159,9 @@ export class Battle {
       }
       case 'flee':
         if (this.scripted === 'stump') return { ok: false, why: "Bubble: We can't leave now!" };
+        return { ok: true };
+      case 'flare':
+        if (!this.canFlare()) return { ok: false, why: '' };
         return { ok: true };
       case 'dive':
         return p.subOwned ? { ok: true } : { ok: false, why: '' };
@@ -289,7 +314,7 @@ export class Battle {
       }
       case 'party': return this.party(c);
       case 'flee': {
-        const ch = e.level >= MOVES.swimAway.hardLevel + (e.k || 0) ? MOVES.swimAway.hardChance : MOVES.swimAway.chance;
+        const ch = swimAwayChance(e);
         this.push({ t: 'anim', who: 'player', kind: 'flee' });
         if (r.chance(ch)) {
           this.over = 'fled';
@@ -298,6 +323,20 @@ export class Battle {
           this.push({ t: 'end', result: 'fled' });
         } else {
           this.log('You try to escape, but the enemy is too fast!');
+        }
+        return;
+      }
+      case 'flare': {
+        this.push({ t: 'anim', who: 'player', kind: 'flare' });
+        if (r.chance(flareChance(p.level, e))) {
+          this.over = 'flared';
+          this.log(`${p.name} flares! The ${e.name} takes one look and swims off!`);
+          this.push({ t: 'anim', who: 'enemy', kind: 'scared' });
+          this.log('It dropped a Betta Bite as it fled.');
+          this.push({ t: 'end', result: 'flared' });
+        } else {
+          this.push({ t: 'anim', who: 'enemy', kind: 'unimpressed' });
+          this.log(`${p.name} flares, but the ${e.name} isn't impressed!`);
         }
         return;
       }

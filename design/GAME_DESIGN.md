@@ -348,6 +348,7 @@ Highwater has no battles).
 | Items | — | — | Kelp Snack +10 HP (3 BB), Bubble Water +8 MP (2 BB); Highwater: Seed Cake +30 HP (8 BB), Fizzy Water +15 MP (6 BB). Carry up to 9 of each. Also usable from the pause screen |
 | Dive / Surface (sub) | your turn | sub owned | Swap into or out of the Dunkleosteus Submarine |
 | Swim Away | — | — | 75%, or 10% vs Level 5+ (kept) |
+| **Flare** (in Swim Away's place) | — | fish below your level, not bosses | 35% + 20% per level you're above the fish, max 95%. Shown instead of Swim Away once it's at least as likely to work (no Flare in the sub or a scripted fight). Works: the fish bolts, no EXP, it drops one Betta Bite on the map and keeps away for 6 s. Fails: the fish "isn't impressed" and takes its turn (issue #2) |
 
 - **Bubble** acts after you: a nip for 2–5 + ⌊L/2⌋, or, once per battle when you're under
   30% HP, a heal of ⌊15% of your max HP⌋. **20% of all enemy attacks, the Gar's special
@@ -1464,3 +1465,20 @@ befriend and hit sounds. Totals become 17 generated pictures + 3 Snarl images, 2
 - [ ] The debug hook additions work with `?debug` only.
 - [ ] The Snarl at ×3, the net overlay and the slot screen look right at 1280×720 and on the
       844×390 phone.
+
+## Change 2 (2026-11-22): Flare, and a clean start to every fight
+
+From issues #1 and #2 (player reports).
+
+- **Fights open cleanly (#1).** The fighters' places come from the battle HUD and menu, which
+  were still hidden while the transition faded in, so for a moment every fish sat at the top
+  of the screen. The battle UI is now filled in and shown while the transition still covers
+  the screen (as the world HUD already was), and the layout falls back to mid-screen if the UI
+  is ever missing.
+- **Flare (#2).** A betta's signature move: Swim Away becomes **Flare** against fish far enough
+  below you (see the move table). Your fins fan out in your colour, you glow, the water
+  ripples and shakes; the fish startles ("!"), turns tail and darts off. A failed flare gets
+  a "..." and the fish's turn. No EXP or Betta Bites screen: it's a way past a fish, not a
+  win; the fish drops a single Betta Bite pickup as it flees. All drawn in code, no new art
+  or sound (it reuses `armor` and `swim_away`).
+

@@ -21,6 +21,10 @@ export const MOVES = {
   gravelGrenade: { mp: 5, lo: 8, hi: 15, level: 4 },
   party: { mp: 5 },
   swimAway: { chance: 0.75, hardChance: 0.1, hardLevel: 5 },
+  // Flare: spread your fins and scare off a fish smaller than you. Only against fish below your
+  // level; base + perLevel for each level of the gap, capped. Swim Away turns into Flare once
+  // flaring is at least as likely to work as swimming away.
+  flare: { base: 0.35, perLevel: 0.2, max: 0.95 },
 };
 
 export const PARTY = {
@@ -119,6 +123,7 @@ export const WORLD = {
   noticeRange: 96, chaseSpeed: 0.7, chaseTime: 3,
   reedReveal: 80, lanternRadius: 128,
   safeAfterBattle: 2,
+  scaredTime: 6,       // seconds a flared-at fish keeps swimming away from you
   regenEvery: 2,
   touchRange: 30, talkRange: 50,
   redGlowGap: 2,

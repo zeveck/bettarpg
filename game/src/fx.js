@@ -99,7 +99,19 @@ export class Particles {
   draw(ctx, ox = 0, oy = 0) {
     for (const p of this.list) {
       const x = Math.round(p.x - ox), y = Math.round(p.y - oy), k = 1 - p.age / p.life;
+      if (p.age < 0) continue; // a delayed particle (rings in a row)
       switch (p.type) {
+        case 'ring': {
+          // a pixel ripple rolling out (a flare's shock wave)
+          const r = 8 + (1 - k) * 70, n = 28;
+          ctx.globalAlpha = k * 0.8; ctx.fillStyle = p.color;
+          for (let i = 0; i < n; i++) {
+            const a = (i / n) * Math.PI * 2;
+            ctx.fillRect(Math.round(x + Math.cos(a) * r * 1.3) - 1, Math.round(y + Math.sin(a) * r * 0.8) - 1, 2, 2);
+          }
+          ctx.globalAlpha = 1;
+          break;
+        }
         case 'bubble': pixelBubble(ctx, x, y, p.r, p.color); break;
         case 'confetti': ctx.fillStyle = p.color; ctx.fillRect(x, y, (p.age * 10 | 0) % 2 ? 2 * p.size : p.size, p.size * 2); break;
         case 'spark': ctx.fillStyle = p.color; ctx.fillRect(x, y, p.size * (k > 0.5 ? 2 : 1), p.size * (k > 0.5 ? 2 : 1)); break;

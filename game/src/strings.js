@@ -211,7 +211,7 @@ export const HINTS = {
   swimTouch: 'Drag on the left side of the screen to swim',
   talk: '{talk}: Talk',
   redGlow: 'Fish glowing red are much stronger than you: swim around them.',
-  battle: 'Choose what to do: Attack, a spell, Party!, an item, or Swim Away.',
+  battle: 'Choose what to do: Attack, a spell, Party!, an item, or Swim Away (Flare, against small fish).',
   befriend: 'Party! tries to make a friend. It works better when the fish is worn down.',
 };
 

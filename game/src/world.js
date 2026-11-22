@@ -465,8 +465,14 @@ export class World {
       e.hidden = !!def.reeds && this.inReeds(e.x, e.y) && dist > WORLD.reedReveal;
       const chases = (def.chase || (this.inDeepMurk(e.hx) && e.deep) || (e.edge && def.dark)) && !e.still;
       let vx = 0, vy = 0;
-      if (e.avoid && dist > 130) e.avoid = false; // you've swum off: it forgets
-      if ((this.safeT > 0 || e.avoid) && dist < 140 && !e.still) {
+      if (e.scaredT > 0) e.scaredT -= dt;
+      if (e.avoid && dist > 130 && !(e.scaredT > 0)) e.avoid = false; // you've swum off: it forgets
+      if (e.scaredT > 0 && !e.still) {
+        // flared at: it darts away from you, fast, and won't pick a fight until it calms down
+        e.avoid = true;
+        const sp = dist < 160 ? 70 : 0;
+        vx = -dx / (dist || 1) * sp; vy = -dy / (dist || 1) * sp; e.state = 'return'; e.wait = 0.5;
+      } else if ((this.safeT > 0 || e.avoid) && dist < 140 && !e.still) {
         // after a battle: nearby fish swim away
         vx = -dx / (dist || 1) * 40; vy = -dy / (dist || 1) * 40; e.state = 'idle'; e.wait = 0.5;
       } else if (e.state === 'chase') {

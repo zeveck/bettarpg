@@ -102,10 +102,10 @@ export class World {
         }
       }
     }
-    // lily pads, pebbles and broken stems scattered in the open water
+    // pebbles and broken stems scattered in the open water
     this.scatter = [];
     if (def.bank !== 'concrete') {
-      const kinds = def.dark ? ['p_stem', 'p_stones'] : ['p_lily', 'p_lily', 'p_stones', 'p_stem'];
+      const kinds = def.dark ? ['p_stem', 'p_stones'] : ['p_stones', 'p_stem', 'p_stones', 'p_stem'];
       for (const q of waterSpots(this.terrain, Math.round((def.w * def.h) / (def.dark ? 60000 : 30000)), () => trng.next(), 1, 4)) {
         if (depthAt(this.terrain, q.x, q.y) === 6) continue;
         this.scatter.push({ sprite: kinds[Math.floor(trng.next() * kinds.length)], x: q.x, y: q.y });
@@ -613,7 +613,7 @@ export class World {
       pixelBubble(ctx, r.x, r.y, Math.max(2, Math.round(r.r)), '#CFF4FF');
     }
     ctx.globalAlpha = 1;
-    // floor things: pickups, lily pads under fish
+    // floor things: pickups under fish
     for (const q of this.pickups) this.drawPickup(ctx, q);
     for (const c of this.critters) this.drawCritter(ctx, c, t);
     if (this.def.lanterns) for (const [lx, ly] of this.def.lanterns) this.drawLanternGlow(ctx, lx, ly, t);
@@ -623,7 +623,7 @@ export class World {
     for (const q of this.props) {
       if (q.until && s.flags[q.until]) continue;
       const c = img(q.sprite); if (!c) continue;
-      const flat = q.sprite === 'p_lily' || q.sprite === 'p_lip';
+      const flat = q.sprite === 'p_lip';
       list.push({ y: flat ? -1e6 + q.y : q.y, d: () => {
         if (q.dark) { ctx.filter = 'brightness(0.55)'; }
         ctx.drawImage(c, Math.round(q.x - c.width / 2), Math.round(q.y - c.height));

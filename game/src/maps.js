@@ -42,8 +42,8 @@ export const MAPS = {
       { id: 'reef', sprite: 'reef', x: 960, y: 270, face: -1 },
     ],
     props: [
-      { sprite: 'p_lily', x: 360, y: 400 }, { sprite: 'p_lily', x: 690, y: 450 }, { sprite: 'p_stones', x: 330, y: 160 },
-      { sprite: 'p_stones', x: 650, y: 560 }, { sprite: 'p_lily', x: 640, y: 120 }, { sprite: 'p_stem', x: 400, y: 520 },
+      { sprite: 'p_stones', x: 330, y: 160 },
+      { sprite: 'p_stones', x: 650, y: 560 }, { sprite: 'p_stem', x: 400, y: 520 },
     ],
     gates: [
       { id: 'south', rect: [478, 600, 68, 40], openIf: 'metFinn', look: 'weave' },
@@ -81,9 +81,9 @@ export const MAPS = {
     props: [
       { sprite: 'p_stump', x: 1395, y: 770, solid: true, id: 'stump' },
       { sprite: 'p_culvert', x: 66, y: 818, id: 'culvert' },
-      { sprite: 'p_lily', x: 600, y: 180 }, { sprite: 'p_lily', x: 1200, y: 420 }, { sprite: 'p_stones', x: 860, y: 260 },
+      { sprite: 'p_stones', x: 860, y: 260 },
       { sprite: 'p_reeds', x: 300, y: 300 }, { sprite: 'p_reeds', x: 1300, y: 300 }, { sprite: 'p_stem', x: 980, y: 720 },
-      { sprite: 'p_stones', x: 1250, y: 820 }, { sprite: 'p_lily', x: 700, y: 820 },
+      { sprite: 'p_stones', x: 1250, y: 820 }, 
     ],
     gates: [
       { id: 'culvert', rect: [40, 790, 34, 60], openIf: 'lantern', look: 'dark', talk: 'culvertDark' },
@@ -127,7 +127,7 @@ export const MAPS = {
     props: [
       { sprite: 'p_bundle', x: 1180, y: 74, id: 'bundle', solid: true, until: 'trailFound' },
       { sprite: 'p_lip', x: 1180, y: 22 },
-      { sprite: 'p_lily', x: 300, y: 380 }, { sprite: 'p_stones', x: 980, y: 560 }, { sprite: 'p_lily', x: 1100, y: 700 },
+      { sprite: 'p_stones', x: 980, y: 560 },
     ],
     gates: [
       { id: 'bundle', rect: [1110, 40, 140, 60], openIf: 'trailFound', look: 'none', talk: 'bundle' },
@@ -189,7 +189,7 @@ export const MAPS = {
     props: [
       { sprite: 'p_lip', x: 680, y: 780 }, { sprite: 'p_lip', x: 746, y: 780 }, { sprite: 'p_lip', x: 812, y: 780 }, { sprite: 'p_lip', x: 856, y: 780 },
       { sprite: 'p_lip', x: 680, y: 600 }, { sprite: 'p_lip', x: 746, y: 600 }, { sprite: 'p_lip', x: 812, y: 600 }, { sprite: 'p_lip', x: 856, y: 600 },
-      { sprite: 'p_lily', x: 420, y: 120 }, { sprite: 'p_lily', x: 1000, y: 160 }, { sprite: 'p_stones', x: 560, y: 200 },
+      { sprite: 'p_stones', x: 560, y: 200 },
       { sprite: 'p_reeds', x: 330, y: 700 }, { sprite: 'p_reeds', x: 1220, y: 620 },
     ],
     // the Snarl holds the top of the Spillway steps: the rect spans the whole join (x 640-896)

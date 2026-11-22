@@ -753,7 +753,7 @@ extraction first. Target sizes are art pixels (width unless marked "tall").
 | E1 | Dragonfly Nymph 36, Snapping Crayfish 38 (overworld ×1, battle ×2 from the same native image) | imagegen2 (MK7) | 2 items | yes | code | must |
 | E2 | Party-hat versions of E1, E3 and N4 captives | code: the cut-out kept hat | — | yes | — | must |
 | E3 | Gargantuan Gar boss (refs: prehistoric_gar, betta) | imagegen2 (MK8) | 100×40 (×2 = 200×80 in battle; ×1 in its pool) | yes | code | must |
-| T3 | Props: reed clump 24, lily pad 20, stones 18, broken stem 12 tall, fallen straw bundle 64, culvert mouth 48, spillway step lip 64, Old Stump 48, reed cage closed 40, reed cage open 40 | imagegen2 (MK10a) | 10 items | yes | — | must |
+| T3 | Props: reed clump 24, stones 18, broken stem 12 tall, fallen straw bundle 64, culvert mouth 48, spillway step lip 64, Old Stump 48, reed cage closed 40, reed cage open 40 | imagegen2 (MK10a) | 9 items (lily pad removed in Change 3) | yes | — | must |
 | I1 | Icons: Betta Bite 10, strange scale 12, brass cog 12, glow-moss lantern 14 tall, Kelp Snack 14, Bubble Water 14, Seed Cake 14, Fizzy Water 14 | imagegen2, cheaper model (MK10b) | 8 items | yes | — | must |
 | UI3 | App icon and favicons | code from K1 | 512 + sizes | maskable margin | — | must |
 | UI4 | Social card, GitHub preview | code (title screen) | 1200×630, 1280×640 | no | — | must |
@@ -866,7 +866,7 @@ gives sizes relative to the reference betta and as a grid.
 - **MK9b:** "(1) An old concrete drain gate with a rusty iron grate and three empty cog
   sockets, front view, about 120 big pixels wide; (2) Lock-Keeper Whorl: <look>, about 32 big
   pixels long; (3) Pip: <look>, about 28 big pixels long."
-- **MK10a:** "Ten small props for a rice-paddy map, front 3/4 view, each on its own: reed
+- **MK10a:** (the lily pad it made was removed in Change 3) "Ten small props for a rice-paddy map, front 3/4 view, each on its own: reed
   clump (24 big pixels wide), lily pad (20), stones (18), broken rice stem (12 tall), fallen
   straw bundle (64), culvert mouth (48), spillway step lip (64), the Old Stump, a mossy sunken
   tree stump (48), a woven reed cage closed (40), the same reed cage with its door open (40)."

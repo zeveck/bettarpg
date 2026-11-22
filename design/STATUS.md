@@ -14,6 +14,7 @@
 10. "Does the game have save slotS? There should be more than just one global save"
 11. "publish" (published Change 1 on 2026-11-21)
 12. (issues #1 and #2) "Swim Away can become Flare once you're strong enough. Yes, it's probability based on your level and theirs, so it can flip to Flare as soon as it's at least as likely as you swimming away. No rewards, unless we say they dropped some as they fled. Yes on fail. ... Sure, the fish could swim away on the map too."
+13. `/gamegen --change The rice paddies include lily pads as one of the graphic elements. Let's remove those.`
 
 From: https://github.com/zeveck/bettarpg (zeveck's own repo; renamed to zeveck/bettarpg-original on 2026-11-21 so the remake could take zeveck/bettarpg), remake, leeway lots.
 Original untouched; this is a new folder and repo with fresh history.
@@ -63,6 +64,12 @@ Original untouched; this is a new folder and repo with fresh history.
 - [x] #1: battle UI shown under the transition; layout fallback; checked at 1280×720 and phone 844×390
 - [x] #2: Flare replaces Swim Away when at least as likely; code-drawn fin fan, glow, ripple; fish bolts on the map and drops a Betta Bite; checked in browser (win, fail, map); sim and save tests pass
 - [x] Routes replayed (13/13; full-game passed on a re-run after one unlucky loss in the Ditch); published
+
+## Change 3 (2026-11-22): no lily pads
+
+- [x] Lily pads removed from every map (10 placed by hand in the village, shallows, reedwater and high water, plus the random open-water scatter, now stones and stems) and from the art list; nothing else moved (the scatter draws the same random numbers)
+- [x] Art-only check: all 6 areas at 1280×720 and phone 844×390, no console errors; README village, shallows, high water and phone shots retaken; social card and GitHub preview have no lily pads
+- [ ] Art sheet on the plans page still shows the lily pad: updates on the next publish
 
 ## Phases
 

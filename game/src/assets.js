@@ -61,7 +61,6 @@ export const MANIFEST = {
   p_rice: [[N + 'props/rice_stalks.png'], null],
   p_riceRow: [[N + 'props/rice_row.png'], null],
   p_reeds: [[N + 'props/reed_clump.png'], { w: 24, h: 25, c: '#5B8C3A' }],
-  p_lily: [[N + 'props/lily_pad.png'], { w: 21, h: 16, c: '#4a8a3a' }],
   p_stones: [[N + 'props/stones.png'], { w: 18, h: 14, c: '#888' }],
   p_stem: [[N + 'props/broken_stem.png'], { w: 8, h: 12, c: '#9a7' }],
   p_bundle: [[N + 'props/straw_bundle.png'], { w: 67, h: 46, c: '#d9b45a' }],

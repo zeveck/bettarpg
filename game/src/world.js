@@ -626,7 +626,9 @@ export class World {
       const flat = q.sprite === 'p_lip';
       list.push({ y: flat ? -1e6 + q.y : q.y, d: () => {
         if (q.dark) { ctx.filter = 'brightness(0.55)'; }
-        ctx.drawImage(c, Math.round(q.x - c.width / 2), Math.round(q.y - c.height));
+        const x0 = Math.round(q.x - c.width / 2), y0 = Math.round(q.y - c.height);
+        if (q.flip) { ctx.save(); ctx.translate(x0 + c.width, y0); ctx.scale(-1, 1); ctx.drawImage(c, 0, 0); ctx.restore(); }
+        else ctx.drawImage(c, x0, y0);
         ctx.filter = 'none';
       } });
     }
@@ -685,7 +687,17 @@ export class World {
     const [x, y, w, h] = g.rect;
     if (g.look === 'none') return;
     if (g.look === 'dark') {
-      ctx.fillStyle = '#05101c'; ctx.fillRect(x, y, w, h);
+      // darkness spilling out of a tunnel mouth: stepped pixel ellipses, deepest at the centre
+      const [cx, cy] = g.shadow || [x + w / 2, y + h / 2];
+      ctx.fillStyle = '#05101c';
+      for (const [rx, ry, a] of [[22, 13, 0.16], [16, 10, 0.2], [10, 7, 0.28], [5, 4, 0.36]]) {
+        ctx.globalAlpha = a;
+        for (let dy = -ry; dy <= ry; dy += 2) {
+          const hw = Math.round(rx * Math.sqrt(1 - (dy / ry) ** 2) / 2) * 2;
+          if (hw > 0) ctx.fillRect(Math.round(cx - hw), Math.round(cy + dy), hw * 2, 2);
+        }
+      }
+      ctx.globalAlpha = 1;
       return;
     }
     if (g.look === 'weave') {

@@ -162,7 +162,8 @@ body.inbattle #hint { align-items: flex-start; padding-top: calc(78px + var(--sa
 .previewrow { display: flex; justify-content: center; }
 #createPreview { width: 120px; height: 84px; image-rendering: pixelated; }
 .pause { width: min(760px, 96vw); }
-body:not(.short) [data-screen=pause] { padding-top: 5.5em; }
+/* the pause menu is centred like every popup; its Items page shows HP and MP, so the corner HUD steps aside instead of showing through under its edge */
+body:has([data-screen=pause]:not([hidden])) #hud { visibility: hidden; }
 .goal { color: var(--gold); margin-bottom: 8px; text-wrap: balance; }
 .warn { color: #FF8080; margin-bottom: 6px; }
 .pausebody { display: flex; gap: 14px; }

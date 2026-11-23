@@ -80,13 +80,13 @@ export const MAPS = {
     npcs: [],
     props: [
       { sprite: 'p_stump', x: 1395, y: 770, solid: true, id: 'stump' },
-      { sprite: 'p_culvert', x: 66, y: 818, id: 'culvert' },
+      { sprite: 'p_culvert', x: 66, y: 818, id: 'culvert', flip: true },
       { sprite: 'p_stones', x: 860, y: 260 },
       { sprite: 'p_reeds', x: 300, y: 300 }, { sprite: 'p_reeds', x: 1300, y: 300 }, { sprite: 'p_stem', x: 980, y: 720 },
       { sprite: 'p_stones', x: 1250, y: 820 }, 
     ],
     gates: [
-      { id: 'culvert', rect: [40, 790, 34, 60], openIf: 'lantern', look: 'dark', talk: 'culvertDark' },
+      { id: 'culvert', rect: [40, 790, 34, 60], openIf: 'lantern', look: 'dark', shadow: [76, 806], talk: 'culvertDark' },
     ],
     exits: [
       { rect: [704, -20, 128, 26], to: 'village', entry: 'south' },
@@ -104,7 +104,7 @@ export const MAPS = {
       { kind: 'angel', lv: [2, 2], x: 640, y: 740 }, { kind: 'angel', lv: [2, 2], x: 950, y: 810 },
       { kind: 'angel', lv: [2, 2], x: 1180, y: 520 },
     ],
-    bites: [[420, 240], [860, 470], [1300, 250], [300, 560], [1100, 840], [620, 640], [1440, 520]],
+    bites: [[420, 240], [860, 470], [1300, 250], [300, 560], [1100, 840], [620, 640], [1370, 610]],
   },
 
   reedwater: {

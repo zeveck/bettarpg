@@ -16,6 +16,10 @@
 12. (issues #1 and #2) "Swim Away can become Flare once you're strong enough. Yes, it's probability based on your level and theirs, so it can flip to Flare as soon as it's at least as likely as you swimming away. No rewards, unless we say they dropped some as they fled. Yes on fail. ... Sure, the fish could swim away on the map too."
 13. `/gamegen --change The rice paddies include lily pads as one of the graphic elements. Let's remove those.`
 14. `/gamegen --publish --no-confirm`
+15. "For some reason when I approach the a cavern in the lower left of the paddie that says "Too dark to swim in there." I see a black rectangle instead of a proper graphic. We need to fix that and publish."
+16. "The pause popup is oddly lower than I'd expect? It seems it should be vertically centered, but it's not, and on my laptop screen it got a scrollbar despite there being plenty of vertical space it could have sized into to avoid. Consider this and how best to fix."
+17. "For the initial shallows I sometimes see a fish snack off in the dirt where it's unreachable. Unless there's some clever puzzle, we shouldn't place unreachable powerups like that."
+18. `/gamegen --change Everybetta in the villages looks awesome, and they have cool little houses, but, in a typical RPG they would each be situated in their houses and there'd be entry/exit and interiors. We'd want to keep the pixel style and these are betta fish versions of the same old shops, homes, whatever. We want to evoke familiar interiors while feeling fun and fishy. --budget 20 --publish --no-confirm`
 
 From: https://github.com/zeveck/bettarpg (zeveck's own repo; renamed to zeveck/bettarpg-original on 2026-11-21 so the remake could take zeveck/bettarpg), remake, leeway lots.
 Original untouched; this is a new folder and repo with fresh history.
@@ -71,6 +75,22 @@ Original untouched; this is a new folder and repo with fresh history.
 - [x] Lily pads removed from every map (10 placed by hand in the village, shallows, reedwater and high water, plus the random open-water scatter, now stones and stems) and from the art list; nothing else moved (the scatter draws the same random numbers)
 - [x] Art-only check: all 6 areas at 1280×720 and phone 844×390, no console errors; README village, shallows, high water and phone shots retaken; social card and GitHub preview have no lily pads
 - [x] Published 2026-11-22 (deploy f6c078e, checked live at desktop and phone); art sheet on the plans page no longer shows the lily pad
+
+## Change 4 (2026-11-23): dark culvert, centred pause, reachable snacks
+
+- [x] Culvert in the Shallows faces the water (flipped); the "too dark" barrier is a stepped darkness spilling from its mouth, not a black box (art only; checked at 1280×720)
+- [x] Pause menu centred like every popup (the 5.5em top gap went); the corner HUD hides while paused (Items shows HP/MP); no scroll at 1280×720, 1366×657, 1440×900, 1536×730, 1920×1080, 1024×600, 844×390
+- [x] Shallows Betta Bite at 1440,520 was on land: moved to 1370,610; tools/check-pickups.mjs checks every bite, scale and cog is reachable (all pass)
+- [x] Replays: area-1, peace, village, ending-friend, ending-fins pass; full-game lost a fight in the Ditch twice (arrives under-levelled after the RNG shift from the moved snack; route to be made sturdier with Change 5's re-recording). Published 2026-11-23
+
+## Change 5 (2026-11-23): houses you can enter
+
+- Budget: $20 (this change)
+- [ ] Design + one review round
+- [ ] Assets: interior rooms, door/shop sounds, indoor music
+- [ ] Build: doors, interiors, villagers inside, new game starts in Finn's house, wake in the inn
+- [ ] Routes re-recorded where they visit villagers; targeted checks; full replays
+- [ ] README/screenshots, art sheet, publish
 
 ## Phases
 

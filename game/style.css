@@ -89,6 +89,8 @@ button, input { font: inherit; color: inherit; font-variant-ligatures: none; fon
 .toast { padding: 4px 14px; animation: bannerIn 0.25s ease-out; max-width: 80vw; text-align: center; text-wrap: balance; }
 #hint { display: flex; justify-content: center; align-items: flex-end; padding-bottom: calc(16px + var(--sa-b)); }
 #hint * { pointer-events: none; }
+/* a talk prompt shows at the same spot: the tip sits just above it */
+body:has(#prompt:not([hidden])) #hint { padding-bottom: calc(66px + var(--sa-b)); }
 body.inbattle #hint { align-items: flex-start; padding-top: calc(78px + var(--sa-t)); }
 .hintbox { padding: 6px 16px; max-width: min(620px, 86vw); text-align: center; text-wrap: balance; }
 #prompt { display: flex; justify-content: center; align-items: flex-end; padding-bottom: calc(14px + var(--sa-b)); }

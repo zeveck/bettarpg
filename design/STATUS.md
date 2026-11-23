@@ -92,7 +92,7 @@ Original untouched; this is a new folder and repo with fresh history.
 - [x] Checks: check-reach (all reachable), check-routes, test-saves; 13/13 routes pass (full game from New Game included; snarl-friend reordered to rest after a side-pool fight); hands-on at 1280x720 and phone 844x390; screen tour text-scanned at both sizes
 - [x] Fresh bug hunt: no crashes or soft-locks; 7 small findings fixed (room toast on Continue, rescued fish spacing, NG+ gate toast, diagonal door entry, no straight-back-in after leaving, parade at Bubble's door, prototype names in saves); 13/13 routes pass again
 - [x] README and screenshots, art sheet (Rooms section) ready
-- [ ] Publish (game, then art sheet)
+- [x] Published 2026-11-23 (game; the swim tip now sits above talk prompts); art sheet on the plans page has a Rooms section and the door sounds
 
 ## Phases
 

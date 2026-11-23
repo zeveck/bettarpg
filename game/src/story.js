@@ -108,7 +108,7 @@ export function createStory(G) {
     }
     if (w.areaId === 'village' && (f.garDefeated || f.garFriend)) {
       // the rescued fish are home
-      [['mossy', 640, 220], ['cap1', 380, 260], ['cap2', 700, 380], ['cap3', 300, 380]].forEach(([id, x, y]) =>
+      [['mossy', 640, 220], ['cap1', 420, 282], ['cap2', 760, 400], ['cap3', 300, 380]].forEach(([id, x, y]) =>
         w.extra.push({ id, sprite: id, x, y, face: -1, t: Math.random() * 6, talk: true, hat: !!f.garFriend }));
     }
   }

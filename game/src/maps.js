@@ -56,7 +56,7 @@ export const MAPS = {
     entries: {
       start: { x: 290, y: 214, face: -1 }, south: { x: 512, y: 580, face: -1 },
       east: { x: 975, y: 330, face: -1 }, inn: { x: 800, y: 240, face: -1 }, home: { x: 512, y: 340, face: 1 },
-      finnDoor: { x: 186, y: 192, face: 1 }, martDoor: { x: 505, y: 198, face: 1 }, innDoor: { x: 819, y: 204, face: -1 }, bubbleDoor: { x: 158, y: 538, face: 1 },
+      finnDoor: { x: 186, y: 192, face: 1 }, martDoor: { x: 505, y: 198, face: 1 }, innDoor: { x: 819, y: 204, face: -1 }, bubbleDoor: { x: 158, y: 538, face: -1 },
     },
     riceRows: [[90, 566, 410], [620, 566, 940]],
     spawns: [], bites: [],

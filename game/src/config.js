@@ -150,7 +150,7 @@ export const ROOMS = {
   hwHome3: { parent: 'highwater', name: "Minnow's Home" },
 };
 // The outdoor area a place belongs to (a room's parent, or the area itself).
-export const areaOf = (id) => ROOMS[id]?.parent || id;
+export const areaOf = (id) => (Object.hasOwn(ROOMS, id) ? ROOMS[id].parent : id);
 // Flags the story would have set on arriving in area n, and the expected level.
 // Below the level an area expects, fights there give x1.5 EXP ("Catch-up bonus!").
 export const CATCH_UP = { shallows: 3, reedwater: 5, highwater: 6, murk: 7, ditch: 8, mult: 1.5 };

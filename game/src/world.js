@@ -140,6 +140,7 @@ export class World {
       return { ...b, w, h, foot, base: b.y + h - 2, canvas: c, doors };
     });
     this.doors = this.buildings.flatMap((b) => b.doors);
+    this.doorCool = 0.6; // just out of a door: no straight back in
     this.looks = (def.looks || []).map((q) => ({ ...q }));
     // a room: Bubble comes in beside you, toward the middle of the room
     if (def.interior) { this.bubble.x = p.x + 22; this.bubble.y = p.y - 10; }
@@ -349,6 +350,7 @@ export class World {
   // ---------- update ----------
   update(dt, canMove) {
     this.t += dt;
+    this.doorCool = Math.max(0, (this.doorCool || 0) - dt);
     const p = this.player, s = this.s;
     const solids = this.solids();
     // swimming: 90 px/s, 0.15 s to top speed, 0.25 s to glide to a stop
@@ -575,7 +577,7 @@ export class World {
   lookShown(q) { return !q.if || this.s.flags[q.if]; }
   // Swimming up into a building's door (the head in its zone, pushing up): its room
   doorAhead(mv) {
-    if (mv.y > -0.4 || Math.abs(mv.y) < Math.abs(mv.x) * 0.5) return null;
+    if (this.doorCool > 0 || mv.y > -0.4 || Math.abs(mv.y) <= Math.abs(mv.x)) return null;
     const h = this.headOf(this.player);
     return this.doors.find((d) => { const [x, y, w, hh] = d.zone; return h.x >= x && h.x <= x + w && h.y >= y && h.y <= y + hh; }) || null;
   }
@@ -589,10 +591,10 @@ export class World {
     };
     for (const n of this.npcs) consider('npc', n, n.x, n.y, n.talkRange || WORLD.talkRange);
     for (const q of this.looks) if (this.lookShown(q)) consider('look', q, q.x, q.y, 30);
-    for (const d of this.doors) {
+    for (const d of this.doorCool > 0 ? [] : this.doors) {
       const h = this.headOf(p), [x, y, w, hh] = d.zone;
       const dist = Math.hypot(Math.max(x - h.x, 0, h.x - x - w), Math.max(y - h.y, 0, h.y - y - hh));
-      if (dist < 12 && dist < bd) { bd = dist; best = { kind: 'door', ref: d, x: d.x, y: d.y }; }
+      if (dist < 22 && dist < bd) { bd = dist; best = { kind: 'door', ref: d, x: d.x, y: d.y }; }
     }
     for (const n of this.extra) if (n.talk && !n.hidden) consider('extra', n, n.x, n.y, n.talkRange || WORLD.talkRange);
     for (const f of this.friends) consider('friend', f, f.x, f.y, 26);

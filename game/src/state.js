@@ -70,7 +70,7 @@ export function sanitize(raw) {
   if (s.rest === 'spring' && !s.flags.gateOpen) s.rest = 'village';
   if (s.rest === 'steps' && !s.flags.trailFound) s.rest = 'village';
   s.freeRest = bools(raw.freeRest);
-  s.area = AREA_IDS.includes(raw.area) || ROOMS[raw.area] ? raw.area : 'village';
+  s.area = AREA_IDS.includes(raw.area) || Object.hasOwn(ROOMS, raw.area) ? raw.area : 'village';
   const p = obj(raw.pos);
   s.pos = Number.isFinite(p.x) && Number.isFinite(p.y) ? { x: p.x, y: p.y } : null;
   s.met = bools(raw.met);
@@ -135,6 +135,7 @@ export function ngPlusFrom(src) {
   s.items = { ...src.items };
   s.endingsSeen = { ...src.endingsSeen };
   s.hints = { ...src.hints };
+  delete s.hints.firstOut; delete s.hints.doorUsed; // the new run's first swim out of Finn's house is shown again
   s.ngPlus = (src.ngPlus || 0) + 1;
   s.hp = maxHp(s); s.mp = maxMp(s);
   s.flags.tutorialDone = true;

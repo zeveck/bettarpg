@@ -165,11 +165,10 @@ G.transition = async (fn, dur = 0.32, sound = 'transition') => {
   G.wipe = null;
 };
 
-G.enterArea = async (id, entry, { wipe = true, quiet = false } = {}) => {
-  const from = G.world?.areaId;
-  // through a door: into a room, or out of one into its own area
-  const door = !!(ROOMS[id] || (from && ROOMS[from] && areaOf(from) === id)) && !!from && from !== id;
-  if (door) quiet = true;
+G.enterArea = async (id, entry, { wipe = true, quiet = false, door = false } = {}) => {
+  const from = G.world?.areaId, quietArg = quiet;
+  // a room is named by a small toast, never by the area banner
+  if (door || ROOMS[id]) quiet = true;
   const go = () => {
     if (!G.world) G.world = new World(G);
     terrainFor(id);
@@ -189,10 +188,10 @@ G.enterArea = async (id, entry, { wipe = true, quiet = false } = {}) => {
     banner(AREA_NAMES[id], id === 'village' ? img('bettahome') : null);
     G.hintOnce('swim');
   }
-  if (door && ROOMS[id]) {
+  if (ROOMS[id]) {
     // inside: the outdoor banner and toasts stay outside
     $('banner').hidden = true; $('toasts').replaceChildren();
-    if (wipe) G.toast(ROOMS[id].name, 1600);
+    if (door || !quietArg) G.toast(ROOMS[id].name, 1600);
   }
   if (door && ROOMS[from]) {
     G.s.hints.doorUsed = true;
@@ -204,7 +203,7 @@ G.enterArea = async (id, entry, { wipe = true, quiet = false } = {}) => {
     }
   }
 };
-G.enterRoom = (id) => G.enterArea(id, 'door');
+G.enterRoom = (id) => G.enterArea(id, 'door', { door: true });
 
 G.world = null;
 G.collect = (q) => {
@@ -1182,7 +1181,7 @@ function update(dt, now) {
         if (p.x >= x - 16 && p.x <= x + w + 16 && p.y >= y - 16 && p.y <= y + h + 16) {
           G.leaving = true;
           input.releaseAll();
-          G.enterArea(ex.to, ex.entry).finally(() => { G.leaving = false; });
+          G.enterArea(ex.to, ex.entry, { door: !!ROOMS[G.world.areaId] }).finally(() => { G.leaving = false; });
           break;
         }
       }

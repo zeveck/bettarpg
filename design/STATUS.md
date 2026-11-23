@@ -86,11 +86,13 @@ Original untouched; this is a new folder and repo with fresh history.
 ## Change 5 (2026-11-23): houses you can enter
 
 - Budget: $20 (this change)
-- [ ] Design + one review round
-- [ ] Assets: interior rooms, door/shop sounds, indoor music
-- [ ] Build: doors, interiors, villagers inside, new game starts in Finn's house, wake in the inn
-- [ ] Routes re-recorded where they visit villagers; targeted checks; full replays
-- [ ] README/screenshots, art sheet, publish
+- [x] Design + one review round (player, builder, art/sound; 5 must, 14 should, all dealt with: REVIEW_LOG.md)
+- [x] Assets: 7 rooms (nanogen), door sound and shop bell (audiogen): about $1.20 of $20; indoor music dropped
+- [x] Build: 9 rooms, doors (swim up or Talk), villagers inside, 3 townsfish in the village street, looks and hidden bites, Bubble's sign, new game in Finn's house, wake in the inn, room saves, touch layout, debug enter()/rooms()
+- [x] Checks: check-reach (all reachable), check-routes, test-saves; 13/13 routes pass (full game from New Game included; snarl-friend reordered to rest after a side-pool fight); hands-on at 1280x720 and phone 844x390; screen tour text-scanned at both sizes
+- [x] Fresh bug hunt: no crashes or soft-locks; 7 small findings fixed (room toast on Continue, rescued fish spacing, NG+ gate toast, diagonal door entry, no straight-back-in after leaving, parade at Bubble's door, prototype names in saves); 13/13 routes pass again
+- [x] README and screenshots, art sheet (Rooms section) ready
+- [ ] Publish (game, then art sheet)
 
 ## Phases
 

@@ -159,3 +159,20 @@ Starting total (mockups): $7.70. This agent's cap: $10.
 
 **This agent's total: $6.02**; game art total $7.70 + $6.02 = **$13.72**.
 Note: game/assets/original/ is gone (the builder moved the full-size kept art to source-art/); refs were taken from there.
+
+## Change 5: rooms (2026-11-23, budget $20)
+
+| ID | File | Tool | Settings | What | Takes | Cost | Running | Status |
+|---|---|---|---|---|---|---|---|---|
+| R1 | .gamegen/candidates/rooms/finn-take1.jpg | nanogen | pro 2K 3:2, refs elder_dwelling x6, betta x8, village screenshot | Elder Finn's study (style anchor for the rooms) | 1 | $0.134 | $0.13 | **accepted** -> interiors/finn.png 384x256 (box 6.58 px, greys excluded) |
+| R2 | .gamegen/candidates/rooms/mart-take1.jpg | nanogen | pro 2K 3:2, refs R1 + fish_mart x6 | The Fish Mart | 1 | $0.134 | $0.27 | **accepted** -> interiors/mart.png |
+| R3 | .gamegen/candidates/rooms/inn-take1.jpg | nanogen | pro 2K 3:2, refs R1 + swishy_solace_inn x6 | The Swishy Solace Inn | 1 | $0.134 | $0.40 | **accepted** -> interiors/inn.png |
+| R4 | .gamegen/candidates/rooms/bubble-take1.jpg | nanogen | pro 2K 3:2, refs R1 + bubble_home x6 | Bubble's Home | 1 | $0.134 | $0.54 | **accepted** -> interiors/bubble.png |
+| R5 | .gamegen/candidates/rooms/hwinn-take1.jpg | nanogen | pro 2K 3:2, refs R1 + highwater_inn x6 | Kelpie's Inn | 1 | $0.134 | $0.67 | **accepted** -> interiors/hwinn.png |
+| R6 | .gamegen/candidates/rooms/lock-take1.jpg | nanogen | pro 2K 3:2, refs R1 + lock_house x6 | The Lock House | 1 | $0.134 | $0.80 | **accepted** -> interiors/lock.png |
+| R7 | .gamegen/candidates/rooms/home-take1.jpg | nanogen | pro 2K 3:2, edit of R4 | A Highwater family home (three homes use it; Minnow's uses R1) | 1 | $0.134 | $0.94 | **accepted** -> interiors/home.png (kept the fish drawings on the wall) |
+| S1 | sfx/door.mp3 | audiogen | sfx 1.0 s, influence 0.5 | Door: soft wooden door, bubbly whoosh | 1 | ~$0.12 (credits) | $1.06 | **accepted**; peak -6.9 dB, rms -25.9 dB; played at full volume in place of the area swoosh |
+| S2 | sfx/shop_bell.mp3 | audiogen | sfx 1.2 s, influence 0.5 | Shop bell: shell wind-chime (Fish Mart) | 1 | ~$0.12 (credits) | $1.18 | **accepted**; peak -10.0 dB, rms -24.3 dB |
+
+Code-drawn: doormats outside every door, the exit chevron, Bubble's room sign, shadows under fish indoors.
+Dropped after review: M1 (indoor music): rooms keep the area's music playing, so nothing restarts at a door.

@@ -28,21 +28,27 @@ async (page) => {
   await press('ArrowUp'); await press('ArrowUp'); await press('Enter');
   await shot('create');
   await press('Escape');
-  // the village: Finn's opening
+  // Elder Finn's house: the opening
   await page.evaluate(() => window.__game.goToLevel(0));
   await sleep(500);
-  await page.evaluate(() => window.__game.set({ pos: { x: 270, y: 212 } }));
+  await page.evaluate(() => window.__game.enter('finnHouse', 'start'));
+  await page.evaluate(() => window.__game.set({ pos: { x: 190, y: 132 } }));
   await press('Space'); await sleep(900); await shot('village-dialog');
   for (let i = 0; i < 12; i++) { const s = await st(); if (!s.dialog) break; await press('Space'); }
+  await shot('finn-house');
+  await page.evaluate(() => window.__game.enter('village', 'finnDoor')); await sleep(600);
   await shot('village');
-  // shop
-  await page.evaluate(() => window.__game.set({ pos: { x: 552, y: 202 }, bb: 120, flags: { highwater: true } }));
+  // shop: inside the Fish Mart
+  await page.evaluate(() => window.__game.enter('fishMart'));
+  await page.evaluate(() => window.__game.set({ pos: { x: 192, y: 158 }, bb: 120, flags: { highwater: true } }));
+  await sleep(400); await shot('fish-mart');
   await press('Space');
   for (let i = 0; i < 12; i++) { const s = await st(); if (s.menus.includes('shop')) break; await press('Space'); }
   await shot('shop');
   await press('Escape');
-  // inn
-  await page.evaluate(() => window.__game.set({ pos: { x: 770, y: 214 } }));
+  // inn: inside the Swishy Solace Inn
+  await page.evaluate(() => window.__game.enter('villageInn'));
+  await page.evaluate(() => window.__game.set({ pos: { x: 192, y: 150 } }));
   await press('Space');
   for (let i = 0; i < 12; i++) { const b = await page.evaluate(() => window.__game.buttons().filter((x) => /Rest/.test(x.label))); if (b.length) break; await press('Space'); }
   await shot('inn');

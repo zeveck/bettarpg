@@ -18,7 +18,9 @@ install, works on desktop and on phones, with keyboard, mouse, touch or a contro
 | | |
 |---|---|
 | ![Paddy Village](media/screenshots/village.png) | ![The Shallows](media/screenshots/shallows.png) |
-| **Paddy Village.** Elder Finn, Shopkeeper Coral, Guard Captain Reef, Bubble the Brave and the Swishy Solace Inn. | **The Shallows.** Your first fights, your first friend, and the Old Stump, where Bubble finally comes along. |
+| **Paddy Village.** Every house and shop has a door: swim in to find Elder Finn, Shopkeeper Coral, Bubble the Brave and the Swishy Solace Inn at home. | **The Shallows.** Your first fights, your first friend, and the Old Stump, where Bubble finally comes along. |
+| ![Elder Finn's House](media/screenshots/finn-house.png) | ![The Fish Mart](media/screenshots/fish-mart.png) |
+| **Indoors.** Your adventure starts in Elder Finn's study. Nine rooms in the two towns, each with something to look at (and a few Betta Bites tucked away). | **The Fish Mart**, Coral behind the counter. Shops and inns are inside now, the way an RPG should be. |
 | ![A battle](media/screenshots/battle.png) | ![Highwater](media/screenshots/highwater.png) |
 | **Battles.** Attack, Bubble Blast, Gravel Grenade, or **Party!**: Happy Balloon Time makes a friend instead of a fight. | **Highwater**, the city on the next terrace, where the Lock-Keeper knows what happened to the drain gate. |
 | ![The Murk](media/screenshots/murk.png) | ![The Gargantuan Gar](media/screenshots/gar.png) |
@@ -33,7 +35,9 @@ install, works on desktop and on phones, with keyboard, mouse, touch or a contro
 - **Swim:** arrow keys or WASD. On a phone, drag on the left side of the screen. On a
   controller, the left stick or d-pad.
 - **Talk, pick up, confirm:** Space, E or Enter (✕ / A on a controller, the Talk button on a
-  phone).
+  phone). The same button looks at things indoors.
+- **Go inside:** swim up into a door (look for the doormat), or press Talk at it. Swim down
+  through the doormat to go back out.
 - **Battle:** Attack, Spells, **Party!**, Items or Swim Away (keys 1 to 5). Party! works
   best once a fish is worn down, and a new friend gives the same rewards as a win. Against
   a fish well below your level, Swim Away becomes **Flare**: spread your fins and scare it off.
@@ -46,8 +50,8 @@ install, works on desktop and on phones, with keyboard, mouse, touch or a contro
 - Found a bug? Pause and pick "Report a bug", or press Ctrl+Shift+F (you'll need a GitHub
   account).
 
-Losing a battle is never the end: you wake at your last rest point with a few Betta Bites
-fewer. Progress saves by itself into one of three save slots; Continue picks up the latest,
+Losing a battle is never the end: you wake at your last rest point (the inn you last slept
+at, or a spring) with a few Betta Bites fewer. Progress saves by itself into one of three save slots; Continue picks up the latest,
 and Load shows them all. There are two endings, a reward for making friends with every kind
 of fish in the paddies, and New Game+ once you've seen an ending. In the village and
 Highwater your friends swim along behind you in a parade (Settings → Parade turns it off).
@@ -80,7 +84,7 @@ whole game from New Game to the credits):
 - [imagegen2](https://github.com/zeveck/imagegen2): the villagers, Highwater's folk, the
   village and Highwater buildings, the Dragonfly Nymph and Snapping Crayfish, the Gargantuan
   Gar, props, rice and item icons, all drawn to match the original sprites' pixel grid.
-- [nanogen](https://github.com/zeveck/nanogen): the title, battle and ending backdrops.
+- [nanogen](https://github.com/zeveck/nanogen): the title, battle and ending backdrops, and the rooms.
 - [anim8gen](https://github.com/zeveck/anim8gen): the betta's swim and the Gar's lunge.
 - [audiogen](https://github.com/zeveck/audiogen): eight songs and thirty sound effects (the Snarl's net throw and net rip came later).
 
@@ -99,7 +103,26 @@ each reviewed, built and play-tested as a change, and
 
 > Does the game have save slotS? There should be more than just one global save
 
-added three save slots, moving any save from the first published version into slot 1.
+added three save slots, moving any save from the first published version into slot 1. Two
+issues filed on the repo ("Swim Away can become Flare once you're strong enough…") added
+Flare and fights that open cleanly. Then a few small changes:
+
+> The rice paddies include lily pads as one of the graphic elements. Let's remove those.
+
+> For some reason when I approach the a cavern in the lower left of the paddie that says "Too dark to swim in there." I see a black rectangle instead of a proper graphic. We need to fix that and publish.
+
+> The pause popup is oddly lower than I'd expect? It seems it should be vertically centered, but it's not, and on my laptop screen it got a scrollbar despite there being plenty of vertical space it could have sized into to avoid. Consider this and how best to fix.
+
+> For the initial shallows I sometimes see a fish snack off in the dirt where it's unreachable. Unless there's some clever puzzle, we shouldn't place unreachable powerups like that.
+
+and then the houses:
+
+> `/gamegen --change Everybetta in the villages looks awesome, and they have cool little houses, but, in a typical RPG they would each be situated in their houses and there'd be entry/exit and interiors. We'd want to keep the pixel style and these are betta fish versions of the same old shops, homes, whatever. We want to evoke familiar interiors while feeling fun and fishy. --budget 20 --publish --no-confirm`
+
+gamegen had the plan reviewed by a player, a builder and an art-and-sound director, made
+seven rooms with nanogen (each from its building's outside and the first room, Elder Finn's
+study, so they match) and a door sound and shop bell with audiogen, then built the doors and
+rooms and re-recorded the routes to swim through them.
 
 The original game's pixel art (the betta in four armor stages, the five enemies, the party
 hats, the submarine, Paddy Village and the rice tuft) is used as it was, shrunk to its
@@ -115,7 +138,9 @@ hook only exists then) in a `playwright-cli` session, then replay routes with re
     tools/run-routes.sh <session> design/solutions/area-1-shallows.json
     tools/run-routes.sh <session> design/solutions/*.json
 
-`tools/check-routes.mjs` checks every route's waypoints are in open water.
+`tools/check-routes.mjs` checks every route's waypoints are in open water, and
+`node tools/check-reach.mjs` checks every pickup, villager, door, room exit and thing to look
+at can be reached.
 `node tools/sim-battles.mjs` plays every tuning fight 4,000 times and checks the balance
 targets (both paths, fins and friendship), against the design's own
 `tools/sim_design.py`.

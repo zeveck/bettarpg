@@ -157,7 +157,7 @@ G.transition = async (fn, dur = 0.32, sound = 'transition') => {
   if (G.wipe) { await fn(); return; }
   G.wipe = { p: 0, t: 0, dur };
   if (sound === 'transition') audio.play('transition', { vol: 0.5 });
-  else if (sound) audio.play(sound, { vol: 0.8 });
+  else if (sound) audio.play(sound, { vol: 1 });
   await new Promise((r) => { G.wipe.onCovered = r; });
   await fn();
   G.wipe.phase = 2;
@@ -189,7 +189,11 @@ G.enterArea = async (id, entry, { wipe = true, quiet = false } = {}) => {
     banner(AREA_NAMES[id], id === 'village' ? img('bettahome') : null);
     G.hintOnce('swim');
   }
-  if (door && wipe && ROOMS[id]) G.toast(ROOMS[id].name, 1600);
+  if (door && ROOMS[id]) {
+    // inside: the outdoor banner and toasts stay outside
+    $('banner').hidden = true; $('toasts').replaceChildren();
+    if (wipe) G.toast(ROOMS[id].name, 1600);
+  }
   if (door && ROOMS[from]) {
     G.s.hints.doorUsed = true;
     // the first swim out of Finn's house: the village, and the gate he just opened

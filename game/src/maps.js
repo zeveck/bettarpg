@@ -27,19 +27,19 @@ export const MAPS = {
       [[96, 296], [96, 534], [150, 534]],
     ],
     buildings: [
-      { sprite: 'b_elder', x: 117, y: 50 },
-      { sprite: 'b_mart', x: 438, y: 31 },
-      { sprite: 'b_inn', x: 756, y: 35 },
-      { sprite: 'b_bubble', x: 110, y: 420 },
+      { sprite: 'b_elder', x: 117, y: 50, doors: [69], to: 'finnHouse' },
+      { sprite: 'b_mart', x: 438, y: 31, doors: [67], to: 'fishMart' },
+      { sprite: 'b_inn', x: 756, y: 35, doors: [33, 93], to: 'villageInn' },
+      { sprite: 'b_bubble', x: 110, y: 420, doors: [48], to: 'bubbleHome' },
       { sprite: 'b_guard', x: 908, y: 62, foot: 0.3 },
       { sprite: 'b_southgate', x: 453, y: 518, arch: true },
     ],
     npcs: [
-      { id: 'finn', sprite: 'finn', x: 236, y: 206, face: 1 },
-      { id: 'coral', sprite: 'coral', x: 578, y: 200, face: -1 },
-      { id: 'seaweed', sprite: 'seaweed', x: 745, y: 212, face: 1 },
-      { id: 'bubbleHome', sprite: 'bubble', x: 250, y: 478, face: -1, until: 'bubbleJoined' },
       { id: 'reef', sprite: 'reef', x: 960, y: 270, face: -1 },
+      // townsfish out in the street (the shopkeepers are indoors)
+      { id: 'vfolk1', sprite: 'folk2', x: 352, y: 254, face: 1 },
+      { id: 'vfolk2', sprite: 'folk1', x: 690, y: 372, face: -1 },
+      { id: 'vfolk3', sprite: 'folk3', x: 236, y: 480, face: -1 },
     ],
     props: [
       { sprite: 'p_stones', x: 330, y: 160 },
@@ -56,6 +56,7 @@ export const MAPS = {
     entries: {
       start: { x: 290, y: 214, face: -1 }, south: { x: 512, y: 580, face: -1 },
       east: { x: 975, y: 330, face: -1 }, inn: { x: 800, y: 240, face: -1 }, home: { x: 512, y: 340, face: 1 },
+      finnDoor: { x: 186, y: 192, face: 1 }, martDoor: { x: 505, y: 198, face: 1 }, innDoor: { x: 819, y: 204, face: -1 }, bubbleDoor: { x: 158, y: 538, face: 1 },
     },
     riceRows: [[90, 566, 410], [620, 566, 940]],
     spawns: [], bites: [],
@@ -164,26 +165,21 @@ export const MAPS = {
     ],
     pathColor: 'stone',
     buildings: [
-      { sprite: 'b_hwinn', x: 140, y: 62 },
-      { sprite: 'b_bubble', x: 380, y: 140, hue: -22 },
+      { sprite: 'b_hwinn', x: 140, y: 62, doors: [89], to: 'hwInn' },
+      { sprite: 'b_bubble', x: 380, y: 140, hue: -22, doors: [48], to: 'hwHome1' },
       { sprite: 'b_pip', x: 640, y: 112 },
       { sprite: 'b_pip', x: 880, y: 112, hue: 160, sat: 0.55 },
-      { sprite: 'b_lock', x: 1150, y: 92 },
-      { sprite: 'b_elder', x: 1300, y: 110, hue: -18 },
-      { sprite: 'b_bubble', x: 520, y: 128, hue: 12 },
+      { sprite: 'b_lock', x: 1150, y: 92, doors: [47], to: 'lockHouse' },
+      { sprite: 'b_elder', x: 1300, y: 110, hue: -18, doors: [69], to: 'hwHome3' },
+      { sprite: 'b_bubble', x: 520, y: 128, hue: 12, doors: [48], to: 'hwHome2' },
     ],
     lanterns: [[130, 360], [330, 360], [560, 360], [820, 360], [1050, 360], [1300, 360], [700, 440], [836, 440]],
     bunting: [[300, 250, 640, 230], [744, 230, 880, 232], [984, 232, 1150, 236]],
     npcs: [
-      { id: 'kelpie', sprite: 'kelpie', x: 360, y: 280, face: -1 },
       { id: 'pip', sprite: 'pip', x: 770, y: 262, face: -1 },
-      { id: 'whorl', sprite: 'whorl', x: 1110, y: 262, face: 1 },
-      { id: 'folk1', sprite: 'folk1', x: 500, y: 380, face: 1 },
       { id: 'folk2', sprite: 'folk2', x: 960, y: 390, face: -1 },
-      { id: 'folk3', sprite: 'folk3', x: 1340, y: 380, face: -1 },
       { id: 'folk4', sprite: 'folk2', x: 620, y: 300, face: 1 },
       { id: 'folk5', sprite: 'folk1', x: 1000, y: 290, face: -1 },
-      { id: 'folk6', sprite: 'folk3', x: 240, y: 400, face: 1 },
       { id: 'folk7', sprite: 'pip', x: 940, y: 262, face: -1 },
     ],
     props: [
@@ -195,7 +191,8 @@ export const MAPS = {
     // the Snarl holds the top of the Spillway steps: the rect spans the whole join (x 640-896)
     gates: [{ id: 'snarl', rect: [640, 440, 256, 44], openIf: 'snarlDone', look: 'none', talk: 'snarl' }],
     exits: [{ rect: [640, 890, 256, 30], to: 'reedwater', entry: 'north' }],
-    entries: { south: { x: 768, y: 860, face: 1 }, inn: { x: 300, y: 300, face: 1 }, steps: { x: 740, y: 830, face: 1 } },
+    entries: { south: { x: 768, y: 860, face: 1 }, inn: { x: 300, y: 300, face: 1 }, steps: { x: 740, y: 830, face: 1 },
+      innDoor: { x: 229, y: 280, face: 1 }, lockDoor: { x: 1197, y: 256, face: -1 }, home1Door: { x: 428, y: 258, face: 1 }, home2Door: { x: 568, y: 246, face: 1 }, home3Door: { x: 1369, y: 252, face: -1 } },
     spawns: [
       { kind: 'cich', lv: [5, 5], x: 400, y: 690 }, { kind: 'cich', lv: [5, 5], x: 1140, y: 640 },
       { kind: 'cich', lv: [5, 5], x: 480, y: 720 },
@@ -273,3 +270,82 @@ export const MAPS = {
     spawns: [], bites: [],
   },
 };
+
+// ---------- rooms: the insides of the village and Highwater buildings ----------
+// Every room is one 384x256 picture (native pixels) with the same dome floor and the
+// doorway at the bottom centre. Floor = water (collision only; the picture is drawn
+// instead of the terrain); `solid` = furniture and walls the fish can't swim through;
+// `fg` = strips of the picture drawn again in front of whoever stands behind them;
+// `looks` = things you can examine with Talk (LOOKS in strings.js).
+const FLOOR = [['e', 193, 158, 168, 70, 1], ['r', 168, 196, 48, 60, 1, 2]];
+const EXIT = [176, 246, 32, 10];
+const room = (o) => ({
+  interior: true, w: 384, h: 256, safe: true, seed: 3, ambience: null, battleBg: 'shallows',
+  shapes: FLOOR, paths: [], buildings: [], props: [], gates: [], spawns: [], bites: [],
+  npcs: [], looks: [], solid: [], fg: [],
+  ...o,
+  exits: [{ rect: EXIT, to: o.parent, entry: o.outside }],
+  entries: { door: { x: 192, y: 206, face: 1 }, ...(o.entries || {}) },
+});
+
+Object.assign(MAPS, {
+  finnHouse: room({
+    parent: 'village', outside: 'finnDoor', backdrop: 'rm_finn', music: 'village',
+    solid: [[44, 96, 86, 62], [94, 136, 36, 28], [282, 96, 38, 46], [326, 110, 36, 50], [272, 150, 94, 58]],
+    npcs: [{ id: 'finn', sprite: 'finn', x: 158, y: 124, face: 1 }],
+    looks: [{ id: 'finnMap', x: 140, y: 92 }, { id: 'finnLamp', x: 286, y: 146 }, { id: 'finnBed', x: 262, y: 186 }],
+    entries: { start: { x: 214, y: 134, face: -1 } },
+  }),
+  fishMart: room({
+    parent: 'village', outside: 'martDoor', backdrop: 'rm_mart', music: 'village', bell: true,
+    solid: [[118, 102, 152, 46], [70, 58, 82, 60], [232, 58, 72, 60], [292, 96, 60, 54], [312, 150, 46, 56], [22, 96, 42, 96], [44, 172, 60, 52]],
+    fg: [[116, 112, 156, 38]],
+    npcs: [{ id: 'coral', sprite: 'coral', x: 192, y: 104, face: 1, talkRange: 70 }],
+    looks: [{ id: 'martScale', x: 142, y: 152 }, { id: 'martJars', x: 92, y: 124 }, { id: 'martCrate', x: 304, y: 182, bite: 'martCrate' }],
+  }),
+  villageInn: room({
+    parent: 'village', outside: 'innDoor', backdrop: 'rm_inn', music: 'village',
+    solid: [[28, 76, 136, 96], [212, 70, 152, 62], [272, 148, 94, 60]],
+    npcs: [{ id: 'seaweed', sprite: 'seaweed', x: 186, y: 112, face: -1 }],
+    looks: [{ id: 'innBell', x: 150, y: 176 }, { id: 'innPods', x: 258, y: 178 }, { id: 'innSign', x: 192, y: 92 }],
+    entries: { bed: { x: 236, y: 168, face: -1 } },
+  }),
+  bubbleHome: room({
+    parent: 'village', outside: 'bubbleDoor', backdrop: 'rm_bubble', music: 'village',
+    solid: [[44, 94, 90, 62], [140, 70, 100, 40], [252, 56, 24, 52], [266, 96, 66, 54], [114, 154, 32, 32]],
+    npcs: [{ id: 'bubbleHome', sprite: 'bubble', x: 206, y: 128, face: -1, until: 'bubbleJoined' }],
+    looks: [{ id: 'bubbleDrawings', x: 142, y: 116 }, { id: 'bubbleMarbles', x: 190, y: 112 }, { id: 'bubbleChest', x: 298, y: 156, bite: 'bubbleChest' },
+      { id: 'bubbleSign', x: 236, y: 112, sign: true, if: 'bubbleJoined' }],
+  }),
+  hwInn: room({
+    parent: 'highwater', outside: 'innDoor', backdrop: 'rm_hwinn', music: 'highwater',
+    solid: [[28, 76, 136, 96], [222, 82, 36, 38], [250, 88, 116, 120]],
+    npcs: [{ id: 'kelpie', sprite: 'kelpie', x: 186, y: 112, face: -1 }],
+    looks: [{ id: 'hwLanterns', x: 192, y: 92 }, { id: 'hwPods', x: 240, y: 178 }, { id: 'hwBell', x: 150, y: 176 }],
+    entries: { bed: { x: 226, y: 160, face: 1 } },
+  }),
+  lockHouse: room({
+    parent: 'highwater', outside: 'lockDoor', backdrop: 'rm_lock', music: 'highwater',
+    solid: [[62, 48, 88, 104], [40, 116, 28, 30], [146, 82, 32, 28], [282, 84, 48, 52], [304, 124, 40, 42], [42, 160, 110, 62], [252, 180, 60, 44], [322, 158, 40, 42]],
+    npcs: [{ id: 'whorl', sprite: 'whorl', x: 250, y: 124, face: -1 }],
+    looks: [{ id: 'lockGauge', x: 270, y: 100 }, { id: 'lockLevers', x: 282, y: 174 }, { id: 'lockBench', x: 160, y: 182 }],
+  }),
+  hwHome1: room({
+    parent: 'highwater', outside: 'home1Door', backdrop: 'rm_home', music: 'highwater',
+    solid: [[60, 104, 62, 44], [40, 140, 32, 22], [118, 104, 30, 20], [144, 66, 100, 42], [246, 84, 106, 78], [328, 136, 28, 32]],
+    npcs: [{ id: 'folk1', sprite: 'folk1', x: 200, y: 136, face: -1 }],
+    looks: [{ id: 'homeTea', x: 190, y: 112 }, { id: 'homeBed', x: 270, y: 172 }],
+  }),
+  hwHome2: room({
+    parent: 'highwater', outside: 'home2Door', backdrop: 'rm_home', music: 'highwater',
+    solid: [[60, 104, 62, 44], [40, 140, 32, 22], [118, 104, 30, 20], [144, 66, 100, 42], [246, 84, 106, 78], [328, 136, 28, 32]],
+    npcs: [{ id: 'folk6', sprite: 'folk3', x: 200, y: 136, face: 1 }],
+    looks: [{ id: 'homeDrawing', x: 152, y: 114 }, { id: 'homeTea', x: 190, y: 112, bite: 'home2Tea' }],
+  }),
+  hwHome3: room({
+    parent: 'highwater', outside: 'home3Door', backdrop: 'rm_finn', music: 'highwater',
+    solid: [[44, 96, 86, 62], [94, 136, 36, 28], [282, 96, 38, 46], [326, 110, 36, 50], [272, 150, 94, 58]],
+    npcs: [{ id: 'folk3', sprite: 'folk3', x: 200, y: 130, face: -1 }],
+    looks: [{ id: 'home3Map', x: 140, y: 92 }, { id: 'homeBed', x: 262, y: 186 }],
+  }),
+});

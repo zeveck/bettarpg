@@ -8,7 +8,7 @@ const MUSIC_DIR = 'assets/audio/';
 export const SFX_NAMES = ['bite', 'hit', 'miss', 'bubble_blast', 'gravel_grenade', 'party', 'befriend',
   'befriend_fail', 'enemy_defeated', 'hurt', 'item', 'level_up', 'armor', 'buy', 'inn', 'swim_away',
   'gar_roar', 'gar_charge', 'net_throw', 'net_rip', 'sub_dive', 'notice', 'bubble_chirp', 'bubble_dizzy', 'shell_crack',
-  'transition', 'fanfare', 'swish'];
+  'transition', 'fanfare', 'swish', 'door', 'shop_bell'];
 const AMBIENCE = ['ambience_murk', 'ambience_paddy'];
 
 let ctx = null, master, musicBus, sfxBus, ambBus;

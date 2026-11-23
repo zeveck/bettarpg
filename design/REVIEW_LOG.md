@@ -85,3 +85,34 @@ Reviewers: Player (6 findings, 2 must), Builder incl. art and sound (8 findings,
 | Art/sound and asset rows | should | Fixed: ×3 in battle, net drawn in code, rows E4/T4/S27/S28 |
 | NG+ Gar numbers, parade order/areas/trail | should | Fixed: exact per-step numbers; kind rotation; village and Highwater city only; 80-point trail |
 | Nice: Peace party doubling; Swim Away in NG+ | nice | Fixed |
+
+## Change 5 (houses you can enter), review round 1 (2026-11-23)
+
+Player, Builder and Art-and-sound reviewers, independently. All findings checked against the code (file:line
+given by the reviewers, spot-checked) and the generated rooms.
+
+| Finding | Severity | Outcome |
+|---|---|---|
+| Room saves reset to the village at room coordinates; migrations misfire; Load says undefined (Builder) | must-fix | Fixed: ROOMS table, sanitize, parent-based migrations, free() check with door fallback, test-saves case |
+| Interiors need shapes for collision; `solid` never read; decorations around the rim (Builder) | must-fix | Fixed: all-water shapes, `solid` in solids(), decorations skipped |
+| Door rect inside the solid footprint; exit bounce-back; "upward" undefined (Builder, Player) | must-fix | Fixed: head-tested zone below the foot, push up or Talk, landing distances, check-reach asserts |
+| Keepers can't be behind counters on a flat backdrop; Pip hidden by the stall (Builder, Art, Player) | must-fix | Fixed: foreground strips cut from the room; stall keepers stay beside stalls |
+| Tools/routes/tests assume the old village (Builder) | must-fix | Fixed: check-reach.mjs, check-routes taught rooms, routes and tests updated |
+| Paddy Village street empty (Player) | should-fix | Fixed: three townsfish outside |
+| Fish Mart has no door, Inn has two (Player, Art) | should-fix | Fixed: shopfront door with doormat; two zones for the Inn |
+| Nothing to do in rooms (Player) | should-fix | Fixed: examine spots, a few hidden Betta Bites |
+| No outside cue for doors (Player, Art) | should-fix | Fixed: code-drawn doormats, "Enter <room>" prompt |
+| Phone stick covers the room (Player) | should-fix | Fixed: room sits right of the stick on touch |
+| Music restarts at doors; door sound stacks on the swoosh (Player, Art, Builder) | should-fix | Fixed: area music continues; door sound replaces the swoosh; M1 dropped |
+| Room style line/scale (Art) | should-fix | Not changed: rooms made with nanogen as smooth pixel illustration, box-reduced 6.58 px to 384x256 like the backdrops; checked at x1 with the cast |
+| Door/doormat left to the generator (Art) | should-fix | Not needed: all six rooms put the doorway and mat at the same bottom-centre spot; exit uses it |
+| Floor contrast for yellow fish (Art) | should-fix | Fixed: soft shadow under fish indoors (contact sheet: readable, outlines hold) |
+| Rooms must match their building (Art) | should-fix | Done in the prompts (refs + named features); checked by eye |
+| Bubble's sign must be code-drawn (Art, Builder) | should-fix | Fixed |
+| Highwater homes reuse Bubble's room (Player, Art, Builder) | should-fix | Fixed: R7 family home |
+| Banner on every exit (Builder) | should-fix | Fixed: quiet room transitions, room-name toast |
+| Bubble passes through furniture (Builder) | should-fix | Fixed |
+| Debug hook can't reach rooms (Builder) | should-fix | Fixed |
+| Opening toast inside the room (Player) | nice | Fixed |
+| Budget estimate (Art) | nice | Restated |
+| Dark surround, Swim home in rooms, waking at the inn by default (Builder) | nice | Fixed / accepted (waking in the inn is the RPG norm) |

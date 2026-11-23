@@ -22,6 +22,7 @@ Modes (see design/GAME_DESIGN.md, "The native-pixel rule"):
   --backdrop <png> --out <png>
       Opaque scene: detect grid, sample; if ~432 wide use it, if ~216 keep half resolution,
       else majority-box reduce to 432 wide; centre-crop 432x200 (216x100); snap to palette.
+      --size WxH changes the native size (interior rooms are 384x256).
 """
 import argparse, json, os, sys
 from collections import Counter
@@ -589,7 +590,8 @@ def mode_sheet(sheet, targets_path, only=None, force_box=False):
     return report
 
 
-def mode_backdrop(src, out_path):
+def mode_backdrop(src, out_path, size=(432, 200)):
+    TW, TH = size
     img = Image.open(src).convert('RGBA')
     w, h = img.size
     # grid detect on a central band (fast enough, representative)
@@ -597,20 +599,20 @@ def mode_backdrop(src, out_path):
     col, rowp = edge_profiles(img, band)
     period, score, ox, oy = detect_period(col, rowp, 2.5, 16)
     gw = w / period
-    if score > 1.6 and abs(gw - 432) <= 0.05 * 432:
+    if score > 1.6 and abs(gw - TW) <= 0.05 * TW:
         col, rowp = edge_profiles(img, (0, 0, w, h))
         s = sample_grid(img, (0, 0, w, h), period, ox, oy, col, rowp)
-        tw, th = 432, 200
+        tw, th = TW, TH
         how = f'grid {period:.2f}'
-    elif score > 1.6 and abs(gw - 216) <= 0.05 * 216:
+    elif score > 1.6 and abs(gw - TW / 2) <= 0.05 * TW / 2:
         col, rowp = edge_profiles(img, (0, 0, w, h))
         s = sample_grid(img, (0, 0, w, h), period, ox, oy, col, rowp)
-        tw, th = 216, 100
+        tw, th = TW // 2, TH // 2
         how = f'grid {period:.2f} (half res)'
     else:
-        cell = w / 432
+        cell = w / TW
         s = box_reduce(img, (0, 0, w, h), cell)
-        tw, th = 432, 200
+        tw, th = TW, TH
         how = f'grid {period:.2f}px -> {gw:.0f} wide (score {score:.2f}) rejected; box {cell:.2f}px'
     sw, sh = s.size
     l, t = (sw - tw) // 2, (sh - th) // 2
@@ -637,6 +639,7 @@ def main():
     ap.add_argument('--force-box', action='store_true')
     ap.add_argument('--backdrop')
     ap.add_argument('--out')
+    ap.add_argument('--size', default='432x200', help='backdrops: native WxH (interior rooms: 384x256)')
     ap.add_argument('--exclude', nargs='*', default=[],
                     help='palette hex colours not to snap to (backdrops: the neutral greys A19D9D C8C8C8 565C56 2A2A2C)')
     a = ap.parse_args()
@@ -648,7 +651,7 @@ def main():
     elif a.sheet:
         mode_sheet(a.sheet, a.targets, a.only, a.force_box)
     elif a.backdrop:
-        mode_backdrop(a.backdrop, a.out)
+        mode_backdrop(a.backdrop, a.out, tuple(int(v) for v in a.size.split('x')))
     else:
         ap.print_help()
 

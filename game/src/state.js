@@ -2,7 +2,7 @@
 // change it outside battle: levels, items, flags, friends. Saved to
 // localStorage as versioned JSON in three slots ('bettarpg-save-1'..'-3'); the
 // published game's single 'bettarpg-save' migrates into slot 1.
-import { PLAYER, ITEMS, ITEM_MAX, REGULAR_KINDS, PEACE_PER_KIND, DEFEAT_LOSS, maxLevel } from './config.js';
+import { PLAYER, ITEMS, ITEM_MAX, REGULAR_KINDS, PEACE_PER_KIND, DEFEAT_LOSS, maxLevel, ROOMS, areaOf } from './config.js';
 
 export const SAVE_KEY = 'bettarpg-save';            // the published game's single save
 export const MIGRATED_KEY = 'bettarpg-save-migrated';
@@ -61,7 +61,7 @@ export function sanitize(raw) {
   s.subOwned = raw.subOwned === true;
   s.flags = bools(raw.flags);
   // saves from before Reef's errand: past the gate means it was open
-  if (s.flags.stumpDone && !s.flags.eastOpen && ((Array.isArray(raw.scales) && raw.scales.length) || s.flags.trailFound || !['village', 'shallows'].includes(raw.area))) s.flags.eastOpen = true;
+  if (s.flags.stumpDone && !s.flags.eastOpen && ((Array.isArray(raw.scales) && raw.scales.length) || s.flags.trailFound || !['village', 'shallows'].includes(areaOf(raw.area)))) s.flags.eastOpen = true;
   for (const k of KINDS) { const n = int(obj(raw.friends)[k], 0, k === 'snarl' ? 1 : 999, 0); if (n) s.friends[k] = n; }
   s.firstFriendKinds = bools(raw.firstFriendKinds);
   s.scales = Array.isArray(raw.scales) ? [...new Set(raw.scales.filter((x) => SCALE_IDS.includes(x)))] : [];
@@ -70,7 +70,7 @@ export function sanitize(raw) {
   if (s.rest === 'spring' && !s.flags.gateOpen) s.rest = 'village';
   if (s.rest === 'steps' && !s.flags.trailFound) s.rest = 'village';
   s.freeRest = bools(raw.freeRest);
-  s.area = AREA_IDS.includes(raw.area) ? raw.area : 'village';
+  s.area = AREA_IDS.includes(raw.area) || ROOMS[raw.area] ? raw.area : 'village';
   const p = obj(raw.pos);
   s.pos = Number.isFinite(p.x) && Number.isFinite(p.y) ? { x: p.x, y: p.y } : null;
   s.met = bools(raw.met);
@@ -84,7 +84,7 @@ export function sanitize(raw) {
   // saves from before the Snarl: anyone past the Spillway steps has already got by it
   const f = s.flags;
   if (!f.snarlDone && (f.highwater || f.lantern || f.gateOpen || f.garDefeated || f.garFriend || s.rest === 'highwater'
-    || s.area === 'murk' || s.area === 'ditch' || (s.area === 'highwater' && s.pos && s.pos.y < 470))) f.snarlDone = true;
+    || s.area === 'murk' || s.area === 'ditch' || areaOf(s.area) === 'highwater' && (ROOMS[s.area] || (s.pos && s.pos.y < 470)))) f.snarlDone = true;
   return s;
 }
 

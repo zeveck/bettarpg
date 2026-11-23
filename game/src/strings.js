@@ -60,6 +60,9 @@ export const SPEAKERS = {
   folk5: { name: 'Rudd', sprite: 'folk1' },
   folk6: { name: 'Little Bream', sprite: 'folk3' },
   folk7: { name: 'Prawn the Peddler', sprite: 'pip' },
+  vfolk1: { name: 'Old Perch', sprite: 'folk2' },
+  vfolk2: { name: 'Tetra', sprite: 'folk1' },
+  vfolk3: { name: 'Molly', sprite: 'folk3' },
   mossy: { name: 'Mossy', sprite: 'mossy' },
   snarl: { name: 'The Snarl', sprite: 'snarl' },
   cap1: { name: 'Pebble', sprite: 'cap1' },
@@ -183,6 +186,18 @@ export const LINES = {
   folk4: [['first', ['Welcome to Highwater, the city on the next terrace! Mind the spillway on your way down.']]],
   folk5: [['first', ['The lanterns? Glow-moss. Whorl grows it in the lock house. Lights the whole terrace at night.']]],
   folk6: [['first', ['Mum says the spillway pools have big cichlids. Big fish, big lessons, she says.']]],
+  vfolk1: [
+    ['garFriend', ['A Gar at the party! In my day we just had a cake and a nap.']],
+    ['first', ['Sweeping the path. The current puts the sand right back, but a fish likes to feel useful.']],
+  ],
+  vfolk2: [
+    ['bubbleJoined', ['Off adventuring with Bubble? Bring back a story. And a snack. Mostly the story.']],
+    ['first', ['Coral just got a new jar of Kelp Snacks in. The Fish Mart is the dome with the green awning.']],
+  ],
+  vfolk3: [
+    ['bubbleJoined', ['Bubble went with YOU? No fair! I\'m training my fins so I can be brave too.']],
+    ['first', ['Bubble lives in the little dome right there. Bubble says they\'re going to be a hero. I believe them!']],
+  ],
   folk7: [['first', ['Fresh moss! Shiny pebbles! ...Just looking? Pip\'s stall has the snacks, I only sell pretty things.']]],
   mossy: [
     ['first', ['You came! You really came!', 'It doesn\'t eat us. It brings us here and just... watches us. It hums at night. I think it\'s lonely.']],
@@ -252,4 +267,31 @@ export const LEVEL_UP_LINES = {
   4: 'You learned Gravel Grenade!',
   5: 'Your armor has been upgraded to advanced protection!',
   7: 'You\'ve achieved full metal armor! Maximum protection! Your balloons got bigger!',
+};
+
+// Things to look at indoors (Talk on them). `label` is the prompt; `found` follows a hidden Betta Bite.
+export const LOOKS = {
+  finnMap: { label: 'Look at the map', lines: ['A map of all the terraced paddies, from the village up to Highwater. Someone has drawn a tiny crown on the Sunken Ditch.'] },
+  finnLamp: { label: 'Look at the lamp', lines: ['A pearl in a clam shell, glowing softly. Finn reads by it every night. Or naps by it. Hard to tell.'] },
+  finnBed: { label: 'Look at the bed', lines: ['A sponge bed with a kelp blanket. It has an elder-shaped dent in it.'] },
+  martScale: { label: 'Look at the weighing clam', lines: ['A clam-shell weighing scale. You lean on it. It says you weigh about 3 Betta Bites.'] },
+  martJars: { label: 'Look at the jars', lines: ['Jars of fish flakes, each with a little red fish on the label. Coral dusts them every morning.'] },
+  martCrate: { label: 'Look in the crate', lines: ['A crate of fresh kelp and sea-carrots.'], found: 'Two Betta Bites were wedged between the carrots!' },
+  innBell: { label: 'Ring the bell', lines: ['Ding! A tiny shell bell. Seaweed looks up and smiles.'] },
+  innPods: { label: 'Look at the pods', lines: ['Sleeping pods of soft yellow sponge, with fresh kelp blankets. They smell like a summer current.'] },
+  innSign: { label: 'Look at the crest', lines: ['The inn\'s crest: a sprig of kelp, swaying in a gentle current. Very soothing. You yawn.'] },
+  bubbleDrawings: { label: 'Look at the drawings', lines: ['Bubble\'s drawings of a very brave little fish. In one of them, the fish is fighting a shadow with a stick.'] },
+  bubbleMarbles: { label: 'Look at the pebbles', lines: ['Bubble\'s best pebbles, lined up by shininess. One of them is actually a snail. It waves.'] },
+  bubbleChest: { label: 'Look in the toy chest', lines: ['A clam-shell toy chest: a bouncy ball, a stick sword, a very chewed sea-grape.'], found: 'Bubble\'s savings: two Betta Bites! Bubble did say "what\'s mine is yours".' },
+  bubbleSign: { label: 'Read the sign', lines: ['"BUBBLE\'S ROOM. Heroes only!" Underneath, in smaller letters: "and {name}".'] },
+  hwLanterns: { label: 'Look at the lanterns', lines: ['Glow-moss lanterns, grown in the Lock House. Kelpie says they\'re cheaper than pearls and twice as cosy.'] },
+  hwPods: { label: 'Look at the pods', lines: ['Three sponge pods in a row, with folded kelp blankets. Highwater-sized: you could fit a whole family in one.'] },
+  hwBell: { label: 'Ring the bell', lines: ['Ding! Kelpie: "Be right with you, sweetie."'] },
+  lockGauge: { label: 'Look at the gauge', lines: ['A brass pressure gauge. The needle points at a little drawing of a happy fish. That\'s good, probably.'] },
+  lockLevers: { label: 'Pull a lever', lines: ['You pull a lever. Somewhere far below, something gurgles. You push it back, quickly.'] },
+  lockBench: { label: 'Look at the workbench', lines: ['Cogs, tools and a half-finished gadget. A note says DON\'T TOUCH in Whorl\'s shaky hand.'] },
+  homeTea: { label: 'Look at the tea set', lines: ['Kelp tea in a conch-shell pot. It\'s still warm, somehow, underwater.'], found: 'Under the teapot: two Betta Bites, for "emergencies".' },
+  homeBed: { label: 'Look at the bed', lines: ['A big family sponge bed behind a kelp curtain. Somebody snores in it, most nights.'] },
+  homeDrawing: { label: 'Look at the drawings', lines: ['A kid\'s drawings of the spillway pools, with a very big cichlid. Little Bream\'s, by the look of it.'] },
+  home3Map: { label: 'Look at the map', lines: ['An old map of Highwater. The Lock House is circled three times.'] },
 };

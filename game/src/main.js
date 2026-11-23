@@ -1,6 +1,6 @@
 // main.js: boot, scaling, the fixed-step loop, the modes (title, create,
 // world, battle, ending), every menu screen, saving, and the debug hook.
-import { maxLevel, NGPLUS, CATCH_UP, PLAYER, ITEMS, ITEM_ORDER, ITEM_MAX, SUB_PRICE, INN_PRICE, AREAS, AREA_NAMES, AREA_START, REGULAR_KINDS,
+import { ROOMS, areaOf, maxLevel, NGPLUS, CATCH_UP, PLAYER, ITEMS, ITEM_ORDER, ITEM_MAX, SUB_PRICE, INN_PRICE, AREAS, AREA_NAMES, AREA_START, REGULAR_KINDS,
   ENEMIES, PEACE_PER_KIND, WORLD, PARTY } from './config.js';
 import { makeRng } from './battle.js';
 import * as audio from './audio.js';
@@ -12,7 +12,7 @@ import { World, spriteCanvas, terrainFor } from './world.js';
 import { BattleScene } from './battlescene.js';
 import { createStory } from './story.js';
 import * as state from './state.js';
-import { NAMES, SPEAKERS, goalLine, HINTS, HOW_TO_PLAY, COLOR_NAMES, STORY, LEVEL_UP_LINES } from './strings.js';
+import { NAMES, SPEAKERS, goalLine, HINTS, HOW_TO_PLAY, COLOR_NAMES, STORY, LEVEL_UP_LINES, LOOKS } from './strings.js';
 import * as ui from './ui.js';
 import { $, el, nav, button, wire, show, hide, say as uiSay, toast as uiToast, hint as uiHint, banner, fade, withKeys, drawPortrait } from './ui.js';
 import { Particles, drawWipe, pixelBubble } from './fx.js';
@@ -151,12 +151,13 @@ G.hintOnce = (key) => {
 };
 
 // ---------- areas ----------
-const REST = { village: ['village', 'inn'], highwater: ['highwater', 'inn'], spring: ['ditch', 'spring'], steps: ['highwater', 'steps'] };
+const REST = { village: ['villageInn', 'bed'], highwater: ['hwInn', 'bed'], spring: ['ditch', 'spring'], steps: ['highwater', 'steps'] };
 
-G.transition = async (fn, dur = 0.32) => {
+G.transition = async (fn, dur = 0.32, sound = 'transition') => {
   if (G.wipe) { await fn(); return; }
   G.wipe = { p: 0, t: 0, dur };
-  audio.play('transition', { vol: 0.5 });
+  if (sound === 'transition') audio.play('transition', { vol: 0.5 });
+  else if (sound) audio.play(sound, { vol: 0.8 });
   await new Promise((r) => { G.wipe.onCovered = r; });
   await fn();
   G.wipe.phase = 2;
@@ -165,6 +166,10 @@ G.transition = async (fn, dur = 0.32) => {
 };
 
 G.enterArea = async (id, entry, { wipe = true, quiet = false } = {}) => {
+  const from = G.world?.areaId;
+  // through a door: into a room, or out of one into its own area
+  const door = !!(ROOMS[id] || (from && ROOMS[from] && areaOf(from) === id)) && !!from && from !== id;
+  if (door) quiet = true;
   const go = () => {
     if (!G.world) G.world = new World(G);
     terrainFor(id);
@@ -179,12 +184,23 @@ G.enterArea = async (id, entry, { wipe = true, quiet = false } = {}) => {
     G.s.area = id;
     G.save();
   };
-  if (wipe) await G.transition(async () => go()); else go();
+  if (wipe) await G.transition(async () => go(), 0.32, door ? (MAPS[id].bell ? 'shop_bell' : 'door') : 'transition'); else go();
   if (!quiet) {
     banner(AREA_NAMES[id], id === 'village' ? img('bettahome') : null);
     G.hintOnce('swim');
   }
+  if (door && wipe && ROOMS[id]) G.toast(ROOMS[id].name, 1600);
+  if (door && ROOMS[from]) {
+    G.s.hints.doorUsed = true;
+    // the first swim out of Finn's house: the village, and the gate he just opened
+    if (from === 'finnHouse' && G.s.flags.metFinn && !G.s.hints.firstOut) {
+      G.s.hints.firstOut = true;
+      banner(AREA_NAMES.village, img('bettahome'));
+      G.toast('The south gate is open!');
+    }
+  }
 };
+G.enterRoom = (id) => G.enterArea(id, 'door');
 
 G.world = null;
 G.collect = (q) => {
@@ -426,6 +442,8 @@ function updatePrompt() {
   let who = 'Talk';
   if (it.kind === 'npc' || it.kind === 'extra') who = 'Talk to ' + (SPEAKERS[it.ref.id === 'bubbleHome' ? 'bubble' : it.ref.id]?.name || 'them');
   if (it.kind === 'gate') who = 'Look';
+  if (it.kind === 'look') who = LOOKS[it.ref.id]?.label || 'Look';
+  if (it.kind === 'door') who = 'Enter ' + (ROOMS[it.ref.to]?.name.replace(/^The /, 'the ') || '');
   if (it.kind === 'friend') who = 'Talk to your friend';
   if (it.kind === 'bubble') who = 'Talk to Bubble';
   $('prompt').innerHTML = `<span>${label('talk')} ${escapeHtml(who)}</span>`;
@@ -436,6 +454,7 @@ async function interact() {
   const it = G.world.interactTarget();
   if (!it) return;
   input.releaseAll();
+  if (it.kind === 'door') { if (!G.leaving) { G.leaving = true; G.enterRoom(it.ref.to).finally(() => { G.leaving = false; }); } return; }
   const p = G.world.player;
   if (Math.abs(it.x - p.x) > 4) p.face = it.x > p.x ? 1 : -1;
   if (it.ref && 'face' in it.ref && it.kind !== 'gate') it.ref.face = p.x > it.ref.x ? 1 : -1;
@@ -547,6 +566,8 @@ async function continueGame(slot) {
     if (pos && !G.world) G.world = new World(G);
     if (pos) { const t = terrainFor(s.area); const { isWater } = await import('./terrain.js'); if (!isWater(t, pos.x, pos.y)) pos = null; }
     await G.enterArea(s.area, pos || Object.keys(MAPS[s.area].entries)[0]);
+    const w = G.world, wp = w.player;
+    if (pos && !w.free(wp.x + wp.face * 8, wp.y, 7)) w.load(s.area, MAPS[s.area].interior ? 'door' : Object.keys(MAPS[s.area].entries)[0]);
   } catch (e) {
     console.warn('Continue fell back to the village', e);
     G.wipe = null;
@@ -584,7 +605,7 @@ function openSlots(mode, from = null) {
     else {
       drawPortrait(c, betta(PLAYER.armorStage(info.level), info.color, false)?.canvas);
       const end = info.endings.length ? ` · Endings: ${info.endings.map((k) => (k === 'friend' ? 'friendship' : 'fins')).join(', ')}` : '';
-      txt.innerHTML = `<b>Slot ${n}: ${escapeHtml(info.name)}</b><span>${levelText(info.level, info.ngPlus)}${info.ngPlus ? ` · NG+&nbsp;${info.ngPlus}` : ''} · ${AREA_SHORT[info.area]} · Friends&nbsp;${info.friends}${end}</span><span class="note">${whenPlayed(info.lastPlayed)}</span>`;
+      txt.innerHTML = `<b>Slot ${n}: ${escapeHtml(info.name)}</b><span>${levelText(info.level, info.ngPlus)}${info.ngPlus ? ` · NG+&nbsp;${info.ngPlus}` : ''} · ${ROOMS[info.area] ? `${AREA_SHORT[areaOf(info.area)]}: ${ROOMS[info.area].name}` : AREA_SHORT[info.area]} · Friends&nbsp;${info.friends}${end}</span><span class="note">${whenPlayed(info.lastPlayed)}</span>`;
     }
     const btns = el('div', 'slotbtns');
     const add = (label, fn, cls = 'btn') => btns.append(button(label, fn, cls));
@@ -677,9 +698,9 @@ async function beginStory(s, slot, fromScreen) {
   await fade(true);
   hide(fromScreen);
   G.save();
-  await G.enterArea('village', 'start', { wipe: false, quiet: true });
+  await G.enterArea('finnHouse', 'start', { wipe: false, quiet: true });
   await fade(false);
-  banner(AREA_NAMES.village, img('bettahome'));
+  G.toast(ROOMS.finnHouse.name, 1600);
   G.cutscene(() => G.story.opening());
 }
 
@@ -1045,6 +1066,7 @@ function toggleMute() { audio.toggleMute(); saveSettings(); updateMute(); }
 async function goHome() {
   if (G.mode !== 'world' || G.busy() || nav.top()) return;
   if (G.world.areaId === 'village') { G.toast('You\'re already home in Paddy Village.'); return; }
+  if (areaOf(G.world.areaId) === 'village') { await G.enterArea('village', 'home'); return; }
   if (await G.confirm('Swim home to Paddy Village?')) await G.enterArea('village', 'home');
 }
 
@@ -1149,7 +1171,9 @@ function update(dt, now) {
     // swimming off the edge through an opening: the next area
     if (G.mode === 'world' && G.world && canMove && !G.leaving) {
       const p = G.world.player;
-      for (const ex of G.world.def.exits || []) {
+      const dr = G.world.doorAhead(input.moveVector());
+      if (dr) { G.leaving = true; input.releaseAll(); G.enterRoom(dr.to).finally(() => { G.leaving = false; }); }
+      for (const ex of G.leaving ? [] : G.world.def.exits || []) {
         const [x, y, w, h] = ex.rect;
         if (p.x >= x - 16 && p.x <= x + w + 16 && p.y >= y - 16 && p.y <= y + h + 16) {
           G.leaving = true;
@@ -1199,7 +1223,7 @@ function logFrame() {
 function stateSnapshot() {
   const s = G.s, w = G.world, b = G.battle;
   return {
-    screen: screenName(), mode: G.mode, area: w?.areaId || null,
+    screen: screenName(), mode: G.mode, area: w?.areaId || null, room: w && ROOMS[w.areaId] ? w.areaId : null, parent: w ? areaOf(w.areaId) : null,
     player: w ? { x: Math.round(w.player.x), y: Math.round(w.player.y), face: w.player.face } : null,
     name: s.name, color: s.color, level: s.level, exp: s.exp, hp: s.hp, mp: s.mp, bb: s.bb, items: { ...s.items },
     flags: { ...s.flags }, friends: { ...s.friends }, friendsTotal: state.friendsTotal(s), scales: s.scales.length, cogs: s.cogs.length,
@@ -1225,6 +1249,8 @@ if (new URLSearchParams(location.search).has('debug')) window.__game = {
     .map((b) => { const r = b.getBoundingClientRect(); return { label: b.textContent.trim() || b.getAttribute('aria-label') || '', x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height), dim: b.classList.contains('dim'), focus: b.classList.contains('focus') }; }),
   audioState: () => audio.audioState(),
   levels: () => AREAS.length,
+  rooms: () => Object.keys(ROOMS),
+  enter: async (id, entry = 'door') => { await G.enterArea(id, entry, { wipe: false, quiet: true }); return true; },
   areas: () => AREAS.slice(),
   goToLevel: async (n, opts = {}) => {
     const id = AREAS[n];

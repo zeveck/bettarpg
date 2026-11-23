@@ -46,7 +46,7 @@ export function buildTerrain(def) {
     const cx1 = Math.min(gw - 1, Math.ceil(x1 / CELL)), cy1 = Math.min(gh - 1, Math.ceil(y1 / CELL));
     for (let cy = cy0; cy <= cy1; cy++) for (let cx = cx0; cx <= cx1; cx++) {
       const px = cx * CELL + 1, py = cy * CELL + 1;
-      if (inside(px, py, wob(px, py, seed))) depth[cy * gw + cx] = d;
+      if (inside(px, py, def.interior ? 0 : wob(px, py, seed))) depth[cy * gw + cx] = d;
     }
   };
   const M = 14;

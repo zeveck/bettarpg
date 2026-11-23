@@ -1482,3 +1482,141 @@ From issues #1 and #2 (player reports).
   win; the fish drops a single Betta Bite pickup as it flees. All drawn in code, no new art
   or sound (it reuses `armor` and `swim_away`).
 
+
+---
+
+## Change 5: Houses you can enter (2026-11-23)
+
+The request, in the person's words: "in a typical RPG they would each be situated in their houses and
+there'd be entry/exit and interiors. We'd want to keep the pixel style and these are betta fish
+versions of the same old shops, homes, whatever. We want to evoke familiar interiors while feeling
+fun and fishy."
+
+### What changes for the player
+
+- **Doors.** Every house, shop and inn in Paddy Village and Highwater has a door you can swim into.
+  Swim **up** into the doorway (keys, stick, or the touch stick) and the screen wipes into the room;
+  swim **down** through the doormat at the bottom of the room to go back outside, landing just below
+  the door. Only swimming *into* a door enters it, so gliding past along the path never pulls you in.
+  A soft pulsing arrow on the doormat shows the way out the first time you're inside.
+- **Villagers live indoors**, each where you'd expect them in an RPG:
+
+  | Where | Inside | Who |
+  |---|---|---|
+  | Paddy Village | **Elder Finn's House**: a cosy study with a map of the paddies, scroll racks, a shell desk | Elder Finn (the opening happens here) |
+  | Paddy Village | **The Fish Mart**: shelf aisles of jars and kelp, a counter with a scale-weighing clam | Coral behind the counter |
+  | Paddy Village | **The Swishy Solace Inn**: a front desk, sponge-and-kelp sleeping pods, a bubble lamp | Seaweed at the desk |
+  | Paddy Village | **Bubble's Home**: a kid's room with "hero" doodles, a toy sword, a shell bed | Bubble (until Bubble joins you; afterwards the room is empty, with a sign: "BUBBLE'S ROOM. Heroes only!") |
+  | Highwater | **Kelpie's Inn**: the bigger, grander inn, lanterns and kelp beds | Kelpie at the desk |
+  | Highwater | **The Lock House**: brass pipes, levers, a cog wheel, the drain-gate workings | Whorl the lock-keeper |
+  | Highwater | **Three homes** (the lilac and the coral house, and the old house by the east wall): the Bubble-home and Finn-house rooms, recoloured to the house outside | one townsfish each (folk1, folk3 and folk6 move in; the rest stay out in the street, which keeps Highwater lively) |
+
+  **Stalls stay open-air.** Pip's stall and the teal stall are market stalls with no walls: Pip and
+  the teal stall's keeper now stand *behind* their counters instead of beside them, so you talk to
+  them across the counter. **Reef stays on guard** at the east gate: the guard post is a lookout, not a
+  home, and Reef's job is the gate.
+- **A new game begins inside Elder Finn's house**, Finn waiting for you by his desk; the opening plays
+  there, then you swim out the door into the village. The "Paddy Village" banner shows as you first
+  swim outside.
+- **Resting**: losing a fight after resting at an inn now wakes you *inside* that inn, by the
+  sleeping pods. Springs are unchanged.
+- **Indoors is calm**: no wild fish, no critters or shimmer; a cosy indoor music loop (soft, the village
+  theme's family); a door sound going in and out, and a little shop bell at the Fish Mart.
+
+### Rooms
+
+- One screen each, no scrolling: **384×256** art pixels (the native grid), centred in the view with
+  a dark surround, like a classic RPG room floating in the dark. A betta (45 px) is about 1/8 of the
+  room's width, so a room reads cosy, not empty.
+- Top-down 3/4 RPG view: back wall across the top with its décor, floor below (sand and pebbles, a
+  woven reed rug), furniture with clear walkable floor between, and the door at the bottom centre
+  with a doormat.
+- **Familiar but fishy:** counters made of driftwood, shelves of jars and kelp bundles, shell
+  furniture, bubble lamps, sea-glass windows, kelp curtains, sponge beds, coral pots. No humans' things
+  that would break the world (no chairs for legs: stools are flat rocks and shells).
+- Each room is one generated image, snapped to the game's palette and native grid like the battle
+  backdrops; solid furniture is a short list of rectangles per room, set by eye from the art, and
+  checked with the reachability tool (every NPC can be reached to talk, every room's exit is reachable).
+- Rooms named on entry by the small area banner ("Elder Finn's House").
+
+### Tech
+
+- Interiors are areas like the others (`MAPS`), with `interior: true`, a `backdrop`, `solid` rects,
+  one exit back out, and an `entries.door` just above the doormat. Not in `AREAS` (the level list),
+  so the debug level list, catch-up EXP and New Game+ are unaffected.
+- Outside, each building gets `door: { x, to, entry }` (x within the sprite); the door rect sits at
+  the bottom of the building's footprint; it fires only while the player swims upward into it.
+- The world skips tufts, rice, scatter, critters, shimmer and fireflies indoors, and draws the
+  backdrop instead of the terrain. The parade stays outside (it only runs in the village and
+  Highwater's city); Bubble follows you in.
+- Saves inside a room load inside the room. `REST.village` and `REST.highwater` wake you at the inn's
+  `bed` entry.
+- The Load screen and pause goal name the room where they name an area.
+
+### Assets (budget $20)
+
+| ID | Asset | Tool | Notes |
+|---|---|---|---|
+| R1 | Elder Finn's House room | imagegen2 (high, 1536×1024), refs elder_dwelling + betta | 384×256 native |
+| R2 | Fish Mart room | imagegen2, refs fish_mart + betta | |
+| R3 | Swishy Solace Inn room | imagegen2, refs swishy_solace_inn + betta | |
+| R4 | Bubble's Home room | imagegen2, refs bubble_home + bubble | also a Highwater home, recoloured |
+| R5 | Kelpie's Inn room | imagegen2, refs highwater_inn + betta | |
+| R6 | Lock House room | imagegen2, refs lock_house + betta | |
+| S1 | Door (in and out): a soft wooden door with a bubbly whoosh | audiogen | |
+| S2 | Shop bell: a small shell wind-chime | audiogen | Fish Mart only |
+| M1 | Indoors: a cosy, quiet loop | audiogen music | all rooms |
+
+Estimated about $3 to $5 of art (six rooms, retries included) and the audio from ElevenLabs credits.
+Cut list: if a room won't come out right after two takes and a change of approach, it reuses
+another room recoloured; the music falls back to the village theme played softer.
+
+### Done when
+
+- Every listed building can be entered and left, at every screen size, by keys, controller and
+  touch; every villager inside can be talked to; shops and inns work from inside.
+- A new game starts in Finn's house and the whole game plays through (the recorded routes updated to
+  swim in and out of doors; the full-game run passes).
+- A save made inside a room loads inside it; waking after a loss puts you in the inn you last rested at.
+
+### Change 5 after review (round 1): what's settled
+
+- **Rooms are their own table**: `ROOMS = { id: { parent, name } }` in config.js. Saves accept room ids; save
+  migrations and "Swim home" go by the parent area; the Load screen says "Paddy Village: Fish Mart". Loading a
+  room save checks the spot is free (solids included) and falls back to the room's door entry. The save tests
+  get a room save.
+- **Room geometry**: each room has `shapes: [['r', -20, -20, 424, 296, 1, 0]]` (all water, edges past the
+  room, collision only), `safe: true`, and `solid` rects for the walls and furniture (read by `solids()`).
+  The decorations (tufts, rice, scatter, critters, shimmer, fireflies) are skipped indoors; the surround is
+  dark, not water blue. Bubble is kept out of solids and inside the room.
+- **Doors, in numbers**: outside, a door zone 28×14 just below the footprint at the drawn door, tested against
+  the betta's head, entered by pushing up (stick or keys, y < -0.4) **or by pressing Talk** (the prompt reads
+  "Enter Fish Mart"), so touch and diagonal approaches work. A woven doormat is drawn in code under every door
+  that opens. The Inn's two arches are two zones into the same room; the Fish Mart's door is its shopfront's
+  middle (its doormat marks it). Inside, the exit is the drawn doormat (bottom centre, the same spot in all
+  rooms); the inside landing is more than 16 px outside the exit's slack; the outside landing is 24 px below the
+  foot. `tools/check-reach.mjs` (from check-pickups) proves for every area and room: every NPC and examine spot
+  can be reached to talk, every exit and door can be reached, every entry is free and clear of every exit.
+- **In front and behind**: furniture that keepers stand behind (counters, desks) is cut from the room image as a
+  foreground strip drawn in the y-sorted list, so Coral, Seaweed and Kelpie stand *behind* their counters.
+  Pip and the teal stall's keeper stay beside their stalls, as now (the stall's art would hide them).
+- **Things to look at**: each room has 2 to 4 examine spots using the Talk prompt ("Look at the map"), each with a
+  short fishy line; three rooms hide a one-time Betta Bite or two in a jar or pot. Bubble's room gets a small
+  code-drawn sign once Bubble has joined ("BUBBLE'S ROOM. Heroes only!" in the dialogue box).
+- **Paddy Village stays lively**: three townsfish move into the village street (recoloured townsfolk sprites,
+  with their own lines), so the street isn't empty once the shopkeepers go inside.
+- **Highwater homes**: a seventh room, a plain townsfish family home (R7, made from R4's layout without the kid's
+  things), used for the three Highwater homes; folk1, folk3 and folk6 live in them.
+- **Sound**: rooms keep the area's music playing (no restart at the door); door transitions play a door sound
+  instead of the area swoosh; the Fish Mart plays a shell bell as you come in. The indoor music track (M1) is
+  dropped: the continuous outdoor theme is smoother.
+- **Opening**: the new game starts in Finn's house with the swim hint; the "Paddy Village" banner and "The south
+  gate is open!" come as you first swim out. After that, leaving a room never shows the area banner; entering
+  one shows the room's name as a small toast.
+- **Phones**: on touch screens the room sits right of the stick zone, clear of the Talk button.
+- **Shadows**: a soft shadow under every fish indoors, so yellow Bubble reads on the sand floors.
+- **Debug hook**: `__game.enter(id, entry)` and `__game.rooms()`; `state()` reports the room and its parent.
+  `goToLevel(0)` keeps the outdoor village start (for the screen tours); a New Game starts indoors.
+- **Routes and tests updated**: area-0, full-game, area-1, area-3, ngplus, peace and the others that visit
+  Seaweed, Kelpie or Whorl swim through doors; ngplus and test-saves expect Finn's house after the opening.
+- Estimate: rooms by nanogen (about $0.13 a take: seven rooms with a retry or two, about $1.50), sounds about $0.30.

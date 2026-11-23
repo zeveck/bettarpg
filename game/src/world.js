@@ -69,8 +69,11 @@ export class World {
     this.safeT = 1.0;
     this.redHintShown = false;
     this.edgeWarned = false;
-    // static things
+    // static things (rooms have none: their picture has it all)
     const trng = makeRng(def.seed || 1);
+    if (def.interior) {
+      this.tufts = []; this.riceRows = []; this.scatter = []; this.critters = []; this.shimmer = []; this.reeds = []; this.fireflies = [];
+    } else {
     this.tufts = bankSpots(this.terrain, Math.round((def.w * def.h) / (def.dark ? 22000 : 9000)), () => trng.next()).map((q) => ({ ...q, ph: trng.next() * 6 }));
     // rice planted in rows in the shallow water near the banks (a paddy, not a pond)
     if (!def.dark && def.bank !== 'concrete') {
@@ -125,14 +128,21 @@ export class World {
       }
     }
     this.fireflies = def.fireflies ? Array.from({ length: 18 }, () => ({ x: trng.next() * def.w, y: 60 + trng.next() * 380, ph: trng.next() * 6, sp: 0.5 + trng.next() })) : [];
+    }
     this.buildings = (def.buildings || []).map((b) => {
       const c = b.hue != null ? recolor(b.sprite, [{ any: true, shift: b.hue, sat: b.sat ?? 1, minS: 0.2 }], 'hue' + b.hue + (b.sat || '')) : img(b.sprite);
       const w = c ? c.width : 100, h = c ? c.height : 100;
       const foot = b.pass ? [] : b.arch
         ? [[b.x + 4, b.y + h - 24, 26, 22], [b.x + w - 30, b.y + h - 24, 26, 22]]
         : [[b.x + 8, b.y + h * (1 - (b.foot || 0.42)), w - 16, h * (b.foot || 0.42) - 4]];
-      return { ...b, w, h, foot, base: b.y + h - 2, canvas: c };
+      const fb = b.y + h - 4;
+      const doors = (b.doors || []).map((dx) => ({ x: b.x + dx, y: fb, to: b.to, zone: [b.x + dx - 14, fb - 2, 28, 22] }));
+      return { ...b, w, h, foot, base: b.y + h - 2, canvas: c, doors };
     });
+    this.doors = this.buildings.flatMap((b) => b.doors);
+    this.looks = (def.looks || []).map((q) => ({ ...q }));
+    // a room: Bubble comes in beside you, toward the middle of the room
+    if (def.interior) { this.bubble.x = p.x + 22; this.bubble.y = p.y - 10; }
     this.props = (def.props || []).map((q) => ({ ...q })).concat(this.scatter.filter((q) => !this.buildings.some((b) => q.x > b.x - 10 && q.x < b.x + b.w + 10 && q.y > b.y && q.y < b.base + 12)));
     this.spawnAll();
     this.camSnap();
@@ -286,6 +296,7 @@ export class World {
     const out = [];
     for (const b of this.buildings) for (const f of b.foot) out.push(f);
     for (const g of this.def.gates || []) if (!this.s.flags[g.openIf]) out.push(g.rect);
+    for (const r of this.def.solid || []) out.push(r);
     for (const q of this.props) {
       if (!q.solid || (q.until && this.s.flags[q.until])) continue;
       const c = img(q.sprite);
@@ -441,6 +452,16 @@ export class World {
     b.x += dx * sp; b.y += dy * sp;
     if (Math.abs(dx) > 2) b.face = dx > 0 ? 1 : -1;
     else if (d < 2) b.face = p.face;
+    if (this.def.interior) {
+      for (const [x, y, w, h] of this.def.solid || []) {
+        if (b.x > x - 6 && b.x < x + w + 6 && b.y > y - 6 && b.y < y + h + 6) {
+          const opts = [[x - 6 - b.x, 0], [x + w + 6 - b.x, 0], [0, y - 6 - b.y], [0, y + h + 6 - b.y]];
+          const [mx, my] = opts.sort((a, c) => Math.hypot(...a) - Math.hypot(...c))[0];
+          b.x += mx; b.y += my;
+        }
+      }
+      if (!isWater(this.terrain, b.x, b.y)) { b.x += (p.x - b.x) * 0.5; b.y += (p.y - b.y) * 0.5; }
+    }
   }
 
   updateNpcs(dt) {
@@ -551,6 +572,13 @@ export class World {
     }
   }
 
+  lookShown(q) { return !q.if || this.s.flags[q.if]; }
+  // Swimming up into a building's door (the head in its zone, pushing up): its room
+  doorAhead(mv) {
+    if (mv.y > -0.4 || Math.abs(mv.y) < Math.abs(mv.x) * 0.5) return null;
+    const h = this.headOf(this.player);
+    return this.doors.find((d) => { const [x, y, w, hh] = d.zone; return h.x >= x && h.x <= x + w && h.y >= y && h.y <= y + hh; }) || null;
+  }
   // What's in reach to talk to / use: {kind, ref, x, y, label}
   interactTarget() {
     const p = this.player;
@@ -559,7 +587,13 @@ export class World {
       const d = Math.hypot(x - p.x, y - p.y);
       if (d < r && d < bd + (r - WORLD.talkRange)) { bd = d; best = { kind, ref, x, y }; }
     };
-    for (const n of this.npcs) consider('npc', n, n.x, n.y);
+    for (const n of this.npcs) consider('npc', n, n.x, n.y, n.talkRange || WORLD.talkRange);
+    for (const q of this.looks) if (this.lookShown(q)) consider('look', q, q.x, q.y, 30);
+    for (const d of this.doors) {
+      const h = this.headOf(p), [x, y, w, hh] = d.zone;
+      const dist = Math.hypot(Math.max(x - h.x, 0, h.x - x - w), Math.max(y - h.y, 0, h.y - y - hh));
+      if (dist < 12 && dist < bd) { bd = dist; best = { kind: 'door', ref: d, x: d.x, y: d.y }; }
+    }
     for (const n of this.extra) if (n.talk && !n.hidden) consider('extra', n, n.x, n.y, n.talkRange || WORLD.talkRange);
     for (const f of this.friends) consider('friend', f, f.x, f.y, 26);
     // Bubble only when nobody else is in reach (Bubble swims right beside you)
@@ -581,6 +615,7 @@ export class World {
     let x = p.x - v.W / 2, y = p.y - v.H * yk;
     const def = this.def;
     x = def.w <= v.W ? (def.w - v.W) / 2 : Math.max(0, Math.min(def.w - v.W, x));
+    if (def.interior && this.G.input.isTouch && def.w <= v.W) x = -Math.min(Math.max((v.W - def.w) / 2, v.W * 0.4), v.W - def.w - 20);
     y = def.h <= v.H ? (def.h - v.H) / 2 : Math.max(0, Math.min(def.h - v.H, y));
     return { x, y };
   }
@@ -595,9 +630,10 @@ export class World {
     const v = this.G.view, s = this.s, t = this.t;
     let cx = Math.round(this.cam.x), cy = Math.round(this.cam.y);
     if (this.shake > 0) { cx += Math.round((Math.random() - 0.5) * this.shake * 4); cy += Math.round((Math.random() - 0.5) * this.shake * 4); }
-    ctx.fillStyle = '#123a66';
+    ctx.fillStyle = this.def.interior ? '#1B110C' : '#123a66';
     ctx.fillRect(0, 0, v.W, v.H);
-    ctx.drawImage(this.terrain.canvas, -cx, -cy);
+    if (this.def.interior) { const bg = this.roomImage(); if (bg) ctx.drawImage(bg, -cx, -cy); }
+    else ctx.drawImage(this.terrain.canvas, -cx, -cy);
     ctx.save();
     ctx.translate(-cx, -cy);
     // shimmer: sparse 1 px highlights that drift
@@ -613,7 +649,16 @@ export class World {
       pixelBubble(ctx, r.x, r.y, Math.max(2, Math.round(r.r)), '#CFF4FF');
     }
     ctx.globalAlpha = 1;
-    // floor things: pickups under fish
+    // floor things: pickups under fish, doormats, shadows indoors
+    for (const d of this.doors) this.drawDoormat(ctx, d.x, d.y + 3);
+    if (this.def.interior) {
+      this.drawExitArrow(ctx, t);
+      ctx.fillStyle = 'rgba(42,26,18,0.22)';
+      const sh = (x, y, w) => { ctx.fillRect(Math.round(x - w / 2), Math.round(y + 9), w, 3); ctx.fillRect(Math.round(x - w / 2 + 3), Math.round(y + 8), w - 6, 5); };
+      for (const n of this.npcs) sh(n.x, n.y, 22);
+      if (s.flags.bubbleJoined) sh(this.bubble.x, this.bubble.y, 18);
+      sh(this.player.x, this.player.y, 24);
+    }
     for (const q of this.pickups) this.drawPickup(ctx, q);
     for (const c of this.critters) this.drawCritter(ctx, c, t);
     if (this.def.lanterns) for (const [lx, ly] of this.def.lanterns) this.drawLanternGlow(ctx, lx, ly, t);
@@ -644,6 +689,10 @@ export class World {
     for (const b of this.def.bunting || []) list.push({ y: -1e6 + 1, d: () => this.drawBunting(ctx, b, t) });
     for (const g of this.def.gates || []) if (!s.flags[g.openIf]) list.push({ y: g.rect[1] + g.rect[3], d: () => this.drawGate(ctx, g) });
     for (const n of this.npcs) list.push({ y: n.y + 10, d: () => this.drawNpc(ctx, n) });
+    // a room's counters and desks, drawn again in front of whoever stands behind them
+    const room = this.def.interior ? this.roomImage() : null;
+    if (room) for (const [x, y, w, h] of this.def.fg || []) list.push({ y: y + h, d: () => ctx.drawImage(room, x, y, w, h, x, y, w, h) });
+    for (const q of this.looks) if (q.sign && this.lookShown(q)) list.push({ y: q.y, d: () => this.drawSign(ctx, q.x, q.y) });
     for (const n of this.extra) if (!n.hidden) list.push({ y: n.y + (n.sortOff || 10), d: () => (n.draw ? n.draw(ctx, n, t) : this.drawNpc(ctx, n)) });
     for (const f of this.friends) list.push({ y: f.y + 8, d: () => drawFish(ctx, hatted(f.kind), f.x, f.y, { flip: f.face < 0, sway: Math.sin(f.t * 5) * 1, bob: Math.round(Math.sin(f.t * 2)) }) });
     for (const e of this.enemies) if (!e.hidden || !this.def.reeds) list.push({ y: e.y + 8, d: () => this.drawEnemy(ctx, e) });
@@ -665,7 +714,7 @@ export class World {
       if (k > 0.8) { ctx.globalAlpha = 0.35; ctx.fillRect(x - 1, y, 3, 1); ctx.fillRect(x, y - 1, 1, 3); ctx.globalAlpha = 1; }
     }
     ctx.restore();
-    this.drawLight(ctx, cx, cy);
+    if (!this.def.interior) this.drawLight(ctx, cx, cy);
     if (this.def.dark) this.drawDark(ctx, cx, cy);
     // tags over fish (after the dark, so levels always show)
     ctx.save(); ctx.translate(-cx, -cy);
@@ -675,6 +724,34 @@ export class World {
     ctx.restore();
   }
 
+  roomImage() { return img(this.def.backdrop); }
+  // a woven reed doormat under every door you can swim into
+  drawDoormat(ctx, x, y) {
+    const x0 = Math.round(x - 12), y0 = Math.round(y);
+    ctx.fillStyle = '#2A1A12'; ctx.fillRect(x0 - 1, y0 - 1, 26, 8);
+    ctx.fillStyle = '#B8863E'; ctx.fillRect(x0, y0, 24, 6);
+    ctx.fillStyle = '#8A5A2B';
+    for (let i = 1; i < 24; i += 3) ctx.fillRect(x0 + i, y0 + ((i >> 1) % 2 ? 1 : 3), 2, 1);
+    ctx.fillStyle = '#E8C552'; ctx.fillRect(x0, y0, 24, 1);
+  }
+  // the way out of a room: a gold chevron bobbing on the doormat, until you've used a door
+  drawExitArrow(ctx, t) {
+    if (this.s.hints.doorUsed) return;
+    const x = 192, y = 232 + Math.round(Math.sin(t * 4));
+    const rows = [[0, 7], [1, 5], [2, 3], [3, 1]];
+    ctx.fillStyle = '#2A1A12';
+    for (const [r, w] of rows) ctx.fillRect(x - Math.ceil(w / 2) - 1, y + r - 1, w + 2, 3);
+    ctx.fillStyle = '#F7C948';
+    for (const [r, w] of rows) ctx.fillRect(x - Math.ceil(w / 2), y + r, w, 1);
+  }
+  // a small blank driftwood board (its words show in the dialogue box)
+  drawSign(ctx, x, y) {
+    const x0 = Math.round(x - 11), y0 = Math.round(y - 22);
+    ctx.fillStyle = '#2A1A12'; ctx.fillRect(x0 + 9, y0 + 10, 4, 13); ctx.fillRect(x0 - 1, y0 - 1, 24, 13);
+    ctx.fillStyle = '#8A5A2B'; ctx.fillRect(x0 + 10, y0 + 11, 2, 11);
+    ctx.fillStyle = '#C9A24A'; ctx.fillRect(x0, y0, 22, 11);
+    ctx.fillStyle = '#8A5A2B'; ctx.fillRect(x0 + 3, y0 + 3, 16, 1); ctx.fillRect(x0 + 3, y0 + 6, 12, 1);
+  }
   drawSwayRows(ctx, c, x, y, amt) {
     const h = c.height, x0 = Math.round(x - c.width / 2), y0 = Math.round(y - h);
     for (let r = 0; r < h; r += 2) {

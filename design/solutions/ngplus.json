@@ -18,7 +18,7 @@
     { "key": "ArrowRight", "after": 150 },
     { "key": "Enter", "after": 3500 },
     { "say": true },
-    { "check": "s.slot === 2 && s.ngPlus === 1 && s.level === 10 && s.rest === 'village' && s.area === 'village' && Object.keys(s.flags).filter((k) => !['tutorialDone', 'metFinn'].includes(k)).length === 0 && s.flags.tutorialDone && s.friendsTotal === 0 && s.lastEnding === 'fins' && s.endingsSeen.fins" },
+    { "check": "s.slot === 2 && s.ngPlus === 1 && s.level === 10 && s.rest === 'village' && s.area === 'finnHouse' && Object.keys(s.flags).filter((k) => !['tutorialDone', 'metFinn'].includes(k)).length === 0 && s.flags.tutorialDone && s.friendsTotal === 0 && s.lastEnding === 'fins' && s.endingsSeen.fins" },
     { "check": "localStorage.getItem('bettarpg-save-1') === sessionStorage.getItem('slot1') && g.slots()[0].level === 10 && g.slots()[0].ngPlus === 0 && g.slots()[1].ngPlus === 1" },
     { "check": "document.querySelector('#hudLv').textContent === 'Lv 10+'" },
     { "js": "await g.goToLevel(1, { ngPlus: 1 });", "after": 1200 },

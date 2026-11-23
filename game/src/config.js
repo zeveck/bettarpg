@@ -137,6 +137,20 @@ export const AREA_NAMES = {
   village: 'Paddy Village', shallows: 'The Shallows', reedwater: 'Reedwater',
   highwater: 'The Spillway and Highwater', murk: 'The Murk', ditch: 'The Sunken Ditch',
 };
+// Rooms (the insides of buildings): the area each belongs to and its name.
+export const ROOMS = {
+  finnHouse: { parent: 'village', name: "Elder Finn's House" },
+  fishMart: { parent: 'village', name: 'The Fish Mart' },
+  villageInn: { parent: 'village', name: 'The Swishy Solace Inn' },
+  bubbleHome: { parent: 'village', name: "Bubble's Home" },
+  hwInn: { parent: 'highwater', name: "Kelpie's Inn" },
+  lockHouse: { parent: 'highwater', name: 'The Lock House' },
+  hwHome1: { parent: 'highwater', name: "Dace's Home" },
+  hwHome2: { parent: 'highwater', name: "Little Bream's Home" },
+  hwHome3: { parent: 'highwater', name: "Minnow's Home" },
+};
+// The outdoor area a place belongs to (a room's parent, or the area itself).
+export const areaOf = (id) => ROOMS[id]?.parent || id;
 // Flags the story would have set on arriving in area n, and the expected level.
 // Below the level an area expects, fights there give x1.5 EXP ("Catch-up bonus!").
 export const CATCH_UP = { shallows: 3, reedwater: 5, highwater: 6, murk: 7, ditch: 8, mult: 1.5 };

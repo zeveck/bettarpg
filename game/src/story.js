@@ -2,7 +2,7 @@
 // opening, the Old Stump, the scales and the straw bundle, the Lock-Keeper,
 // the cogs and the drain gate, the shadow in the Murk, the Gate Spring,
 // Mossy, the Gar, both endings and Peace in the Paddies.
-import { LINES, FRIEND_LINES, STORY, SPEAKERS } from './strings.js';
+import { LINES, FRIEND_LINES, STORY, SPEAKERS, LOOKS } from './strings.js';
 import { WORLD, PLAYER, INN_PRICE, SUB_PRICE, ITEMS, REEF_FRIENDS, LANTERN_LEVEL, SNARL, SPILLWAY_SPRING, NGPLUS } from './config.js';
 import { maxHp, maxMp, friendsTotal, peaceDone } from './state.js';
 import { img } from './assets.js';
@@ -140,6 +140,7 @@ export function createStory(G) {
       const lines = FRIEND_LINES[it.ref.kind] || ['Party!'];
       return G.say({ name: 'Friend', sprite: G.spriteCanvas(it.ref.kind === 'cat' ? 'cat' : it.ref.kind) }, lines[Math.floor(Math.random() * lines.length)]);
     }
+    if (it.kind === 'look') return look(it.ref);
     const n = it.ref, id = n.id;
     if (it.kind === 'extra') {
       if (id === 'gar') return garTalk();
@@ -197,10 +198,27 @@ export function createStory(G) {
         return G.openShop('pip');
       }
       case 'whorl': return whorlTalk();
-      case 'folk1': case 'folk2': case 'folk3': case 'folk4': case 'folk5': case 'folk6': case 'folk7': {
+      case 'folk1': case 'folk2': case 'folk3': case 'folk4': case 'folk5': case 'folk6': case 'folk7':
+      case 'vfolk1': case 'vfolk2': case 'vfolk3': {
         s.met[id] = true;
         return sayAll(id, pick(id));
       }
+    }
+  }
+
+  // things to look at indoors; a few hide a Betta Bite or two, found once
+  async function look(q) {
+    const s = S(), L = LOOKS[q.id];
+    if (!L) return;
+    const found = q.bite && !s.flags['found_' + q.bite];
+    for (const l of L.lines) await G.say('sign', fill(l));
+    if (found) {
+      s.flags['found_' + q.bite] = true;
+      const n = 2;
+      s.bb += n;
+      G.sfx('bite');
+      G.world.fx.number(q.x, q.y - 12, '+' + n, '#F7C948', 1);
+      await G.say('sign', L.found || `You found ${n} Betta Bites!`);
     }
   }
 
@@ -290,7 +308,7 @@ export function createStory(G) {
     s.met.finn = true;
     await G.say('finn', fill(L[4]));
     G.sfx('shell_crack', { rate: 0.6 });
-    G.toast('The south gate is open!');
+    // the gate's toast and the village banner come as you first swim out of the house
     G.save();
     G.hintOnce('swim');
   }

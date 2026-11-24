@@ -831,7 +831,11 @@ function openPause(page = null) {
   add('Settings', () => openSettings());
   if (window.gameReport?.shown()) add('Report a bug', () => window.gameReport.open());
   if (!inBattle && state.friendsTotal(G.s) > 0) add(G.s.wearHat ? 'Take off party hat' : 'Wear party hat', (e) => { G.s.wearHat = !G.s.wearHat; e.currentTarget.textContent = G.s.wearHat ? 'Take off party hat' : 'Wear party hat'; G.save(); });
-  if (!inBattle) add('Save & quit to title', () => { G.saveWarnAt = 0; if (G.save() === false) { audio.blip('buzz'); return; } closePause(); quitToTitle(); });
+  if (!inBattle) add('Save & quit to title', async () => {
+    G.saveWarnAt = 0;
+    if (G.save() === false && !(await G.confirm("Couldn't save. Quit to the title anyway? Progress since your last save will be lost."))) return;
+    closePause(); quitToTitle();
+  });
   $('padLost').hidden = !G.padLost;
   show('pause');
   nav.push({ id: 'pause', el: screenEl('pause'), back: () => closePause() });
@@ -994,7 +998,7 @@ function openControls() {
     clearTimeout(armTimer);
     armTimer = setTimeout(() => {
       armTimer = 0;
-      if (!nav.has('controls')) return; // closed before it armed
+      if (nav.top()?.id !== 'controls') return; // closed, or something opened on top, before it armed
       capturing = { kind, action, slot };
       input.capturePress.clear();
       input.capture = (k, v, held = 0) => {

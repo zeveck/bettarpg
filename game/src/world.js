@@ -136,7 +136,13 @@ export class World {
         ? [[b.x + 4, b.y + h - 24, 26, 22], [b.x + w - 30, b.y + h - 24, 26, 22]]
         : [[b.x + 8, b.y + h * (1 - (b.foot || 0.42)), w - 16, h * (b.foot || 0.42) - 4]];
       const fb = b.y + h - 4;
-      const doors = (b.doors || []).map((dx) => ({ x: b.x + dx, y: fb, to: b.to, zone: [b.x + dx - 14, fb - 2, 28, 22] }));
+      // each door's zone reaches halfway to its neighbour, so swimming up between two arches still goes in
+      const dxs = b.doors || [];
+      const doors = dxs.map((dx, i) => {
+        const l = i > 0 ? Math.min(dx - 14, (dxs[i - 1] + dx) / 2) : dx - 14;
+        const r = i < dxs.length - 1 ? Math.max(dx + 14, (dx + dxs[i + 1]) / 2) : dx + 14;
+        return { x: b.x + dx, y: fb, to: b.to, zone: [b.x + l, fb - 2, r - l, 22] };
+      });
       return { ...b, w, h, foot, base: b.y + h - 2, canvas: c, doors };
     });
     this.doors = this.buildings.flatMap((b) => b.doors);

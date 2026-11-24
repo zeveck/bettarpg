@@ -446,7 +446,7 @@ function updatePrompt() {
   if (key === promptKey) return;
   promptKey = key;
   if (input.isTouch && G.mode === 'world') $('talkbtn').hidden = !it;
-  if (!it || input.device === 'touch') { $('prompt').hidden = true; return; }
+  if (!it) { $('prompt').hidden = true; return; }
   let who = 'Talk';
   if (it.kind === 'npc' || it.kind === 'extra') who = 'Talk to ' + (SPEAKERS[it.ref.id === 'bubbleHome' ? 'bubble' : it.ref.id]?.name || 'them');
   if (it.kind === 'gate') who = 'Look';
@@ -454,6 +454,9 @@ function updatePrompt() {
   if (it.kind === 'door') who = 'Enter ' + (ROOMS[it.ref.to]?.name.replace(/^The /, 'the ') || '');
   if (it.kind === 'friend') who = 'Talk to your friend';
   if (it.kind === 'bubble') who = 'Talk to Bubble';
+  // the round button says what it will do (Talk, Enter, Look, Read, Pull, Ring)
+  $('talkbtn').textContent = who.split(' ')[0];
+  if (input.device === 'touch') { $('prompt').hidden = true; return; }
   $('prompt').innerHTML = `<span>${label('talk')} ${escapeHtml(who)}</span>`;
   $('prompt').hidden = false;
   if (!G.s.hints.talk) { G.s.hints.talk = true; }

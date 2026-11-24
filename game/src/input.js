@@ -33,6 +33,7 @@ export const input = {
   listener: null,           // (ev) => void
   onDevice: null,
   onPadLost: null,
+  capturePress: new Map(),  // pad button -> when it was pressed while capturing
   capture: null,            // Controls screen: (kind, value) => void, while choosing a binding
   navRepeat: { dir: null, next: 0 },
   lastInput: '',
@@ -111,7 +112,7 @@ export const input = {
         if (window.otherDevices?.isOpen?.()) { window.otherDevices.dismiss(); continue; }
         this.padSeen = true;
         this.setDevice('gamepad');
-        if (this.capture) continue; // bind on release
+        if (this.capture) { this.capturePress.set(i, now); continue; } // bind on release
         this.padHeld.add(i);
         const action = this.controls.padAction(i);
         let menu = { 0: 'confirm', 1: 'back', 4: 'first', 5: 'last', 12: 'up', 13: 'down', 14: 'left', 15: 'right' }[i] || null;
@@ -119,7 +120,10 @@ export const input = {
         if (menu && ['up', 'down', 'left', 'right'].includes(menu)) this.navRepeat = { dir: menu, next: now + 350, src: 'b' + i };
       } else if (!btn[i] && was) {
         this.padHeld.delete(i);
-        if (this.capture && !reportOpen) this.capture('pad', i);
+        // only a press that began while choosing counts (not the one that opened it)
+        const t0 = this.capturePress.get(i);
+        this.capturePress.delete(i);
+        if (this.capture && !reportOpen && t0 !== undefined) this.capture('pad', i, now - t0);
       }
     }
     this.padPrev = btn;

@@ -988,7 +988,8 @@ function openControls() {
       armTimer = 0;
       if (!nav.has('controls')) return; // closed before it armed
       capturing = { kind, action, slot };
-      input.capture = (k, v) => {
+      input.capturePress.clear();
+      input.capture = (k, v, held = 0) => {
         if (k === 'key' && kind === 'key') {
           if (v === 'Escape') { endCapture('Cancelled.'); return; }
           // menu keys stay menu keys (Talk may keep Space), so no one can lock themselves out
@@ -996,13 +997,12 @@ function openControls() {
           const other = input.controls.bindKey(action, slot, v);
           endCapture(other === false ? "That key can't be used." : other ? `${keyCap(v)} was ${escapeHtml(actName(other))}'s; ${escapeHtml(actName(other))} now has ${keyNames(other)}.` : 'Saved.');
         } else if (k === 'pad' && kind === 'pad') {
-          if (v === 1 && performance.now() - downAt > 900) { endCapture('Cancelled.'); return; }
+          if (v === 1 && held > 900) { endCapture('Cancelled.'); return; }
           if (v === 1 || v === 9 || (v === 0 && action !== 'talk')) { endCapture(`${padCap(v)} is kept for menus.`); return; }
           const other = input.controls.bindPad(action, slot, v);
           endCapture(other === false ? "That button can't be used." : other ? `That button was ${actName(other)}'s; they swapped.` : 'Saved.');
         } else if (k === 'key' && v === 'Escape') endCapture('Cancelled.');
       };
-      downAt = performance.now();
     }, 180);
   };
   const actName = (id) => input.controls.actions().find((a) => a.id === id)?.name || id;

@@ -7,3 +7,4 @@ assets/anim8gen/
 node_modules/
 .DS_Store
 __pycache__/
+design/bugcheck/

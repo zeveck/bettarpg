@@ -129,7 +129,12 @@ G.tweenProp = (p, x, y, dur) => new Promise((r) => {
 G.save = () => {
   const s = G.s;
   if (G.world && G.mode === 'world') { s.area = G.world.areaId; s.pos = { x: Math.round(G.world.player.x), y: Math.round(G.world.player.y) }; }
-  state.storeSlot(G.slot || 1, s);
+  if (!state.storeSlot(G.slot || 1, s)) {
+    const t = performance.now();
+    if (!(G.saveWarnAt && t - G.saveWarnAt < 60000)) { G.saveWarnAt = t; G.toast("Couldn't save: this browser's storage is full or blocked.", 3500); $('toasts').lastChild?.classList.add('over'); }
+    return false;
+  }
+  return true;
 };
 function saveSettings() {
   state.storeSettings({ ...G.settings, ...audio.audioSettings() });
@@ -823,7 +828,7 @@ function openPause(page = null) {
   add('Settings', () => openSettings());
   if (window.gameReport?.shown()) add('Report a bug', () => window.gameReport.open());
   if (!inBattle && state.friendsTotal(G.s) > 0) add(G.s.wearHat ? 'Take off party hat' : 'Wear party hat', (e) => { G.s.wearHat = !G.s.wearHat; e.currentTarget.textContent = G.s.wearHat ? 'Take off party hat' : 'Wear party hat'; G.save(); });
-  if (!inBattle) add('Save & quit to title', () => { G.save(); closePause(); quitToTitle(); });
+  if (!inBattle) add('Save & quit to title', () => { G.saveWarnAt = 0; if (G.save() === false) { audio.blip('buzz'); return; } closePause(); quitToTitle(); });
   $('padLost').hidden = !G.padLost;
   show('pause');
   nav.push({ id: 'pause', el: screenEl('pause'), back: () => closePause() });
@@ -1317,7 +1322,7 @@ if (new URLSearchParams(location.search).has('debug')) window.__game = {
   // play-test only: show an ending scene ('fins' or 'friend') without changing flags
   ending: (kind = 'friend') => { G.playEnding(kind); return true; },
   assets: () => assetReport(),
-  save: () => { G.save(); return true; },
+  save: () => G.save(),
   slots: () => state.SLOTS.map((n) => { const i = state.slotInfo(n); return { slot: n, empty: !!i.empty, unreadable: !!i.unreadable, name: i.name || null, level: i.level || null,
     ngPlus: i.ngPlus || 0, area: i.area || null, friends: i.friends || 0, endings: i.endings || [], lastPlayed: i.lastPlayed || 0 }; }),
   startNgPlus: (from, to) => { for (const l of [...nav.stack]) hide(l.id); nav.stack = []; endScene(); show('slots'); nav.push({ id: 'slots', el: screenEl('slots') }); return startNgPlus(from, to, { skipConfirm: true }); },

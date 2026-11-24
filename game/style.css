@@ -261,9 +261,11 @@ body.short .friend canvas { width: 40px; height: 40px; }
 /* phones: the Gar fight gets a one-line log and a compact party HUD; credits fit */
 body.short.garfight .log { min-height: calc(1.25em + 10px); }
 body.short.garfight .log div:not(:last-child) { display: none; }
-body.short.garfight #garBox { display: flex; align-items: center; gap: 10px; }
+body.short.garfight #garBox { display: flex; align-items: center; gap: 6px; }
+body.short.garfight #garBox .friendsrow { gap: 4px; min-width: 0; }
+body.short.garfight .meter { gap: 3px; flex-shrink: 0; }
 body.short.garfight .friendsrow, body.short.garfight .meter { margin-top: 2px; }
-body.short.garfight .meter span { width: 14px; height: 18px; }
+body.short.garfight .meter span { width: 11px; height: 15px; }
 body.short [data-screen=credits] .credits { max-height: 70%; padding: 6px 12px; font-size: 0.85em; }
 body.short #creditsBody { grid-template-columns: 1fr 1fr 1fr; }
 body.short [data-screen=credits] .credits h2 { display: none; }

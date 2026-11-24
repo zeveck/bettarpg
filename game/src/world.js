@@ -632,7 +632,7 @@ export class World {
     const v = this.G.view, s = this.s, t = this.t;
     let cx = Math.round(this.cam.x), cy = Math.round(this.cam.y);
     if (this.shake > 0) { cx += Math.round((Math.random() - 0.5) * this.shake * 4); cy += Math.round((Math.random() - 0.5) * this.shake * 4); }
-    ctx.fillStyle = this.def.interior ? '#1B110C' : '#123a66';
+    ctx.fillStyle = this.def.interior ? '#2A1A12' : '#123a66'; // rooms: the pictures' own edge colour, so no box shows
     ctx.fillRect(0, 0, v.W, v.H);
     if (this.def.interior) { const bg = this.roomImage(); if (bg) ctx.drawImage(bg, -cx, -cy); }
     else ctx.drawImage(this.terrain.canvas, -cx, -cy);

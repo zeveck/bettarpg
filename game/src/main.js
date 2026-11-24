@@ -1115,6 +1115,7 @@ function onInput(ev) {
 }
 
 // touch: the floating stick on the left 40%, and taps
+let tapBusy = false; // was a dialog, menu or scene up when this tap began?
 function setupTouch() {
   const zone = $('stickzone'), stick = $('stick'), knob = $('knob');
   let id = null, ox = 0, oy = 0;
@@ -1149,11 +1150,14 @@ function setupTouch() {
     if (e.pointerType === 'mouse') { if (input.device === 'touch') input.setDevice('keyboard'); }
     else input.setDevice('touch');
     if (e.target === cv && G.mode === 'title' && !nav.top()) openTitle();
+    // a tap that closes a dialog (or a menu) must not start a talk with its click
+    tapBusy = !$('dialog').hidden || !!nav.top() || G.busy();
   }, true);
   // a tap on the picture moves dialogue on too (endings, scenes)
   cv.addEventListener('pointerdown', () => { if (!$('dialog').hidden) ui.dialogTap(); });
   cv.addEventListener('click', () => {
     if (G.mode === 'battle' && G.battle?.continueBtn) { ui.press(G.battle.continueBtn); return; }
+    if (tapBusy) return;
     if (G.canTalkNow() && G.world.interactTarget()) interact();
   });
 }

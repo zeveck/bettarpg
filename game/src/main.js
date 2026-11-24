@@ -979,11 +979,14 @@ function openControls() {
   if (input.isTouch) note.push('Touch controls (the stick, Talk and the on-screen buttons) stay as they are.');
   $('ctlNote').textContent = note.join(' ');
   $('ctlMsg').textContent = 'Choose a key to change it.';
+  let armTimer = 0;
   const startCapture = (kind, action, slot) => {
     $('ctlMsg').textContent = kind === 'key' ? `Press a key for ${input.controls.actions().find((a) => a.id === action).name} (Esc cancels)` : 'Press a button (hold ○/B to cancel)';
     // listen only after the press that chose it is released
-    setTimeout(() => {
-      let downAt = 0;
+    clearTimeout(armTimer);
+    armTimer = setTimeout(() => {
+      armTimer = 0;
+      if (!nav.has('controls')) return; // closed before it armed
       capturing = { kind, action, slot };
       input.capture = (k, v) => {
         if (k === 'key' && kind === 'key') {
@@ -1007,7 +1010,10 @@ function openControls() {
   const endCapture = (msg) => { capturing = null; input.capture = null; $('ctlMsg').innerHTML = msg; audio.blip('select'); build(); };
   build();
   show('controls');
-  const done = () => { if (capturing) { endCapture('Cancelled.'); return; } hide('controls'); nav.remove('controls'); };
+  const done = () => {
+    if (armTimer) { clearTimeout(armTimer); armTimer = 0; $('ctlMsg').textContent = 'Cancelled.'; return; }
+    if (capturing) { endCapture('Cancelled.'); return; }
+    hide('controls'); nav.remove('controls'); };
   $('ctlDone').onclick = (e) => { e.stopPropagation(); audio.blip('back'); done(); };
   $('ctlReset').onclick = async (e) => {
     e.stopPropagation();

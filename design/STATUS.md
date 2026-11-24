@@ -20,6 +20,9 @@
 16. "The pause popup is oddly lower than I'd expect? It seems it should be vertically centered, but it's not, and on my laptop screen it got a scrollbar despite there being plenty of vertical space it could have sized into to avoid. Consider this and how best to fix."
 17. "For the initial shallows I sometimes see a fish snack off in the dirt where it's unreachable. Unless there's some clever puzzle, we shouldn't place unreachable powerups like that."
 18. `/gamegen --change Everybetta in the villages looks awesome, and they have cool little houses, but, in a typical RPG they would each be situated in their houses and there'd be entry/exit and interiors. We'd want to keep the pixel style and these are betta fish versions of the same old shops, homes, whatever. We want to evoke familiar interiors while feeling fun and fishy. --budget 20 --publish --no-confirm`
+19. `/gamegen:gamegen --bugcheck`
+20. (during the check) "If you find any bugs, do a /gamegen:gamegen --fix all after."
+21. "Actually, if you find any bugs, do a /gamegen:gamegen --fix all --publish --no-confirm after."
 
 From: https://github.com/zeveck/bettarpg (zeveck's own repo; renamed to zeveck/bettarpg-original on 2026-11-21 so the remake could take zeveck/bettarpg), remake, leeway lots.
 Original untouched; this is a new folder and repo with fresh history.
@@ -54,7 +57,6 @@ Original untouched; this is a new folder and repo with fresh history.
 - Gallery: top of https://synapticnoise.com
 - Plans page: card Published, design page https://synapticnoise.com/plans/betta-rpg/design/, art sheet https://synapticnoise.com/plans/betta-rpg/art/ (art sheet manifest: .gamegen/art-sheet/manifest.json)
 - Shared design on claude.ai renamed and updated (same link)
-- GitHub preview image: to upload (none set)
 
 ## Change 1 (2026-11-21): mini-boss, parade, New Game+
 
@@ -93,6 +95,25 @@ Original untouched; this is a new folder and repo with fresh history.
 - [x] Fresh bug hunt: no crashes or soft-locks; 7 small findings fixed (room toast on Continue, rescued fish spacing, NG+ gate toast, diagonal door entry, no straight-back-in after leaving, parade at Bubble's door, prototype names in saves); 13/13 routes pass again
 - [x] README and screenshots, art sheet (Rooms section) ready
 - [x] Published 2026-11-23 (game; the swim tip now sits above talk prompts); art sheet on the plans page has a Rooms section and the door sounds
+
+## Bug check (2026-11-24)
+
+Fresh player, bug hunter and polish reviewer; desktop 1280x720 and 1920x1080, phone 844x390 (touch) and portrait, pretend controller. No crashes, console errors or soft-locks; text scan clean. Fixing all (request 21), then publishing.
+
+1. Phone: tapping to close a dialog opened the same talk again, endlessly (every phone player, first villager): fixed
+2. Phone: the round Talk button always said "Talk", never Enter/Look/Read: fixed
+3. Rooms sat in a lighter brown box on a darker surround: fixed
+4. Phone: the Gar's friendship balloons spilled out of its box: fixed
+5. Controls: backing out right after choosing a key silently rebound the next key pressed: fixed
+6. Controller: holding A a little long when choosing a button slot cancelled it: fixed
+7. A save the browser refused was silent (Save & quit lost progress): fixed (warning; Save & quit stays in the game)
+8. Village inn: swimming up the path between its two arches did nothing: fixed
+
+- [x] Each fix checked in the browser at its size (phone touch, pretend controller, refused storage); a fresh code review of the fixes found two follow-ups (a failed Save & quit now asks to quit anyway; key capture never arms under a confirm), both fixed
+- [x] check-reach, check-routes, test-saves pass; 13/13 routes pass, full game included (no console errors); README room screenshots retaken
+- [x] Published 2026-11-24
+
+Below the bar: Controls opened over Settings shows Settings' edges; hint under the pause panel; befriend hint overlaps the Gar box; How-to card height jumps; create preview box; Bubble on top of you entering a room; doorway stops on the arch wall; reused room art (hwHome3 = Finn's room); How to play doesn't mention doors; Load slot "Friends 0" wraps; Home/pause during a fade; overlays survive Save & quit.
 
 ## Phases
 

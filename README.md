@@ -124,6 +124,21 @@ seven rooms with nanogen (each from its building's outside and the first room, E
 study, so they match) and a door sound and shop bell with audiogen, then built the doors and
 rooms and re-recorded the routes to swim through them.
 
+Then a bug check, with fresh testers on desktop, phone and controller:
+
+> `/gamegen:gamegen --bugcheck`
+
+> If you find any bugs, do a /gamegen:gamegen --fix all after.
+
+> Actually, if you find any bugs, do a /gamegen:gamegen --fix all --publish --no-confirm after.
+
+It found eight things worth fixing (the worst: on a phone, tapping to close a dialog opened it
+again), fixed them all, and replayed every route. Last, Minnow got a room of their own:
+
+> `/gamegen --change give Minnow's Highwater home its own room picture instead of reusing Elder Finn's --publish --no-confirm`
+
+one more nanogen room, from the same first room so it matches.
+
 The original game's pixel art (the betta in four armor stages, the five enemies, the party
 hats, the submarine, Paddy Village and the rice tuft) is used as it was, shrunk to its
 native pixels; the full-size originals are in `source-art/`. The design, reviews and asset

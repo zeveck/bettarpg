@@ -331,10 +331,11 @@ Object.assign(MAPS, {
     looks: [{ id: 'lockGauge', x: 270, y: 100 }, { id: 'lockLevers', x: 282, y: 174 }, { id: 'lockBench', x: 160, y: 182 }],
   }),
   hwHome1: room({
-    parent: 'highwater', outside: 'home1Door', backdrop: 'rm_home', music: 'highwater',
-    solid: [[60, 104, 62, 44], [40, 140, 32, 22], [118, 104, 30, 20], [144, 66, 100, 42], [246, 84, 106, 78], [328, 136, 28, 32]],
-    npcs: [{ id: 'folk1', sprite: 'folk1', x: 200, y: 136, face: -1 }],
-    looks: [{ id: 'homeTea', x: 190, y: 112 }, { id: 'homeBed', x: 270, y: 172 }],
+    parent: 'highwater', outside: 'home1Door', backdrop: 'rm_dace', music: 'highwater',
+    // Dace's coral den: notebook table (left), spyglass on a tripod, kelp hammock (right)
+    solid: [[52, 104, 86, 54], [218, 96, 26, 18], [262, 100, 96, 56]],
+    npcs: [{ id: 'folk1', sprite: 'folk1', x: 200, y: 140, face: -1 }],
+    looks: [{ id: 'daceBoard', x: 150, y: 96 }, { id: 'daceNotes', x: 100, y: 166 }, { id: 'daceScope', x: 232, y: 122 }, { id: 'daceBed', x: 300, y: 166 }],
   }),
   hwHome2: room({
     parent: 'highwater', outside: 'home2Door', backdrop: 'rm_home', music: 'highwater',

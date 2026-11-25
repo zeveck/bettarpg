@@ -1509,7 +1509,7 @@ fun and fishy."
   | Paddy Village | **Bubble's Home**: a kid's room with "hero" doodles, a toy sword, a shell bed | Bubble (until Bubble joins you; afterwards the room is empty, with a sign: "BUBBLE'S ROOM. Heroes only!") |
   | Highwater | **Kelpie's Inn**: the bigger, grander inn, lanterns and kelp beds | Kelpie at the desk |
   | Highwater | **The Lock House**: brass pipes, levers, a cog wheel, the drain-gate workings | Whorl the lock-keeper |
-  | Highwater | **Three homes** (the lilac and the coral house, and the old house by the east wall): the lilac and coral houses share one family-home room; the old house by the east wall is **Minnow's own den** (a gate fan's room: a Highwater map with the Lock House circled, a workbench of toy water-wheels, a model lock gate, a sponge bed) | one townsfish each (folk1, folk3 and folk6 move in; the rest stay out in the street, which keeps Highwater lively) |
+  | Highwater | **Three homes** (the lilac and the coral house, and the old house by the east wall): the yellow house is Little Bream's family home (kid's drawings, a tea set); the coral house is **Dace's own coral-orange den** (a cork board of shadow sketches, a spyglass at the porthole, a kelp hammock); the old house by the east wall is **Minnow's own den** (a gate fan's room: a Highwater map with the Lock House circled, a workbench of toy water-wheels, a model lock gate, a sponge bed) | one townsfish each (folk1, folk3 and folk6 move in; the rest stay out in the street, which keeps Highwater lively) |
 
   **Stalls stay open-air.** Pip's stall and the teal stall are market stalls with no walls: Pip and
   the teal stall's keeper now stand *behind* their counters instead of beside them, so you talk to

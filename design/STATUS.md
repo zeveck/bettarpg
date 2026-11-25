@@ -24,6 +24,7 @@
 20. (during the check) "If you find any bugs, do a /gamegen:gamegen --fix all after."
 21. "Actually, if you find any bugs, do a /gamegen:gamegen --fix all --publish --no-confirm after."
 22. `/gamegen --change give Minnow's Highwater home its own room picture instead of reusing Elder Finn's --publish --no-confirm`
+23. `/gamegen --change give the coral house its own orange room instead of sharing the lilac house's yellow one --publish --no-confirm`
 
 From: https://github.com/zeveck/bettarpg (zeveck's own repo; renamed to zeveck/bettarpg-original on 2026-11-21 so the remake could take zeveck/bettarpg), remake, leeway lots.
 Original untouched; this is a new folder and repo with fresh history.
@@ -96,6 +97,14 @@ Original untouched; this is a new folder and repo with fresh history.
 - [x] Fresh bug hunt: no crashes or soft-locks; 7 small findings fixed (room toast on Continue, rescued fish spacing, NG+ gate toast, diagonal door entry, no straight-back-in after leaving, parade at Bubble's door, prototype names in saves); 13/13 routes pass again
 - [x] README and screenshots, art sheet (Rooms section) ready
 - [x] Published 2026-11-23 (game; the swim tip now sits above talk prompts); art sheet on the plans page has a Rooms section and the door sounds
+
+## Change 7 (2026-11-25): Dace's coral room
+
+- Budget: $20 (this change); spent ~$0.27 (one take plus one edit)
+- [x] The coral house is Dace's Home (hwHome1; the other house, Little Bream's, is yellow outside, not lilac). It gets its own coral-orange room: a night-watcher's den (a cork board of shadow-and-pipe sketches, a notebook, a spyglass at the porthole, a kelp hammock); new furniture outline and four new things to look at. Little Bream's Home keeps the family room
+- [x] Checks: check-reach (all reachable); hands-on at 1280x720 and phone 844x390 (each look spot, bumping into each piece of furniture, leaving by the door); no console errors. No recorded route enters the room, so no replays
+- [x] Art sheet: Dace's room added; the shared room is now captioned as Little Bream's Home
+- [x] Published 2026-11-25
 
 ## Change 6 (2026-11-25): Minnow's own room
 

@@ -183,3 +183,10 @@ Dropped after review: M1 (indoor music): rooms keep the area's music playing, so
 |---|---|---|---|---|---|---|---|---|
 | R8 | .gamegen/candidates/rooms/minnow-take1.jpg | nanogen | pro 2K 3:2, refs R1 + R7 | Minnow's den in Highwater (map with the Lock House circled, toy water-wheels, model lock gate, sponge bed) | 1 | $0.134 | $0.13 | **accepted** -> interiors/minnow.png 384x256 (box 6.58 px); hwHome3 no longer reuses Finn's room |
 
+
+## Change 7: Dace's coral room (2026-11-25, budget $20)
+
+| # | Candidate | Tool | Settings | What | Takes | Est. cost | Running | Result |
+|---|---|---|---|---|---|---|---|---|
+| R9 | .gamegen/candidates/rooms/dace-take1.jpg | nanogen | pro 2K 3:2, refs R7 + R1 | Dace's coral den in Highwater | 1 | $0.134 | $0.13 | rejected: the pipe sketch came out as a smoking pipe |
+| R9b | .gamegen/candidates/rooms/dace-take2.jpg | nanogen | pro 2K 3:2, edit of R9 | the sketch redrawn as a drainage pipe | 1 | $0.134 | $0.27 | **accepted** -> interiors/dace.png 384x256 (box 6.58 px); the palette has no orange, so the snapped pinks were shifted to hue 17 (saturation x1.45) to match the coral house outside |

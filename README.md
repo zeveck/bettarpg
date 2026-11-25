@@ -139,6 +139,12 @@ again), fixed them all, and replayed every route. Last, Minnow got a room of the
 
 one more nanogen room, from the same first room so it matches.
 
+and then the coral house got its own room too:
+
+> `/gamegen --change give the coral house its own orange room instead of sharing the lilac house's yellow one --publish --no-confirm`
+
+Dace, who watches the old outflow pipe at night, got a coral-orange den with a spyglass at the porthole.
+
 The original game's pixel art (the betta in four armor stages, the five enemies, the party
 hats, the submarine, Paddy Village and the rice tuft) is used as it was, shrunk to its
 native pixels; the full-size originals are in `source-art/`. The design, reviews and asset

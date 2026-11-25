@@ -293,5 +293,8 @@ export const LOOKS = {
   homeTea: { label: 'Look at the tea set', lines: ['Kelp tea in a conch-shell pot. It\'s still warm, somehow, underwater.'], found: 'Under the teapot: two Betta Bites, for "emergencies".' },
   homeBed: { label: 'Look at the bed', lines: ['A big family sponge bed behind a kelp curtain. Somebody snores in it, most nights.'] },
   homeDrawing: { label: 'Look at the drawings', lines: ['A kid\'s drawings of the spillway pools, with a very big cichlid. Little Bream\'s, by the look of it.'] },
-  home3Map: { label: 'Look at the map', lines: ['An old map of Highwater. The Lock House is circled three times.'] },
+  minnowMap: { label: 'Look at the map', lines: ['Minnow\'s map of Highwater. The Lock House is circled in red. So is everything else with water in it, which is most of Highwater.'] },
+  minnowBench: { label: 'Look at the workbench', lines: ['Toy water-wheels, a pile of brass cogs and a very small screwdriver. One of the wheels actually turns.'] },
+  minnowGate: { label: 'Look at the model gate', lines: ['A working model of the big lock gate, tiny wheel and all. Minnow has clearly been practising for the day Whorl retires.'] },
+  minnowBed: { label: 'Look at the bed', lines: ['A round sponge bed with a striped kelp blanket. Under the pillow: a drawing of Lock-Keeper Whorl, signed.'] },
 };

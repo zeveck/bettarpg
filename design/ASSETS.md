@@ -176,3 +176,10 @@ Note: game/assets/original/ is gone (the builder moved the full-size kept art to
 
 Code-drawn: doormats outside every door, the exit chevron, Bubble's room sign, shadows under fish indoors.
 Dropped after review: M1 (indoor music): rooms keep the area's music playing, so nothing restarts at a door.
+
+## Change 6: Minnow's own room (2026-11-25, budget $20)
+
+| # | Candidate | Tool | Settings | What | Takes | Est. cost | Running | Result |
+|---|---|---|---|---|---|---|---|---|
+| R8 | .gamegen/candidates/rooms/minnow-take1.jpg | nanogen | pro 2K 3:2, refs R1 + R7 | Minnow's den in Highwater (map with the Lock House circled, toy water-wheels, model lock gate, sponge bed) | 1 | $0.134 | $0.13 | **accepted** -> interiors/minnow.png 384x256 (box 6.58 px); hwHome3 no longer reuses Finn's room |
+

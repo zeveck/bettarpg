@@ -92,6 +92,7 @@ export const MANIFEST = {
   rm_hwinn: [[N + 'interiors/hwinn.png'], { w: 384, h: 256, c: '#C9A24A', bg: true }],
   rm_lock: [[N + 'interiors/lock.png'], { w: 384, h: 256, c: '#C9A24A', bg: true }],
   rm_home: [[N + 'interiors/home.png'], { w: 384, h: 256, c: '#C9A24A', bg: true }],
+  rm_minnow: [[N + 'interiors/minnow.png'], { w: 384, h: 256, c: '#C9A24A', bg: true }],
   bg_title: [[N + 'backdrops/title.png'], { w: 432, h: 200, c: '#2B7FC4', bg: true }],
   bg_shallows: [[N + 'backdrops/shallows.png'], { w: 432, h: 200, c: '#3290D1', bg: true }],
   bg_reedwater: [[N + 'backdrops/reedwater.png'], null],

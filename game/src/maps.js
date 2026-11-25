@@ -343,9 +343,10 @@ Object.assign(MAPS, {
     looks: [{ id: 'homeDrawing', x: 152, y: 114 }, { id: 'homeTea', x: 190, y: 112, bite: 'home2Tea' }],
   }),
   hwHome3: room({
-    parent: 'highwater', outside: 'home3Door', backdrop: 'rm_finn', music: 'highwater',
-    solid: [[44, 96, 86, 62], [94, 136, 36, 28], [282, 96, 38, 46], [326, 110, 36, 50], [272, 150, 94, 58]],
+    parent: 'highwater', outside: 'home3Door', backdrop: 'rm_minnow', music: 'highwater',
+    // Minnow's own den: workbench of toy wheels (left), wheel and stool, sponge bed (right), model lock gate
+    solid: [[48, 97, 80, 60], [32, 142, 28, 42], [250, 97, 80, 60], [230, 180, 58, 44]],
     npcs: [{ id: 'folk3', sprite: 'folk3', x: 200, y: 130, face: -1 }],
-    looks: [{ id: 'home3Map', x: 140, y: 92 }, { id: 'homeBed', x: 262, y: 186 }],
+    looks: [{ id: 'minnowMap', x: 150, y: 94 }, { id: 'minnowBench', x: 100, y: 166 }, { id: 'minnowGate', x: 222, y: 196 }, { id: 'minnowBed', x: 292, y: 166 }],
   }),
 });

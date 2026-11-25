@@ -23,6 +23,7 @@
 19. `/gamegen:gamegen --bugcheck`
 20. (during the check) "If you find any bugs, do a /gamegen:gamegen --fix all after."
 21. "Actually, if you find any bugs, do a /gamegen:gamegen --fix all --publish --no-confirm after."
+22. `/gamegen --change give Minnow's Highwater home its own room picture instead of reusing Elder Finn's --publish --no-confirm`
 
 From: https://github.com/zeveck/bettarpg (zeveck's own repo; renamed to zeveck/bettarpg-original on 2026-11-21 so the remake could take zeveck/bettarpg), remake, leeway lots.
 Original untouched; this is a new folder and repo with fresh history.
@@ -55,7 +56,7 @@ Original untouched; this is a new folder and repo with fresh history.
 
 - Live: https://bettarpg.synapticnoise.com (HTTPS on), repo https://github.com/zeveck/bettarpg (public); original renamed to zeveck/bettarpg-original (bettarpg.com unchanged)
 - Gallery: top of https://synapticnoise.com
-- Plans page: card Published, design page https://synapticnoise.com/plans/betta-rpg/design/, art sheet https://synapticnoise.com/plans/betta-rpg/art/ (art sheet manifest: .gamegen/art-sheet/manifest.json)
+- Plans page: card Published, design page https://synapticnoise.com/plans/betta-rpg/design/, art sheet https://synapticnoise.com/plans/betta-rpg/art/ (its manifest was lost by 2026-11-25; the built page is in the gallery repo)
 - Shared design on claude.ai renamed and updated (same link)
 
 ## Change 1 (2026-11-21): mini-boss, parade, New Game+
@@ -95,6 +96,14 @@ Original untouched; this is a new folder and repo with fresh history.
 - [x] Fresh bug hunt: no crashes or soft-locks; 7 small findings fixed (room toast on Continue, rescued fish spacing, NG+ gate toast, diagonal door entry, no straight-back-in after leaving, parade at Bubble's door, prototype names in saves); 13/13 routes pass again
 - [x] README and screenshots, art sheet (Rooms section) ready
 - [x] Published 2026-11-23 (game; the swim tip now sits above talk prompts); art sheet on the plans page has a Rooms section and the door sounds
+
+## Change 6 (2026-11-25): Minnow's own room
+
+- Budget: $20 (this change); spent ~$0.13 (one nanogen take, accepted first time)
+- [x] Minnow's Home (hwHome3) gets its own room: a gate fan's den (Highwater map with the Lock House circled, workbench of toy water-wheels, model lock gate, sponge bed); new furniture outline and four new things to look at; Finn's room is no longer reused
+- [x] Checks: check-reach (all reachable); hands-on at 1280x720 and phone 844x390 (each look spot, bumping into each piece of furniture, leaving by the door); no console errors. No recorded route enters the room, so no replays (art and rules within one room)
+- [x] Art sheet: Minnow's room added to Rooms. The sheet's manifest (.gamegen/art-sheet/manifest.json) is missing, so this was added to the built page directly; rebuild the manifest before any larger art-sheet change
+- [x] Published 2026-11-25
 
 ## Bug check (2026-11-24)
 

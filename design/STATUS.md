@@ -100,6 +100,13 @@ Original untouched; this is a new folder and repo with fresh history.
 - [x] README and screenshots, art sheet (Rooms section) ready
 - [x] Published 2026-11-23 (game; the swim tip now sits above talk prompts); art sheet on the plans page has a Rooms section and the door sounds
 
+## Fix #3 (2026-11-25): the inn's two doors
+
+- [x] Issue #3 filed (the person's own, from request 24), then fixed: the Swishy Solace Inn's room has two doorways like its two doors outside (nanogen edit, ~$0.13); rooms can have several doorways (doorXs/outsides in maps.js), each building door leads to its own doorway and back. Consistency: every other enterable building shows one door and has one doorway; the guard post's gate now says GUARDS ONLY when you swim up (it isn't a way in); stalls and gates have no doors
+- [x] Checks: check-reach, check-routes, test-saves; hands-on: in by each door, out by each doorway, Talk at a door, the gate; phone 844x390; the two routes that use the inn now leave by the left doorway; all 13 routes replayed
+- [x] Art sheet: the inn's room updated
+- [x] Published 2026-11-25 (#3 closes on this push)
+
 ## Change 7 (2026-11-25): Dace's coral room
 
 - Budget: $20 (this change); spent ~$0.27 (one take plus one edit)

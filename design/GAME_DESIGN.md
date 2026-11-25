@@ -1498,6 +1498,9 @@ fun and fishy."
   Swim **up** into the doorway (keys, stick, or the touch stick) and the screen wipes into the room;
   swim **down** through the doormat at the bottom of the room to go back outside, landing just below
   the door. Only swimming *into* a door enters it, so gliding past along the path never pulls you in.
+  A room has as many doorways as its building has doors: the Swishy Solace Inn has two arches outside
+  and two doorways inside; each door leads to its own doorway, and each doorway back out of its own door.
+  Doors you can't use say so when you swim up (the guard post's gate: "GUARDS ONLY").
   A soft pulsing arrow on the doormat shows the way out the first time you're inside.
 - **Villagers live indoors**, each where you'd expect them in an RPG:
 

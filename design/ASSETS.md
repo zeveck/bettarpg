@@ -190,3 +190,9 @@ Dropped after review: M1 (indoor music): rooms keep the area's music playing, so
 |---|---|---|---|---|---|---|---|---|
 | R9 | .gamegen/candidates/rooms/dace-take1.jpg | nanogen | pro 2K 3:2, refs R7 + R1 | Dace's coral den in Highwater | 1 | $0.134 | $0.13 | rejected: the pipe sketch came out as a smoking pipe |
 | R9b | .gamegen/candidates/rooms/dace-take2.jpg | nanogen | pro 2K 3:2, edit of R9 | the sketch redrawn as a drainage pipe | 1 | $0.134 | $0.27 | **accepted** -> interiors/dace.png 384x256 (box 6.58 px); the palette has no orange, so the snapped pinks were shifted to hue 17 (saturation x1.45) to match the coral house outside |
+
+## Fix #3: the inn's two doorways (2026-11-25)
+
+| # | Candidate | Tool | Settings | What | Takes | Est. cost | Running | Result |
+|---|---|---|---|---|---|---|---|---|
+| R3b | .gamegen/candidates/rooms/inn-take2.jpg | nanogen | pro 2K 3:2, edit of R3 | the Swishy Solace Inn with two doorways (x 125 and 260 native), everything else kept | 1 | $0.134 | $0.13 | **accepted** -> interiors/inn.png (the one-door version kept as .gamegen/candidates/rooms/inn-native-before.png) |

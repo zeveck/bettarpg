@@ -145,6 +145,15 @@ and then the coral house got its own room too:
 
 Dace, who watches the old outflow pipe at night, got a coral-orange den with a spyglass at the porthole.
 
+Then an issue, filed and fixed in one go:
+
+> Report an issue that The interior of the The Swishy Solace Inn should have two doors to match its exterior depiction. Make sure we're consistent in general. and then /fix it and publish no-confirm.
+
+gamegen filed [#3](https://github.com/zeveck/bettarpg/issues/3), redrew the inn's room with two doorways
+(each door now leads to its own doorway and back), checked every other building (one door outside,
+one doorway in), gave the guard post's gate a "GUARDS ONLY" sign so it no longer just ignores you,
+and replayed every route.
+
 The original game's pixel art (the betta in four armor stages, the five enemies, the party
 hats, the submarine, Paddy Village and the rice tuft) is used as it was, shrunk to its
 native pixels; the full-size originals are in `source-art/`. The design, reviews and asset

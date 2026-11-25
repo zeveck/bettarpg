@@ -27,6 +27,8 @@
 23. `/gamegen --change give the coral house its own orange room instead of sharing the lilac house's yellow one --publish --no-confirm`
 24. "Report an issue that The interior of the The Swishy Solace Inn should have two doors to match its exterior depiction. Make sure we're consistent in general. and then /fix it and publish no-confirm."
 25. #3: The Swishy Solace Inn's room should have two doors, like its outside (https://github.com/zeveck/bettarpg/issues/3)
+26. "My bettas eye seems to have a transparent pixel?"
+27. (while checking) "Please fix all such \"holes\" and --publish --no-confirm"
 
 From: https://github.com/zeveck/bettarpg (zeveck's own repo; renamed to zeveck/bettarpg-original on 2026-11-21 so the remake could take zeveck/bettarpg), remake, leeway lots.
 Original untouched; this is a new folder and repo with fresh history.
@@ -99,6 +101,14 @@ Original untouched; this is a new folder and repo with fresh history.
 - [x] Fresh bug hunt: no crashes or soft-locks; 7 small findings fixed (room toast on Continue, rescued fish spacing, NG+ gate toast, diagonal door entry, no straight-back-in after leaving, parade at Bubble's door, prototype names in saves); 13/13 routes pass again
 - [x] README and screenshots, art sheet (Rooms section) ready
 - [x] Published 2026-11-23 (game; the swim tip now sits above talk prompts); art sheet on the plans page has a Rooms section and the door sounds
+
+## Holes (2026-11-25): see-through pixels in sprites
+
+- [x] Cause: the original game's betta art has its eye glint as a transparent pixel (and the guppy's too); shrinking art to native pixels also left pinholes. A scan found 29 sprites with transparent pixels fully enclosed by colour
+- [x] Filled in 25: eye glints #d2cbc2 (the helmet betta's own glint) on the betta at every armor stage, swimming frames and party hats, and the guppy; pinholes in fins and legs take the surrounding colour; the guard post's see-through window is dark like its other window, Kelpie's inn's right window lit orange like the rest, and the market stalls get a dark wood back. Kept open on purpose: the torn net's mesh, the brass cog's axle hole, gaps between rice blades, the crayfish's claw arm. Originals kept in .gamegen/candidates/holes-before/
+- [x] Checks: rescan finds only those four; in play at 1280x720 (battle, Highwater with a blue betta) and phone 844x390; no console errors. Art only (collisions don't use the pictures), so no replays
+- [x] Art sheet: the 18 affected pictures and the swimming animation redrawn
+- [x] Published 2026-11-25
 
 ## Fix #3 (2026-11-25): the inn's two doors
 

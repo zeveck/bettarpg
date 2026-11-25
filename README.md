@@ -154,6 +154,16 @@ gamegen filed [#3](https://github.com/zeveck/bettarpg/issues/3), redrew the inn'
 one doorway in), gave the guard post's gate a "GUARDS ONLY" sign so it no longer just ignores you,
 and replayed every route.
 
+Then a sharp eye:
+
+> My bettas eye seems to have a transparent pixel?
+
+> Please fix all such "holes" and --publish --no-confirm
+
+The original betta art left its eye glint see-through. gamegen scanned every sprite for pixels
+you could see through but shouldn't, filled 25 of them (eye glints, pinholes, two windows and the
+back of the market stalls), and left the real openings (the net's mesh, the cog's axle) alone.
+
 The original game's pixel art (the betta in four armor stages, the five enemies, the party
 hats, the submarine, Paddy Village and the rice tuft) is used as it was, shrunk to its
 native pixels; the full-size originals are in `source-art/`. The design, reviews and asset

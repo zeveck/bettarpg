@@ -7,7 +7,7 @@ import * as audio from './audio.js';
 import { input, ACTIONS, label, keyCap, padCap, escapeHtml, confirmCap, backCap } from './input.js';
 import { loadAll, img, hasReal, assetReport } from './assets.js';
 import { betta, hatted, plain, fromCanvas, drawFish, PLAYER_COLORS, portrait, bettaSwim } from './sprites.js';
-import { MAPS } from './maps.js';
+import { MAPS, doorEntry } from './maps.js';
 import { World, spriteCanvas, terrainFor } from './world.js';
 import { BattleScene } from './battlescene.js';
 import { createStory } from './story.js';
@@ -208,7 +208,7 @@ G.enterArea = async (id, entry, { wipe = true, quiet = false, door = false } = {
     }
   }
 };
-G.enterRoom = (id) => G.enterArea(id, 'door', { door: true });
+G.enterRoom = (id, idx = 0) => G.enterArea(id, doorEntry(idx), { door: true });
 
 G.world = null;
 G.collect = (q) => {
@@ -465,7 +465,7 @@ async function interact() {
   const it = G.world.interactTarget();
   if (!it) return;
   input.releaseAll();
-  if (it.kind === 'door') { if (!G.leaving) { G.leaving = true; G.enterRoom(it.ref.to).finally(() => { G.leaving = false; }); } return; }
+  if (it.kind === 'door') { if (!G.leaving) { G.leaving = true; G.enterRoom(it.ref.to, it.ref.idx).finally(() => { G.leaving = false; }); } return; }
   const p = G.world.player;
   if (Math.abs(it.x - p.x) > 4) p.face = it.x > p.x ? 1 : -1;
   if (it.ref && 'face' in it.ref && it.kind !== 'gate') it.ref.face = p.x > it.ref.x ? 1 : -1;
@@ -1197,7 +1197,7 @@ function update(dt, now) {
     if (G.mode === 'world' && G.world && canMove && !G.leaving) {
       const p = G.world.player;
       const dr = G.world.doorAhead(input.moveVector());
-      if (dr) { G.leaving = true; input.releaseAll(); G.enterRoom(dr.to).finally(() => { G.leaving = false; }); }
+      if (dr) { G.leaving = true; input.releaseAll(); G.enterRoom(dr.to, dr.idx).finally(() => { G.leaving = false; }); }
       for (const ex of G.leaving ? [] : G.world.def.exits || []) {
         const [x, y, w, h] = ex.rect;
         if (p.x >= x - 16 && p.x <= x + w + 16 && p.y >= y - 16 && p.y <= y + h + 16) {

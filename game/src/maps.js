@@ -56,10 +56,12 @@ export const MAPS = {
     entries: {
       start: { x: 290, y: 214, face: -1 }, south: { x: 512, y: 580, face: -1 },
       east: { x: 975, y: 330, face: -1 }, inn: { x: 800, y: 240, face: -1 }, home: { x: 512, y: 340, face: 1 },
-      finnDoor: { x: 186, y: 192, face: 1 }, martDoor: { x: 505, y: 198, face: 1 }, innDoor: { x: 819, y: 204, face: -1 }, bubbleDoor: { x: 158, y: 538, face: -1 },
+      finnDoor: { x: 186, y: 192, face: 1 }, martDoor: { x: 505, y: 198, face: 1 }, innDoor: { x: 819, y: 204, face: -1 }, innDoorL: { x: 789, y: 204, face: -1 }, innDoorR: { x: 849, y: 204, face: 1 }, bubbleDoor: { x: 158, y: 538, face: -1 },
     },
     riceRows: [[90, 566, 410], [620, 566, 940]],
     spawns: [], bites: [],
+    // the guard post's gate isn't a way in: it says so when you swim up to it
+    looks: [{ id: 'guardGate', x: 962, y: 224 }],
   },
 
   shallows: {
@@ -279,14 +281,26 @@ export const MAPS = {
 // `looks` = things you can examine with Talk (LOOKS in strings.js).
 const FLOOR = [['e', 193, 158, 168, 70, 1], ['r', 168, 196, 48, 60, 1, 2]];
 const EXIT = [176, 246, 32, 10];
-const room = (o) => ({
-  interior: true, w: 384, h: 256, safe: true, seed: 3, ambience: null, battleBg: 'shallows',
-  shapes: FLOOR, paths: [], buildings: [], props: [], gates: [], spawns: [], bites: [],
-  npcs: [], looks: [], solid: [], fg: [],
-  ...o,
-  exits: [{ rect: EXIT, to: o.parent, entry: o.outside }],
-  entries: { door: { x: 192, y: 206, face: 1 }, ...(o.entries || {}) },
-});
+// A room's doorways sit in the bottom wall, at doorXs (one, in the middle, unless the building
+// outside has more). Doorway i leads out to outsides[i]; building door i leads in to doorway i.
+const doorEntry = (i) => (i ? 'door' + i : 'door');
+const room = (o) => {
+  const xs = o.doorXs || [192];
+  const outs = o.outsides || [o.outside];
+  const entries = {};
+  xs.forEach((x, i) => { entries[doorEntry(i)] = { x, y: 206, face: 1 }; });
+  return {
+    interior: true, w: 384, h: 256, safe: true, seed: 3, ambience: null, battleBg: 'shallows',
+    shapes: [FLOOR[0], ...xs.map((x) => ['r', x - 24, FLOOR[1][2], 48, 60, 1, 2])],
+    paths: [], buildings: [], props: [], gates: [], spawns: [], bites: [],
+    npcs: [], looks: [], solid: [], fg: [],
+    ...o,
+    doorXs: xs,
+    exits: xs.map((x, i) => ({ rect: [x - EXIT[2] / 2, EXIT[1], EXIT[2], EXIT[3]], to: o.parent, entry: outs[i] || outs[0] })),
+    entries: { ...entries, ...(o.entries || {}) },
+  };
+};
+export { doorEntry };
 
 Object.assign(MAPS, {
   finnHouse: room({
@@ -304,8 +318,10 @@ Object.assign(MAPS, {
     looks: [{ id: 'martScale', x: 142, y: 152 }, { id: 'martJars', x: 92, y: 124 }, { id: 'martCrate', x: 304, y: 182, bite: 'martCrate' }],
   }),
   villageInn: room({
-    parent: 'village', outside: 'innDoor', backdrop: 'rm_inn', music: 'village',
-    solid: [[28, 76, 136, 96], [212, 70, 152, 62], [272, 148, 94, 60]],
+    parent: 'village', outside: 'innDoorL', backdrop: 'rm_inn', music: 'village',
+    // two front doors outside, two doorways inside: left leads to left, right to right
+    doorXs: [125, 260], outsides: ['innDoorL', 'innDoorR'],
+    solid: [[28, 76, 136, 96], [212, 70, 152, 62], [277, 152, 89, 56]],
     npcs: [{ id: 'seaweed', sprite: 'seaweed', x: 186, y: 112, face: -1 }],
     looks: [{ id: 'innBell', x: 150, y: 176 }, { id: 'innPods', x: 258, y: 178 }, { id: 'innSign', x: 192, y: 92 }],
     entries: { bed: { x: 236, y: 168, face: -1 } },

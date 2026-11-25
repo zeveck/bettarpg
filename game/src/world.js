@@ -141,7 +141,7 @@ export class World {
       const doors = dxs.map((dx, i) => {
         const l = i > 0 ? Math.min(dx - 14, (dxs[i - 1] + dx) / 2) : dx - 14;
         const r = i < dxs.length - 1 ? Math.max(dx + 14, (dx + dxs[i + 1]) / 2) : dx + 14;
-        return { x: b.x + dx, y: fb, to: b.to, zone: [b.x + l, fb - 2, r - l, 22] };
+        return { x: b.x + dx, y: fb, to: b.to, idx: i, zone: [b.x + l, fb - 2, r - l, 22] };
       });
       return { ...b, w, h, foot, base: b.y + h - 2, canvas: c, doors };
     });
@@ -745,12 +745,14 @@ export class World {
   // the way out of a room: a gold chevron bobbing on the doormat, until you've used a door
   drawExitArrow(ctx, t) {
     if (this.s.hints.doorUsed) return;
-    const x = 192, y = 232 + Math.round(Math.sin(t * 4));
+    const y = 232 + Math.round(Math.sin(t * 4));
     const rows = [[0, 7], [1, 5], [2, 3], [3, 1]];
-    ctx.fillStyle = '#2A1A12';
-    for (const [r, w] of rows) ctx.fillRect(x - Math.ceil(w / 2) - 1, y + r - 1, w + 2, 3);
-    ctx.fillStyle = '#F7C948';
-    for (const [r, w] of rows) ctx.fillRect(x - Math.ceil(w / 2), y + r, w, 1);
+    for (const x of this.def.doorXs || [192]) {
+      ctx.fillStyle = '#2A1A12';
+      for (const [r, w] of rows) ctx.fillRect(x - Math.ceil(w / 2) - 1, y + r - 1, w + 2, 3);
+      ctx.fillStyle = '#F7C948';
+      for (const [r, w] of rows) ctx.fillRect(x - Math.ceil(w / 2), y + r, w, 1);
+    }
   }
   // a small blank driftwood board (its words show in the dialogue box)
   drawSign(ctx, x, y) {

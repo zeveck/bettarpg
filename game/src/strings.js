@@ -293,6 +293,7 @@ export const LOOKS = {
   homeTea: { label: 'Look at the tea set', lines: ['Kelp tea in a conch-shell pot. It\'s still warm, somehow, underwater.'], found: 'Under the teapot: two Betta Bites, for "emergencies".' },
   homeBed: { label: 'Look at the bed', lines: ['A big family sponge bed behind a kelp curtain. Somebody snores in it, most nights.'] },
   homeDrawing: { label: 'Look at the drawings', lines: ['A kid\'s drawings of the spillway pools, with a very big cichlid. Little Bream\'s, by the look of it.'] },
+  guardGate: { label: 'Look at the gate', lines: ['The guard post\'s gate is barred. A sign says GUARDS ONLY. Underneath, smaller: "and snacks for Captain Reef."'] },
   daceBoard: { label: 'Look at the board', lines: ['Sketches pinned to a cork board: a long dark shadow, the old outflow pipe, and red string joining them. Dace has been busy.'] },
   daceNotes: { label: 'Read the notebook', lines: ['"Night 41. Rice stalks swaying. Shadow in the pipe again, longer than last time. Tea gone cold."'] },
   daceScope: { label: 'Look through the spyglass', lines: ['It points out of the porthole, straight at the old outflow pipe. Nothing there now. Probably.'] },

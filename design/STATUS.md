@@ -25,6 +25,8 @@
 21. "Actually, if you find any bugs, do a /gamegen:gamegen --fix all --publish --no-confirm after."
 22. `/gamegen --change give Minnow's Highwater home its own room picture instead of reusing Elder Finn's --publish --no-confirm`
 23. `/gamegen --change give the coral house its own orange room instead of sharing the lilac house's yellow one --publish --no-confirm`
+24. "Report an issue that The interior of the The Swishy Solace Inn should have two doors to match its exterior depiction. Make sure we're consistent in general. and then /fix it and publish no-confirm."
+25. #3: The Swishy Solace Inn's room should have two doors, like its outside (https://github.com/zeveck/bettarpg/issues/3)
 
 From: https://github.com/zeveck/bettarpg (zeveck's own repo; renamed to zeveck/bettarpg-original on 2026-11-21 so the remake could take zeveck/bettarpg), remake, leeway lots.
 Original untouched; this is a new folder and repo with fresh history.

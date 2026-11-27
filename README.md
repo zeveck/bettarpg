@@ -164,6 +164,12 @@ The original betta art left its eye glint see-through. gamegen scanned every spr
 you could see through but shouldn't, filled 25 of them (eye glints, pinholes, two windows and the
 back of the market stalls), and left the real openings (the net's mesh, the cog's axle) alone.
 
+Then two reports from the game's own "Report a bug" button, fixed with `/gamegen --fix all --publish --no-confirm`:
+[#4](https://github.com/zeveck/bettarpg/issues/4), words hopping between lines as dialogue typed out
+(each line is now laid out in full before it's revealed), and
+[#5](https://github.com/zeveck/bettarpg/issues/5), the controls freezing at the Old Stump when you
+swam up from its right (Bubble was being steered two ways at once and never arrived).
+
 The original game's pixel art (the betta in four armor stages, the five enemies, the party
 hats, the submarine, Paddy Village and the rice tuft) is used as it was, shrunk to its
 native pixels; the full-size originals are in `source-art/`. The design, reviews and asset

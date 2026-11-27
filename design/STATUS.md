@@ -29,6 +29,9 @@
 25. #3: The Swishy Solace Inn's room should have two doors, like its outside (https://github.com/zeveck/bettarpg/issues/3)
 26. "My bettas eye seems to have a transparent pixel?"
 27. (while checking) "Please fix all such \"holes\" and --publish --no-confirm"
+28. `/gamegen --fix all --publish --no-confirm`
+29. #4: Dialogue text problem (https://github.com/zeveck/bettarpg/issues/4)
+30. #5: Quest broken (https://github.com/zeveck/bettarpg/issues/5)
 
 From: https://github.com/zeveck/bettarpg (zeveck's own repo; renamed to zeveck/bettarpg-original on 2026-11-21 so the remake could take zeveck/bettarpg), remake, leeway lots.
 Original untouched; this is a new folder and repo with fresh history.
@@ -101,6 +104,13 @@ Original untouched; this is a new folder and repo with fresh history.
 - [x] Fresh bug hunt: no crashes or soft-locks; 7 small findings fixed (room toast on Continue, rescued fish spacing, NG+ gate toast, diagonal door entry, no straight-back-in after leaving, parade at Bubble's door, prototype names in saves); 13/13 routes pass again
 - [x] README and screenshots, art sheet (Rooms section) ready
 - [x] Published 2026-11-23 (game; the swim tip now sits above talk prompts); art sheet on the plans page has a Rooms section and the door sounds
+
+## Fix #4 and #5 (2026-11-27)
+
+- [x] #4 (the person's own, from the game): dialogue words hopped between lines as they typed (Finn's opening, three times). Cause: the line was typed into a paragraph with "pretty" wrapping, re-planned every few letters. Now the whole line is laid out from the start, the rest hidden, with plain wrapping (pretty lays a half-hidden line out differently on phones). Checked: every letter's position sampled while typing, Finn's five lines at 1280x720, 844x390 and 390x844: none move (the old code moved 20 to 48 letters a line)
+- [x] #5 (the person's own, from the game): the Old Stump scene froze for good when you faced left (swimming up from its right). Cause: the scene swam Bubble to a spot behind you while Bubble's own following pulled it to the other side; Bubble hovered between them and the scene never ended. Now Bubble's following waits while a scene moves it (and it simply arrives after 5 s); Bubble comes from behind you and the angelfish from in front, whichever way you face. Checked: froze before, from the right now plays through to the fight; from the left as before
+- [x] Fresh review of both fixes: nothing wrong (cosmetic: Bubble or the angelfish can start over land near a bank). Replays area-1-shallows, peace, full-game: all pass, no console errors
+- [x] README making-of; published 2026-11-27
 
 ## Holes (2026-11-25): see-through pixels in sprites
 

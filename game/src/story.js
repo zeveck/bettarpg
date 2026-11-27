@@ -324,21 +324,22 @@ export function createStory(G) {
       f.stumpScale = true;
       // Bubble catches up
       const p = w.player;
-      w.bubble.x = p.x - 220; w.bubble.y = p.y - 40; w.bubble.face = 1;
+      // from behind you, whichever way you face
+      w.bubble.x = p.x - 220 * p.face; w.bubble.y = p.y - 40; w.bubble.face = p.face;
       f.bubbleJoined = true;
       G.save();
       p.trail = [];
-      await G.moveBubbleTo(p.x - 30, p.y + 4);
+      await G.moveBubbleTo(p.x - 30 * p.face, p.y + 4);
       G.sfx('bubble_chirp');
       await G.say('bubble', STORY.bubbleArrives);
       // Bubble cheers you up before the fight, so arriving hurt can't lose the lesson
       if (s.hp < maxHp(s)) { s.hp = maxHp(s); G.sfx('inn', { vol: 0.6 }); G.toast('Bubble cheers you on: HP restored!'); }
       await G.say('bubble', STORY.stumpScale);
       // the angelfish charges in
-      const e = w.makeEnemy({ kind: 'angel', level: 2 + K(), x: p.x + 200, y: p.y - 30, id: 'stumpAngel', stump: true, still: true });
+      const e = w.makeEnemy({ kind: 'angel', level: 2 + K(), x: p.x + 200 * p.face, y: p.y - 30, id: 'stumpAngel', stump: true, still: true });
       w.enemies.push(e);
       G.sfx('notice');
-      await G.moveEntity(e, p.x + 26, p.y, 150);
+      await G.moveEntity(e, p.x + 26 * p.face, p.y, 150);
     });
     stumpRunning = false;
     const e = w.enemies.find((q) => q.id === 'stumpAngel');

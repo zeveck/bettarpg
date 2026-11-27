@@ -109,11 +109,18 @@ G.say = (who, text, choices) => {
 G.cutscene = async (fn) => { G.busyCount++; try { await fn(); } finally { G.busyCount--; } };
 G.canTalkNow = () => G.mode === 'world' && !G.busy() && !nav.top() && !G.wipe;
 G.moveEntity = (e, x, y, speed = 60) => new Promise((r) => { e.walkTo = { x, y, speed, done: r }; if (!G.world.extra.includes(e) && !G.world.npcs.includes(e)) G.world.walkers = [...(G.world.walkers || []), e]; });
+// Bubble's own following waits while a scene steers it (the two pulling
+// different ways could leave Bubble hovering and the scene never ending);
+// after 5 s it simply arrives.
 G.moveBubbleTo = (x, y) => new Promise((r) => {
   const b = G.world.bubble;
+  b.scripted = true;
+  let n = 0;
+  const done = () => { b.scripted = false; r(); };
   const step = () => {
     const dx = x - b.x, dy = y - b.y, d = Math.hypot(dx, dy);
-    if (d < 3) return r();
+    if (d < 3) return done();
+    if (++n > 300) { b.x = x; b.y = y; return done(); }
     b.face = dx > 0 ? 1 : -1;
     G.waits.push({ t: 1 / 60, r: () => { const sp = 140 / 60; b.x += dx / d * Math.min(sp, d); b.y += dy / d * Math.min(sp, d); step(); } });
   };
@@ -914,6 +921,7 @@ function endScene() {
   ui.resetDialogs();
   G.busyCount = 0;
   G.waits = [];
+  if (G.world?.bubble) G.world.bubble.scripted = false;
   G.starting = false;
   G.leaving = false;
   if (G.battle) { G.battle.end(); G.battle = null; }

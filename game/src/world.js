@@ -451,6 +451,7 @@ export class World {
 
   updateBubble(dt) {
     const b = this.bubble, p = this.player;
+    if (b.scripted) return; // a scene is moving Bubble
     const tr = p.trail;
     const target = tr.length > 9 ? tr[tr.length - 9] : { x: p.x - 22 * p.face, y: p.y + 4 };
     const dx = target.x - b.x, dy = target.y - b.y, d = Math.hypot(dx, dy);

@@ -219,13 +219,18 @@ function sayNow(speaker, text, choices = null) {
     const pc = $('dPortrait');
     pc.hidden = !speaker?.sprite;
     if (speaker?.sprite) drawPortrait(pc, speaker.sprite);
-    $('dText').textContent = '';
+    // The whole line is laid out from the start and revealed letter by letter,
+    // so words never hop to the next line (or the box grow) as it types.
+    const shownEl = document.createElement('span'), restEl = document.createElement('span');
+    restEl.className = 'dunshown';
+    restEl.textContent = text;
+    $('dText').replaceChildren(shownEl, restEl);
     $('dChoices').innerHTML = '';
     $('dNext').innerHTML = '';
     const state = { text, shown: 0, done: false, resolve, choices, t0: performance.now() };
     dlg = state;
     const finishTyping = () => {
-      state.shown = text.length; $('dText').textContent = text; state.done = true;
+      state.shown = text.length; shownEl.textContent = text; restEl.textContent = ''; state.done = true;
       if (choices) {
         choices.forEach((c, i) => {
           const b = button(escapeHtml(c), () => close(i));
@@ -251,7 +256,7 @@ function sayNow(speaker, text, choices = null) {
     state.timer = setInterval(() => {
       if (state.done) { clearInterval(state.timer); return; }
       state.shown = Math.min(text.length, state.shown + 2);
-      $('dText').textContent = text.slice(0, state.shown);
+      shownEl.textContent = text.slice(0, state.shown); restEl.textContent = text.slice(state.shown);
       if (state.shown % 4 === 0) audio.blip('text');
       if (state.shown >= text.length) { clearInterval(state.timer); finishTyping(); }
     }, 32);

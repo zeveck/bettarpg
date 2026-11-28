@@ -32,6 +32,14 @@
 28. `/gamegen --fix all --publish --no-confirm`
 29. #4: Dialogue text problem (https://github.com/zeveck/bettarpg/issues/4)
 30. #5: Quest broken (https://github.com/zeveck/bettarpg/issues/5)
+31. "Concerning #5 -- I didn't even have bubbles in my party yet, he just appeared was part of the bug. Make sure your fix fixes what I actually filed."
+32. "What I'm saying, is I didn't have bubbles with me. You described the bug as related to pathing bubbles, but since he wasn't with me, I worried you'd fix a real bug different bug than what I saw."
+33. "Popping into view isn't wrong if he's in my party. If he's not in my party, it makes no sense for him to just appear."
+34. "Oh, he swims up TO join you? Then, yes, he should swim from off screen."
+35. "Sorry. Because of how he'd appeared and it locked up, it'd be unclear what happened or was supposed to happen."
+36. "Since the village is above, isn't that also a weird place for him to swim in from?"
+37. "I wonder if he should just join you or if you should get a nudge comment suggesting Bubbles might know something and to go get him, but I don't know if that plays out in a way that'd make sense / seem good."
+38. ""Bubble will swim in from the top of the screen toward the village along open water, " what? swimming in from the top of the screen isn't going "towards" the village? I'm confused?"
 
 From: https://github.com/zeveck/bettarpg (zeveck's own repo; renamed to zeveck/bettarpg-original on 2026-11-21 so the remake could take zeveck/bettarpg), remake, leeway lots.
 Original untouched; this is a new folder and repo with fresh history.
@@ -109,8 +117,9 @@ Original untouched; this is a new folder and repo with fresh history.
 
 - [x] #4 (the person's own, from the game): dialogue words hopped between lines as they typed (Finn's opening, three times). Cause: the line was typed into a paragraph with "pretty" wrapping, re-planned every few letters. Now the whole line is laid out from the start, the rest hidden, with plain wrapping (pretty lays a half-hidden line out differently on phones). Checked: every letter's position sampled while typing, Finn's five lines at 1280x720, 844x390 and 390x844: none move (the old code moved 20 to 48 letters a line)
 - [x] #5 (the person's own, from the game): the Old Stump scene froze for good when you faced left (swimming up from its right). Cause: the scene swam Bubble to a spot behind you while Bubble's own following pulled it to the other side; Bubble hovered between them and the scene never ended. Now Bubble's following waits while a scene moves it (and it simply arrives after 5 s); Bubble comes from behind you and the angelfish from in front, whichever way you face. Checked: froze before, from the right now plays through to the fight; from the left as before
+- [x] #5 follow-up (requests 31-38): the old game, from a start without Bubble, showed exactly the report: the scale line, Bubble popped onto your fish, then nothing. Bubble joining is planned, but it made no sense: it popped in (the follow code snapped it to you) and, if you'd never visited Bubble's house, said "I told you I'd come!". Now Bubble swims down from just above the screen (the village is north) by open water to beside you; if you never met, it says "Wait up! I'm Bubble, from Paddy Village! Elder Finn said you'd gone to the Old Stump, so I swam after you!". Finn's opening sets it up ("Young Bubble has been begging to go exploring. If a small pair of fins follows you out there, look after each other."). Fetching Bubble first was considered and not done (a backtrack gate before the first story beat); the person can choose it. Checked from both sides, frames looked at, no errors. A fresh review found Bubble could come from a side (~6% of start spots) or through the stump/bank (~1%); now Bubble picks a spot beside you (behind, in front, above, below) reachable from the top: all 5,488 simulated starts come from the top. Replays: area-0-village, peace, full-game pass; area-1-shallows failed once (didn't make 3 friends in time) then passed 3 of 3
 - [x] Fresh review of both fixes: nothing wrong (cosmetic: Bubble or the angelfish can start over land near a bank). Replays area-1-shallows, peace, full-game: all pass, no console errors
-- [x] README making-of; published 2026-11-27
+- [x] README making-of; published 2026-11-27 (fixes); Bubble's arrival published 2026-11-28
 
 ## Holes (2026-11-25): see-through pixels in sprites
 

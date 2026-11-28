@@ -228,8 +228,12 @@ Flags are saved; nothing on the main path can be missed, used up or taken in the
 5. **The Old Stump** (scripted, can't be skipped or broken):
    - Bubble cheers you to full HP as it arrives, so arriving hurt can't lose the lesson.
    - You find a huge, dark, ancient-looking scale (Bubble: "That's no betta scale. It's as big
-     as my head!"). Bubble swims up: "I told you I'd come!" `bubbleJoined` is set now, so
-     Bubble stays with you whatever happens next.
+     as my head!"). Bubble swims up: down from just above the screen (the village is north),
+     by open water, to beside you: "I told you I'd come!", or, if you never visited Bubble's
+     house, "Wait up! I'm Bubble, from Paddy Village! Elder Finn said you'd gone to the Old
+     Stump, so I swam after you!" (Finn's opening sets this up: "Young Bubble has been begging
+     to go exploring..."). `bubbleJoined` is set now, so Bubble stays with you whatever happens
+     next. (Fix #5: Bubble used to pop in beside you, and facing left the scene froze.)
    - A **Level-2 Territorial Angelfish** charges in: a battle with Bubble beside you.
      Swim Away is shown dimmed ("Bubble: We can't leave now!"). The angelfish can't drop
      below 1 HP in this fight, from your hits or Bubble's ("The angelfish is too stubborn to

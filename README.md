@@ -169,6 +169,12 @@ Then two reports from the game's own "Report a bug" button, fixed with `/gamegen
 (each line is now laid out in full before it's revealed), and
 [#5](https://github.com/zeveck/bettarpg/issues/5), the controls freezing at the Old Stump when you
 swam up from its right (Bubble was being steered two ways at once and never arrived).
+A follow-up from the person who filed #5:
+
+> I didn't even have bubbles in my party yet, he just appeared was part of the bug.
+
+So Bubble now swims down from the village's direction to catch up with you, introduces itself
+if you've never met, and Elder Finn mentions young Bubble before you set out.
 
 The original game's pixel art (the betta in four armor stages, the five enemies, the party
 hats, the submarine, Paddy Village and the rice tuft) is used as it was, shrunk to its

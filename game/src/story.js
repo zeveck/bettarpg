@@ -303,14 +303,47 @@ export function createStory(G) {
     const s = S();
     await G.wait(300);
     const L = LINES.finnOpening;
-    for (const l of L.slice(0, 4)) await G.say('finn', fill(l));
+    for (const l of L.slice(0, -1)) await G.say('finn', fill(l));
     s.flags.metFinn = true;
     s.met.finn = true;
-    await G.say('finn', fill(L[4]));
+    await G.say('finn', fill(L[L.length - 1]));
     G.sfx('shell_crack', { rate: 0.6 });
     // the gate's toast and the village banner come as you first swim out of the house
     G.save();
     G.hintOnce('swim');
+  }
+
+  // Where Bubble swims in from, and to: a spot beside you (behind you first, then
+  // in front, above, below) that Bubble can reach by a straight swim through water
+  // from just above the screen (the village is north); failing that, from a side
+  // edge, highest first; failing that, straight down to the spot behind you.
+  function bubbleEntry(w, p) {
+    const cam = w.cam, v = G.view, d = w.def, solids = w.solids();
+    const spots = [[-30 * p.face, 4], [30 * p.face, 4], [-8 * p.face, -26], [-8 * p.face, 30]]
+      .map(([dx, dy]) => ({ x: p.x + dx, y: p.y + dy }))
+      .filter((q, i) => i === 0 || w.free(q.x, q.y, 6, solids));
+    const clear = (x, y, to) => {
+      const n = Math.ceil(Math.hypot(to.x - x, to.y - y) / 6);
+      for (let i = 0; i <= n; i++) {
+        const px = x + (to.x - x) * i / n, py = y + (to.y - y) * i / n;
+        if (px < 0 || py < 0 || px > d.w || py > d.h) continue; // off the map's edge
+        if (Math.hypot(px - to.x, py - to.y) > 12 && !w.free(px, py, 6, solids)) return false;
+      }
+      return true;
+    };
+    const top = cam.y - 24;
+    for (const to of spots) {
+      const tops = [];
+      for (let x = cam.x + 16; x <= cam.x + v.W - 16; x += 16) tops.push(x);
+      tops.sort((a, b) => Math.abs(a - to.x) - Math.abs(b - to.x));
+      for (const x of tops) if (clear(x, top, to)) return { from: { x, y: top }, to };
+    }
+    for (const to of spots) {
+      for (let y = cam.y + 16; y < to.y; y += 16) {
+        for (const x of [cam.x - 24, cam.x + v.W + 24].sort((a, b) => Math.abs(a - to.x) - Math.abs(b - to.x))) if (clear(x, y, to)) return { from: { x, y }, to };
+      }
+    }
+    return { from: { x: spots[0].x, y: top }, to: spots[0] };
   }
 
   let stumpRunning = false;
@@ -324,14 +357,17 @@ export function createStory(G) {
       f.stumpScale = true;
       // Bubble catches up
       const p = w.player;
-      // from behind you, whichever way you face
-      w.bubble.x = p.x - 220 * p.face; w.bubble.y = p.y - 40; w.bubble.face = p.face;
+      // Bubble swims down from the village (north), from just off screen, by open water
+      const { from, to } = bubbleEntry(w, p);
+      w.bubble.x = from.x; w.bubble.y = from.y; w.bubble.face = to.x >= from.x ? 1 : -1;
       f.bubbleJoined = true;
       G.save();
       p.trail = [];
-      await G.moveBubbleTo(p.x - 30 * p.face, p.y + 4);
       G.sfx('bubble_chirp');
-      await G.say('bubble', STORY.bubbleArrives);
+      await G.moveBubbleTo(to.x, to.y, 240);
+      // the first time you meet Bubble, it says who it is
+      await G.say('bubble', s.met.bubbleHome ? STORY.bubbleArrives : STORY.bubbleArrivesNew);
+      s.met.bubbleHome = true;
       // Bubble cheers you up before the fight, so arriving hurt can't lose the lesson
       if (s.hp < maxHp(s)) { s.hp = maxHp(s); G.sfx('inn', { vol: 0.6 }); G.toast('Bubble cheers you on: HP restored!'); }
       await G.say('bubble', STORY.stumpScale);

@@ -95,6 +95,7 @@ export const LINES = {
     'There have been strange happenings lately... fish have been disappearing from the outer paddies.',
     'The rumors speak of dark shadows that come when the rice stalks sway. Perhaps you could investigate?',
     'Mossy was last seen at the Old Stump, at the far end of the Shallows. Swim there and see what you can find.',
+    'Young Bubble has been begging to go exploring. If a small pair of fins follows you out there, look after each other.',
     'I\'ll have the south gate opened for you. Swim safely, {name}.',
   ],
   coral: [
@@ -239,6 +240,8 @@ export const HOW_TO_PLAY = [
 export const STORY = {
   stumpScale: 'That\'s no betta scale. It\'s as big as my head!',
   bubbleArrives: 'I told you I\'d come!',
+  // when you never visited Bubble at home: Bubble introduces itself
+  bubbleArrivesNew: 'Wait up! I\'m Bubble, from Paddy Village! Elder Finn said you\'d gone to the Old Stump, so I swam after you!',
   stumpFoundScale: 'A huge, dark, ancient-looking scale lies by the Old Stump.',
   stumpLesson: 'Fighting isn\'t the only way. Try this!',
   thirdScale: 'They all point uphill. Whatever dropped these was huge... and old.',

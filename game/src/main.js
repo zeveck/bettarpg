@@ -112,7 +112,7 @@ G.moveEntity = (e, x, y, speed = 60) => new Promise((r) => { e.walkTo = { x, y, 
 // Bubble's own following waits while a scene steers it (the two pulling
 // different ways could leave Bubble hovering and the scene never ending);
 // after 5 s it simply arrives.
-G.moveBubbleTo = (x, y) => new Promise((r) => {
+G.moveBubbleTo = (x, y, speed = 140) => new Promise((r) => {
   const b = G.world.bubble;
   b.scripted = true;
   let n = 0;
@@ -122,7 +122,7 @@ G.moveBubbleTo = (x, y) => new Promise((r) => {
     if (d < 3) return done();
     if (++n > 300) { b.x = x; b.y = y; return done(); }
     b.face = dx > 0 ? 1 : -1;
-    G.waits.push({ t: 1 / 60, r: () => { const sp = 140 / 60; b.x += dx / d * Math.min(sp, d); b.y += dy / d * Math.min(sp, d); step(); } });
+    G.waits.push({ t: 1 / 60, r: () => { const sp = speed / 60; b.x += dx / d * Math.min(sp, d); b.y += dy / d * Math.min(sp, d); step(); } });
   };
   step();
 });
